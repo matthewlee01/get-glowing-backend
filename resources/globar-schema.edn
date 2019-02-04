@@ -1,0 +1,24 @@
+{:objects {:User {:description "A Service Consumer"
+                  :fields {:id {:type (non-null ID)}
+                           :name {:type (non-null String)}
+                           :password {:type String}
+                           :vendors {:type (list :Vendor)
+                                     :description "a list of vendors who have served this user"
+                                     :resolve :User/vendors}}}
+
+           :Vendor {:description "A Service provider"
+                    :fields {:id {:type (non-null ID)}
+                             :name {:type (non-null String)}
+                             :url {:type String
+                                   :description "Home page URL"}
+                             :users {:type (list :User)
+                                     :description "a list of users who have been served by a vendor"
+                                     :resolve :Vendor/users}}}}
+
+ :queries{:user_by_id {:type :User
+                       :description "get a user and their favorite vendors"
+                       :args {:id {:type ID}}
+                       :resolve :query/user-by-id}}}
+
+
+
