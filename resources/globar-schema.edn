@@ -1,24 +1,75 @@
-{:objects {:User {:description "A Service Consumer"
-                  :fields {:id {:type (non-null ID)}
-                           :name {:type (non-null String)}
-                           :password {:type String}
-                           :vendors {:type (list :Vendor)
-                                     :description "a list of vendors who have served this user"
-                                     :resolve :User/vendors}}}
+{:objects
+    {:User
+        {:description "A Service Consumer."
+         :fields
+             {:id
+                 {:type (non-null ID)}
+              :name
+                 {:type (non-null String)}
+              :password
+                 {:type String}
+              :vendor
+                 {:type (list :Vendor)
+                  :description "a list of vendors who have served this user."
+                  :resolve :User/vendors}
+              :ratings
+                 {:type (list :VendorRating)
+                  :descripton "List of vendor ratings provided by this user."
+                  :resolve :User/vendor-ratings}}}
+     :Vendor
+        {:description "A Service provider."
+         :fields
+            {:id
+                {:type (non-null ID)}
+             :name
+                {:type (non-null String)}
+             :url
+                {:type String
+                 :description "Home page URL."}
+             :users
+                {:type (list :User)
+                 :description "a list of users who have been served by a vendor."
+                 :resolve :Vendor/users}
+             :rating_summary
+                {:type (non-null :VendorRatingSummary)
+                 :resolve :Vendor/rating-summary}}}
 
-           :Vendor {:description "A Service provider"
-                    :fields {:id {:type (non-null ID)}
-                             :name {:type (non-null String)}
-                             :url {:type String
-                                   :description "Home page URL"}
-                             :users {:type (list :User)
-                                     :description "a list of users who have been served by a vendor"
-                                     :resolve :Vendor/users}}}}
+     :VendorRatingSummary
+        {:description "Summary of ratings for a vendor."
+         :fields
+            {:count
+                {:type (non-null Int)
+                 :description "Number of ratings provided for this vendor.  Ratings are 1 to 5 stars."}
+             :average
+                {:type (non-null Float)
+                 :description "The average value of all ratings, or 0 if never rated."}}}
 
- :queries{:user_by_id {:type :User
-                       :description "get a user and their favorite vendors"
-                       :args {:id {:type ID}}
-                       :resolve :query/user-by-id}}}
+     :VendorRating
+        {:description "A user's rating of a particular vendor."
+         :fields
+            {:vendor
+                {:type (non-null :Vendor)
+                 :description "The Vendor that has been rated by the user."
+                 :resolve :VendorRating/vendor}
+             :rating {:type (non-null Int)
+                      :description "The rating as 1 to 5 stars."}}}}
+
+
+
+ :queries
+    {:user_by_id
+        {:type :User
+         :description "Get a user and their favorite vendors."
+         :args
+            {:id {:type ID}}
+         :resolve :query/user-by-id}
+
+     :vendor_by_id
+        {:type :Vendor
+         :description "Get a vendor and their list of users."
+         :args
+            {:id {:type ID}}
+         :resolve :query/vendor-by-id}}}
 
 
 
