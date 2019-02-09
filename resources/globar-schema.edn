@@ -8,7 +8,7 @@
                  {:type (non-null String)}
               :password
                  {:type String}
-              :vendor
+              :vendors
                  {:type (list :Vendor)
                   :description "a list of vendors who have served this user."
                   :resolve :User/vendors}
@@ -69,7 +69,21 @@
          :description "Get a vendor and their list of users."
          :args
             {:id {:type ID}}
-         :resolve :query/vendor-by-id}}}
+         :resolve :query/vendor-by-id}}
+
+ :mutations
+    {:rate_vendor
+        {:type :Vendor
+         :description "Establishes a rating of a vendor by a user.
+         On success (ie: the user and vendor both exist), selects
+         the vendor.  Otherwise selects nil and an error"
+         :args
+            {:vendor_id {:type (non-null ID)}
+             :user_id {:type (non-null ID)}
+             :rating
+                {:type (non-null Int)
+                 :description "Vendor rating as a number between 1 and 5."}}
+         :resolve :mutation/rate-vendor}}}
 
 
 
