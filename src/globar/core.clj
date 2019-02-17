@@ -3,26 +3,9 @@
             [clojure.java.browse :refer [browse-url]]
             [globar.system :as system]
             [clojure.walk :as walk]
-            [com.stuartsierra.component :as component])
-  (:import (clojure.lang IPersistentMap)))
+            [com.stuartsierra.component :as component]
+            [globar.test_utils :as utils]))
 
-
-(defn simplify
-  "Converts all ordered maps nested within the map into standard hash maps, and
-   sequences into vectors, which makes for easier constants in the tests, and eliminates ordering problems."
-  [m]
-  (walk/postwalk
-    (fn [node]
-      (cond
-        (instance? IPersistentMap node)
-        (into {} node)
-
-        (seq? node)
-        (vec node)
-
-        :else
-        node))
-    m))
 
 (defonce system (system/new-system))
 
@@ -34,7 +17,7 @@
       :schema-provider
       :schema
       (lacinia/execute query-string nil nil)
-      simplify))
+      utils/simplify))
 
 
 (defn start []

@@ -2,8 +2,8 @@
     {:User
         {:description "A Service Consumer."
          :fields
-             {:id
-                 {:type (non-null ID)}
+             {:user_id
+                 {:type (non-null Int)}
               :name
                  {:type (non-null String)}
               :password
@@ -19,17 +19,21 @@
      :Vendor
         {:description "A Service provider."
          :fields
-            {:id
-                {:type (non-null ID)}
+            {:vendor_id
+                {:type (non-null Int)}
              :name
                 {:type (non-null String)}
-             :url
+             :summary
                 {:type String
-                 :description "Home page URL."}
+                 :description "Short form description of this vendor"}
              :users
                 {:type (list :User)
                  :description "a list of users who have been served by a vendor."
                  :resolve :Vendor/users}
+             :ratings
+                {:type (list :VendorRating)
+                 :description "List of ratings that have been submitted for this vendor."
+                 :resolve :Vendor/vendor-ratings}
              :rating_summary
                 {:type (non-null :VendorRatingSummary)
                  :resolve :Vendor/rating-summary}}}
@@ -61,14 +65,14 @@
         {:type :User
          :description "Get a user and their favorite vendors."
          :args
-            {:id {:type ID}}
+            {:id {:type Int}}
          :resolve :query/user-by-id}
 
      :vendor_by_id
         {:type :Vendor
          :description "Get a vendor and their list of users."
          :args
-            {:id {:type ID}}
+            {:id {:type Int}}
          :resolve :query/vendor-by-id}}
 
  :mutations
@@ -78,8 +82,8 @@
          On success (ie: the user and vendor both exist), selects
          the vendor.  Otherwise selects nil and an error"
          :args
-            {:vendor_id {:type (non-null ID)}
-             :user_id {:type (non-null ID)}
+            {:vendor_id {:type (non-null Int)}
+             :user_id {:type (non-null Int)}
              :rating
                 {:type (non-null Int)
                  :description "Vendor rating as a number between 1 and 5."}}

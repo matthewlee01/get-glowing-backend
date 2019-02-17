@@ -6,7 +6,8 @@
             [com.walmartlabs.lacinia.resolve :refer [resolve-as]]
             [com.stuartsierra.component :as component]
             [globar.db :as db]
-            [clojure.edn :as edn]))
+            [clojure.edn :as edn]
+            [io.pedestal.log :as log]))
 
 (defn user-by-id
   [db]
@@ -49,28 +50,34 @@
 (defn user-vendorlist
   [db]
   (fn [_ _ user]
-    (db/list-vendors-for-user db (:id user))))
+    (db/list-vendors-for-user db (:user_id user))))
 
 (defn vendor-userlist
   [db]
   (fn [_ _ vendor]
-    (db/list-users-for-vendor db (:id vendor))))
+    (db/list-users-for-vendor db (:vendor_id vendor))))
 
 (defn rating-summary
   [db]
   (fn [_ _ vendor]
-    (let [ratings (map :rating (db/list-ratings-for-vendor db (:id vendor)))
+    (let [ratings (map :rating (db/list-ratings-for-vendor db (:vendor_id vendor)))
           n (count ratings)]
-         {:count n
-          :average (if (zero? n)
-                     0
-                     (/ (apply + ratings)
-                        (float n)))})))
+      (log/debug :ratings ratings)
+      {:count n
+       :average (if (zero? n)
+                  0
+                  (/ (apply + ratings)
+                     (float n)))})))
 (defn user-ratings
   [db]
   (fn [_ _ user]
-    (db/list-ratings-for-user db (:id user))))
+    (db/list-ratings-for-user db (:user_id user))))
 
+(defn vendor-ratings
+  "this pulls a list of all the ratings that have been submitted for a vendor"
+  [db]
+  (fn [_ _ vendor]
+    (db/list-ratings-for-vendor db (:vendor_id vendor))))
 
 (defn vendor-rating->vendor
   "returns a function that returns a vendor object related to a given
@@ -90,6 +97,7 @@
      :User/vendor-ratings (user-ratings db)
      :Vendor/users        (vendor-userlist db)
      :Vendor/rating-summary (rating-summary db)
+     :Vendor/vendor-ratings (vendor-ratings db)
      :VendorRating/vendor (vendor-rating->vendor db)}))
 
 
