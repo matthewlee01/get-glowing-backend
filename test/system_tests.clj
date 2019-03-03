@@ -20,7 +20,7 @@
       (lacinia/execute query variables nil)
       simplify))
 
-(deftest can-read-users+vendors
+(deftest can-read-customers+vendors
   (let [system (component/start-system (test-system))]
     (try
       (let [results (q system
@@ -32,23 +32,23 @@
                results)))
 
       (let [results (q system
-                       "{user_by_id(id:1410) {name password user_id}}"
+                       "{customer_by_id(id:1410) {name password cust_id}}"
                        nil)]
-        (is (= {:data {:user_by_id {:name "bleedingedge"
-                                    :password "password2"
-                                    :user_id 1410}}}
+        (is (= {:data {:customer_by_id {:name "bleedingedge"
+                                        :password "password2"
+                                        :cust_id 1410}}}
                results)))
 
       (let [results (q system
-                       "{user_by_id(id: 37) {name user_id ratings
+                       "{customer_by_id(id: 37) {name cust_id ratings
                                                              {vendor {name} rating}}}"
                        nil)]
-        (is (= {:data {:user_by_id {:name "curiousattemptbunny"
-                                    :user_id 37
-                                    :ratings [ {:vendor {:name "Toes for Joes"}
-                                                :rating 3}
-                                               {:vendor {:name "War Paint"}
-                                                :rating 5}]}}}
+        (is (= {:data {:customer_by_id {:name "curiousattemptbunny"
+                                        :cust_id 37
+                                        :ratings [ {:vendor {:name "Toes for Joes"}
+                                                    :rating 3}
+                                                   {:vendor {:name "War Paint"}
+                                                    :rating 5}]}}}
 
                results)))
 
@@ -59,36 +59,41 @@
   (let [system (component/start-system (test-system))]
     (try
       (let [results (q system
-                       "{user_by_id(id: 37) {name user_id ratings
+                       "{cust_by_id(id: 37) {name cust_id ratings
                                                             {vendor {name} rating}}}"
                        nil)]
         (is (= results
-               {:data {:user_by_id {:name "curiousattemptbunny"
-                                         :user_id 37
+               {:data {:cust_by_id {:name "curiousattemptbunny"
+                                         :cust_id 37
                                          :ratings [ {:vendor {:name "Toes for Joes"}
                                                      :rating 3}
                                                    {:vendor {:name "War Paint"}
                                                     :rating 5}]}}})))
 
-      (q system
-         "mutation {rate_vendor(user_id: 37, vendor_id: 1236, rating: 2) {rating_summary{count average}}}"
-         nil)
+      ;; create a new review for Vera's Butt Wax and check that the results are what we're looking for
+      (is (= (q system
+                "mutation {rate_vendor(cust_id: 37, vendor_id: 1236, rating: 2) {name rating_summary{count average}}}"
+                nil)
+             {:data {:rate_vendor {:name "Vera's Butt Wax"
+                                   :rating_summary {:count 2
+                                                    :average 3.0}}}}))
 
       (let [results (q system
-                       "{user_by_id(id: 37) {name user_id ratings
+                       "{customer_by_id(id: 37) {name cust_id ratings
                                                             {vendor {name} rating}}}"
                        nil)]
         (is (= results
-               {:data {:user_by_id {:name "curiousattemptbunny"
-                                    :user_id 37
-                                    :ratings [ {:vendor {:name "Toes for Joes"}
-                                                :rating 3}
-                                              {:vendor {:name "War Paint"}
-                                               :rating 5}
-                                              {:vendor {:name "Vera's Butt Wax"}
-                                               :rating 2}]}}})))
+               {:data {:customer_by_id {:name "curiousattemptbunny"
+                                        :cust_id 37
+                                        :ratings [ {:vendor {:name "Toes for Joes"}
+                                                    :rating 3}
+                                                  {:vendor {:name "War Paint"}
+                                                   :rating 5}
+                                                  {:vendor {:name "Vera's Butt Wax"}
+                                                   :rating 2}]}}})))
       (catch Exception e)
       (finally (component/stop-system system)
                ;; since we added some data, we need to re-init the db for subsequent tests
                (clojure.java.shell/sh "./bin/setup-db.sh")))))
+
 

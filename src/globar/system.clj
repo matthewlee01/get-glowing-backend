@@ -4,6 +4,7 @@
             [globar.server :as server]
             [globar.db :as db]))
 
+;; this is the system definition.  all new components should be added to this
 (defn new-system
   "this defines the component system map, that describes all the components
   that together compose the system"

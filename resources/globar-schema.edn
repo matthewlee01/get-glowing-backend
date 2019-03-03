@@ -1,21 +1,24 @@
 {:objects
-    {:User
+    {:Customer
         {:description "A Service Consumer."
          :fields
-             {:user_id
-                 {:type (non-null Int)}
-              :name
-                 {:type (non-null String)}
-              :password
-                 {:type String}
-              :vendors
-                 {:type (list :Vendor)
-                  :description "a list of vendors who have served this user."
-                  :resolve :User/vendors}
+             {:cust_id {:type (non-null Int)}
+              :name {:type String}
+              :email {:type (non-null String)}
+              :addr_str_num {:type String}
+              :addr_str_name {:type String}
+              :addr_city {:type String}
+              :addr_state {:type String}
+              :addr_postal {:type String}
+              :phone {:type String}
+              :locale {:type String}
+              :vendors {:type (list :Vendor)
+                        :description "a list of vendors who have served this customer."
+                        :resolve :Customer/vendors}
               :ratings
                  {:type (list :VendorRating)
-                  :descripton "List of vendor ratings provided by this user."
-                  :resolve :User/vendor-ratings}}}
+                  :descripton "List of vendor ratings provided by this customer."
+                  :resolve :Customer/vendor-ratings}}}
      :Vendor
         {:description "A Service provider."
          :fields
@@ -26,10 +29,10 @@
              :summary
                 {:type String
                  :description "Short form description of this vendor"}
-             :users
-                {:type (list :User)
-                 :description "a list of users who have been served by a vendor."
-                 :resolve :Vendor/users}
+             :customers
+                {:type (list :Customer)
+                 :description "a list of customers who have been served by a vendor."
+                 :resolve :Vendor/customers}
              :ratings
                 {:type (list :VendorRating)
                  :description "List of ratings that have been submitted for this vendor."
@@ -49,28 +52,48 @@
                  :description "The average value of all ratings, or 0 if never rated."}}}
 
      :VendorRating
-        {:description "A user's rating of a particular vendor."
+        {:description "A customer's rating of a particular vendor."
          :fields
             {:vendor
                 {:type (non-null :Vendor)
-                 :description "The Vendor that has been rated by the user."
+                 :description "The Vendor that has been rated by the customer."
                  :resolve :VendorRating/vendor}
              :rating {:type (non-null Int)
                       :description "The rating as 1 to 5 stars."}}}}
 
 
+ :input-objects
+    {:InputCreateCustomer
+       {:description "Required fields to create a new customer."
+        :fields
+           {:email {:type (non-null String)}}}
+
+     :InputUpdateCustomer
+       {:description "Fields you might want to update on the customer object.  Only the cust_id is required."
+        :fields
+           {:cust_id {:type (non-null Int)} ;; this is the only non-null field - you will always have to provide this
+            :name {:type String}
+            :email {:type String}
+            :password {:type String}
+            :addr_str_num {:type String}
+            :addr_str_name {:type String}
+            :addr_city {:type String}
+            :addr_state {:type String}
+            :addr_postal {:type String}
+            :phone {:type String}
+            :locale {:type String}}}}
 
  :queries
-    {:user_by_id
-        {:type :User
-         :description "Get a user and their favorite vendors."
+    {:customer_by_email
+        {:type :Customer
+         :description "Get a customer and their favorite vendors."
          :args
-            {:id {:type Int}}
-         :resolve :query/user-by-id}
+            {:email {:type String}}
+         :resolve :query/customer-by-email}
 
      :vendor_by_id
         {:type :Vendor
-         :description "Get a vendor and their list of users."
+         :description "Get a vendor and their list of customers."
          :args
             {:id {:type Int}}
          :resolve :query/vendor-by-id}}
@@ -78,16 +101,31 @@
  :mutations
     {:rate_vendor
         {:type :Vendor
-         :description "Establishes a rating of a vendor by a user.
-         On success (ie: the user and vendor both exist), selects
+         :description "Establishes a rating of a vendor by a customer.
+         On success (ie: the customer and vendor both exist), selects
          the vendor.  Otherwise selects nil and an error"
          :args
             {:vendor_id {:type (non-null Int)}
-             :user_id {:type (non-null Int)}
+             :cust_id {:type (non-null Int)}
              :rating
                 {:type (non-null Int)
                  :description "Vendor rating as a number between 1 and 5."}}
-         :resolve :mutation/rate-vendor}}}
+         :resolve :mutation/rate-vendor}
+
+     :create_customer
+        {:type :Customer
+         :description "This mutation creates a new customer in the system.
+         The only parameter to be provided is the email address."
+         :args
+             {:new_cust {:type (non-null :InputCreateCustomer)}}
+         :resolve :mutation/create-customer}
+
+     :update_customer
+        {:type :Customer
+         :description "This mutation updates an existing customer in the system."
+         :args
+           {:upd_cust {:type (non-null :InputUpdateCustomer)}}
+         :resolve :mutation/update-customer}}}
 
 
 

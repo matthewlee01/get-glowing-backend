@@ -1,5 +1,5 @@
 (ns globar.schema
-  "Contains custom resolvers and a function to provide the full schema"
+  "Contains custom resolvers and defines the schema provider component"
   (:require [clojure.java.io :as io]
             [com.walmartlabs.lacinia.util :as util]
             [com.walmartlabs.lacinia.schema :as schema]
@@ -9,10 +9,10 @@
             [clojure.edn :as edn]
             [io.pedestal.log :as log]))
 
-(defn user-by-id
+(defn customer-by-email
   [db]
   (fn [_ args _]
-    (db/find-user-by-id db (:id args))))
+    (db/find-customer-by-email db (:email args))))
 
 (defn vendor-by-id
   [db]
@@ -23,17 +23,17 @@
   [db]
   (fn [_ args _]
     (let [{vendor-id :vendor_id
-           user-id :user_id
+           cust-id :cust_id
            rating :rating} args
           vendor (db/find-vendor-by-id db vendor-id)
-          user (db/find-user-by-id db user-id)]
+          customer (db/find-customer-by-id db cust-id)]
       (cond
         (nil? vendor)
         (resolve-as nil {:message "Vendor not found."
                          :status 404})
 
-        (nil? user)
-        (resolve-as nil {:message "User not found."
+        (nil? customer)
+        (resolve-as nil {:message "Customer not found."
                          :status 404})
 
         (not (<= 1 rating 5))
@@ -42,20 +42,40 @@
 
         :else
         (do
-          (db/upsert-vendor-rating db vendor-id user-id rating)
+          (db/upsert-vendor-rating db vendor-id cust-id rating)
           vendor)))))
 
+(defn create-customer
+  "this handles the case where we are creating a customer for the first time"
+  [db]
+  (fn [_ args _]
+    (log/debug :fn "create-customer" :args args)
+    (let [email (:email (:new_cust args))]
+      (db/create-customer db email)
+      (db/find-customer-by-email db email))))
+
+(defn update-customer
+  "this resolver handles the update-customer mutation"
+  [db]
+  (fn [_ args _]
+    (let [cust-id (:cust_id (:upd_cust args))
+          old-cust (db/find-customer-by-id db cust-id)
+          new-cust (merge old-cust (:upd_cust args))]
+      (do
+        (log/debug :fn "update-customer" :old-cust old-cust :new-cust new-cust)
+        (db/update-customer db new-cust)
+        (db/find-customer-by-id db cust-id)))))
 
 
-(defn user-vendorlist
+(defn customer-vendorlist
   [db]
   (fn [_ _ user]
-    (db/list-vendors-for-user db (:user_id user))))
+    (db/list-vendors-for-customer db (:cust_id user))))
 
 (defn vendor-userlist
   [db]
   (fn [_ _ vendor]
-    (db/list-users-for-vendor db (:vendor_id vendor))))
+    (db/list-customers-for-vendor db (:vendor_id vendor))))
 
 (defn rating-summary
   [db]
@@ -68,10 +88,10 @@
                   0
                   (/ (apply + ratings)
                      (float n)))})))
-(defn user-ratings
+(defn customer-ratings
   [db]
-  (fn [_ _ user]
-    (db/list-ratings-for-user db (:user_id user))))
+  (fn [_ _ customer]
+    (db/list-ratings-for-customer db (:user_id customer))))
 
 (defn vendor-ratings
   "this pulls a list of all the ratings that have been submitted for a vendor"
@@ -90,16 +110,17 @@
   "update resolver symbols in the schema with actual resolver function references"
   [component]
   (let [db (:db component)]
-    {:query/user-by-id    (user-by-id db)
+    {:query/customer-by-email    (customer-by-email db)
      :query/vendor-by-id  (vendor-by-id db)
      :mutation/rate-vendor (rate-vendor db)
-     :User/vendors        (user-vendorlist db)
-     :User/vendor-ratings (user-ratings db)
-     :Vendor/users        (vendor-userlist db)
+     :mutation/create-customer (create-customer db)
+     :mutation/update-customer (update-customer db)
+     :Customer/vendors        (customer-vendorlist db)
+     :Customer/vendor-ratings (customer-ratings db)
+     :Vendor/customers        (vendor-userlist db)
      :Vendor/rating-summary (rating-summary db)
      :Vendor/vendor-ratings (vendor-ratings db)
      :VendorRating/vendor (vendor-rating->vendor db)}))
-
 
 (defn load-schema
   "this function reads the schema file from disk, replaces resolver symbols

@@ -6,28 +6,36 @@
             [com.stuartsierra.component :as component]
             [globar.test_utils :as utils]))
 
-
+;; this creates a new "system", where a system represents all of the components
+;; required for the backend to function properly
 (defonce system (system/new-system))
 
 
 ;; when this function generates a failed to parse graphQL query error,
 ;; try checking that the {} and () are matched in the nested query
-(defn q [query-string]
+(defn q
+  "this function takes a string representing a graphql query,
+  executes it, and prints the results to stdout"
+  [query-string]
   (-> system
       :schema-provider
       :schema
       (lacinia/execute query-string nil nil)
       utils/simplify))
 
-
-(defn start []
+(defn start
+  "this function provides a way to start up the system and
+  open a browser tab"
+  []
   (alter-var-root #'system component/start-system)
   (browse-url "http://localhost:8888/")
   :started)
 
 
 
-(defn stop []
+(defn stop
+  "this function stops the running system"
+  []
   (alter-var-root #'system component/stop-system)
   :stopped)
 
