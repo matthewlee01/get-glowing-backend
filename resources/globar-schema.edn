@@ -118,12 +118,12 @@
             {:email {:type String}}
          :resolve :query/customer-by-email}
 
-     :vendor_by_id
+     :vendor_by_email
         {:type :Vendor
          :description "Get a vendor and their list of customers."
          :args
-            {:id {:type Int}}
-         :resolve :query/vendor-by-id}}
+            {:email {:type String}}
+         :resolve :query/vendor-by-email}}
 
  :mutations
     {:rate_vendor

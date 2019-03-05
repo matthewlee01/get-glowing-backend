@@ -35,18 +35,18 @@
 (deftest test-vendor-update
   (let [system (component/start-system (create-test-system))
         email "mrbig123@somedomain.com"
-        updateVendor {:upd_cust {:vendor_id 1237
-                                 :name_first "I am the Test user"
-                                 :name_last "Andrrson-Coopers"
-                                 :email email
-                                 :addr_str_num "#2-5985"
-                                 :addr_str_name "Canada Way SE"
-                                 :addr_city "New Westminster"
-                                 :addr_state "BC"
-                                 :addr_postal "V5e-3N9"
-                                 :phone "778-994-6836"
-                                 :locale "Pacific Standard Time"
-                                 :summary "This is my story - I wish I had one, but this is all I got!"}}]
+        updateVendor {:upd_vendor {:vendor_id 1237
+                                   :name_first "I am the Test user"
+                                   :name_last "Andrrson-Coopers"
+                                   :email email
+                                   :addr_str_num "#2-5985"
+                                   :addr_str_name "Canada Way SE"
+                                   :addr_city "New Westminster"
+                                   :addr_state "BC"
+                                   :addr_postal "V5e-3N9"
+                                   :phone "778-994-6836"
+                                   :locale "Pacific Standard Time"
+                                   :summary "This is my story - I wish I had one, but this is all I got!"}}]
     (try
 
       ;; when i try to update a vendor, does this succeed?
@@ -59,7 +59,6 @@
       (let [qstring (str "query{vendor_by_email(email: \"" email "\"){vendor_id name_first name_last email
                           addr_str_num addr_str_name addr_city addr_state addr_postal phone locale summary}}")
             qresult (q system qstring nil)]
-        (println qstring)
         (is (= (:upd_vendor updateVendor) (get-in qresult [:data :vendor_by_email]))))
 
       (catch Exception e)

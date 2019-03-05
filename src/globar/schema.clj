@@ -14,10 +14,10 @@
   (fn [_ args _]
     (db/find-customer-by-email db (:email args))))
 
-(defn vendor-by-id
+(defn vendor-by-email
   [db]
   (fn [_ args _]
-    (db/find-vendor-by-id db (:id args))))
+    (db/find-vendor-by-email db (:email args))))
 
 (defn rate-vendor
   [db]
@@ -131,7 +131,7 @@
   [component]
   (let [db (:db component)]
     {:query/customer-by-email    (customer-by-email db)
-     :query/vendor-by-id  (vendor-by-id db)
+     :query/vendor-by-email  (vendor-by-email db)
      :mutation/rate-vendor (rate-vendor db)
      :mutation/create-customer (create-customer db)
      :mutation/update-customer (update-customer db)

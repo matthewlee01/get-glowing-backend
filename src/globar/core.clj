@@ -3,8 +3,8 @@
             [clojure.java.browse :refer [browse-url]]
             [globar.system :as system]
             [clojure.walk :as walk]
-            [com.stuartsierra.component :as component]
-            [globar.test_utils :as utils]))
+            [com.stuartsierra.component :as component])
+  (:gen-class))
 
 ;; this creates a new "system", where a system represents all of the components
 ;; required for the backend to function properly
@@ -20,8 +20,8 @@
   (-> system
       :schema-provider
       :schema
-      (lacinia/execute query-string nil nil)
-      utils/simplify))
+      (lacinia/execute query-string nil nil)))
+
 
 (defn start
   "this function provides a way to start up the system and
@@ -38,4 +38,7 @@
   []
   (alter-var-root #'system component/stop-system)
   :stopped)
+
+(defn -main []
+  (start))
 
