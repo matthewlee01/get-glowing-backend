@@ -3,7 +3,8 @@
         {:description "A Service Consumer."
          :fields
              {:cust_id {:type (non-null Int)}
-              :name {:type String}
+              :name_first {:type String}
+              :name_last {:type String}
               :email {:type (non-null String)}
               :addr_str_num {:type String}
               :addr_str_name {:type String}
@@ -22,24 +23,28 @@
      :Vendor
         {:description "A Service provider."
          :fields
-            {:vendor_id
-                {:type (non-null Int)}
-             :name
-                {:type (non-null String)}
-             :summary
-                {:type String
-                 :description "Short form description of this vendor"}
-             :customers
-                {:type (list :Customer)
-                 :description "a list of customers who have been served by a vendor."
-                 :resolve :Vendor/customers}
-             :ratings
-                {:type (list :VendorRating)
-                 :description "List of ratings that have been submitted for this vendor."
-                 :resolve :Vendor/vendor-ratings}
-             :rating_summary
-                {:type (non-null :VendorRatingSummary)
-                 :resolve :Vendor/rating-summary}}}
+            {:vendor_id {:type (non-null Int)}
+             :name_first {:type String}
+             :name_last {:type String}
+             :email {:type (non-null String)}
+             :addr_str_num {:type String}
+             :addr_str_name {:type String}
+             :addr_city {:type String}
+             :addr_state {:type String}
+             :addr_postal {:type String}
+             :phone {:type String}
+             :locale {:type String}
+
+             :summary {:type String
+                       :description "Short form description of this vendor"}
+             :customers {:type (list :Customer)
+                         :description "a list of customers who have been served by a vendor."
+                         :resolve :Vendor/customers}
+             :ratings {:type (list :VendorRating)
+                       :description "List of ratings that have been submitted for this vendor."
+                       :resolve :Vendor/vendor-ratings}
+             :rating_summary {:type (non-null :VendorRatingSummary)
+                              :resolve :Vendor/rating-summary}}}
 
      :VendorRatingSummary
         {:description "Summary of ratings for a vendor."
@@ -72,7 +77,8 @@
        {:description "Fields you might want to update on the customer object.  Only the cust_id is required."
         :fields
            {:cust_id {:type (non-null Int)} ;; this is the only non-null field - you will always have to provide this
-            :name {:type String}
+            :name_first {:type String}
+            :name_last {:type String}
             :email {:type String}
             :password {:type String}
             :addr_str_num {:type String}
@@ -81,7 +87,28 @@
             :addr_state {:type String}
             :addr_postal {:type String}
             :phone {:type String}
-            :locale {:type String}}}}
+            :locale {:type String}}}
+      :InputCreateVendor
+       {:description "Required fields to create a new vendor."
+        :fields
+           {:email {:type (non-null String)}}}
+
+     :InputUpdateVendor
+       {:description "Fields you might want to update on the vendor object.  Only the vendor_id is required."
+        :fields
+           {:vendor_id {:type (non-null Int)} ;; this is the only non-null field - you will always have to provide this
+            :name_first {:type String}
+            :name_last {:type String}
+            :email {:type String}
+            :password {:type String}
+            :addr_str_num {:type String}
+            :addr_str_name {:type String}
+            :addr_city {:type String}
+            :addr_state {:type String}
+            :addr_postal {:type String}
+            :phone {:type String}
+            :locale {:type String}
+            :summary {:type String}}}}
 
  :queries
     {:customer_by_email
@@ -125,7 +152,22 @@
          :description "This mutation updates an existing customer in the system."
          :args
            {:upd_cust {:type (non-null :InputUpdateCustomer)}}
-         :resolve :mutation/update-customer}}}
+         :resolve :mutation/update-customer}
+
+     :create_vendor
+        {:type :Vendor
+         :description "This mutation creates a new vendor in the system.
+         The only parameter to be provided is the email address."
+         :args
+           {:new_vendor {:type (non-null :InputCreateVendor)}}
+         :resolve :mutation/create-vendor}
+
+     :update_vendor
+        {:type :Vendor
+         :description "This mutation updates an existing vendor in the system."
+         :args
+           {:upd_vendor {:type (non-null :InputUpdateVendor)}}
+         :resolve :mutation/update-vendor}}}
 
 
 

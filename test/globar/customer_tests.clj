@@ -36,7 +36,8 @@
   (let [system (component/start-system (create-test-system))
         email "mrbig123@somedomain.com"
         updateUser {:upd_cust {:cust_id 37
-                               :name "I am the Test user"
+                               :name_first "I am the Test user"
+                               :name_last "Andrrson-Coopers"
                                :email email
                                :addr_str_num "#2-5985"
                                :addr_str_name "Canada Way SE"
@@ -54,8 +55,8 @@
          (is (= (:locale updateUser) (get-in qresult [:data :update_customer :locale]))))
 
        ;; when i read back the customer i just updated, does it match the data i updated with?
-       (let [qstring (str "query{customer_by_email(email: \"" email "\"){cust_id name email addr_str_num addr_str_name
-                           addr_city addr_state addr_postal phone locale}}")
+       (let [qstring (str "query{customer_by_email(email: \"" email "\"){cust_id name_first name_last
+                           email addr_str_num addr_str_name addr_city addr_state addr_postal phone locale}}")
              qresult (q system qstring nil)]
          (println qstring)
          (is (= (:upd_cust updateUser) (get-in qresult [:data :customer_by_email]))))

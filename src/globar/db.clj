@@ -55,25 +55,24 @@
   "this is for internal use because internally we use the id for cross table joins"
   [component cust-id]
   (first
-    (query component
-           ["SELECT *
-             FROM CUSTOMERS
-             WHERE cust_id = ?" cust-id])))
+    (query component ["SELECT * FROM CUSTOMERS WHERE cust_id = ?" cust-id])))
 
 (defn find-customer-by-email
   "this is the main client facing entrypoint as the email is the primary identifier for humans"
   [component cust-email]
-  (let [result (query component ["SELECT *
-                       FROM CUSTOMERS
-                       WHERE email = ?" cust-email])]
+  (let [result (query component ["SELECT * FROM CUSTOMERS WHERE email = ?" cust-email])]
     (first result)))
 
 (defn find-vendor-by-id
   [component vendor-id]
   (first
-    (query component
-           ["select vendor_id, name, summary, created_at, updated_at
-            from vendor where vendor_id = ?" vendor-id])))
+    (query component ["SELECT * FROM VENDORS WHERE vendor_id = ?" vendor-id])))
+
+(defn find-vendor-by-email
+  "this is the main client facing entrypoint as the email is the primary identifier for humans"
+  [component vendor-email]
+  (let [result (query component ["SELECT * FROM VENDORS WHERE email = ?" vendor-email])]
+    (first result)))
 
 ;; let's wait until it's clearer what this means in the business domain
 ;; could be a list of favorites, could be vendors the cust has transacted with
@@ -127,15 +126,15 @@
   "Adds a new customer object, providing only the email address as the seed info"
   [component email]
   (log/debug :fn "create-customer" :email email)
-  (execute component ["INSERT INTO customers (email)
-                       VALUES (?)" email])
+  (execute component ["INSERT INTO CUSTOMERS (email) VALUES (?)" email])
   nil)
 
 (defn update-customer
   "Adds a new customer object, or changes the values of an existing rating if one exists"
   [component new-cust]
   (let [{cust-id :cust_id
-         name :name
+         name-first :name_first
+         name-last :name_last
          password :password
          email :email
          addr-str-num :addr_str_num
@@ -145,7 +144,10 @@
          addr-postal :addr_postal
          phone :phone
          locale :locale} new-cust]
-    (jdbc/update! (:ds component) :customers {:name name :password password :email email
+    (jdbc/update! (:ds component) :Customers {:name_first name-first
+                                              :name_last name-last
+                                              :password password
+                                              :email email
                                               :addr_str_num addr-str-num
                                               :addr_str_name addr-str-name
                                               :addr_city addr-city
@@ -154,5 +156,44 @@
                                               :phone phone
                                               :locale locale}
                   ["cust_id = ?" cust-id]))
+  nil)
+
+(defn create-vendor
+  "Adds a new vendor object, providing only the email address as the seed info"
+  [component email]
+  (log/debug :fn "create-vendor" :email email)
+  (execute component ["INSERT INTO VENDORS (email) VALUES (?)" email])
+  nil)
+
+(defn update-vendor
+  "Takes a new-vendor map, destructures it to get the vendor attributes required to
+  populate a string to send to the jdbc client and update the db"
+  [component new-vendor]
+  (let [{vendor-id :vendor_id
+         name-first :name_first
+         name-last :name_last
+         password :password
+         email :email
+         addr-str-num :addr_str_num
+         addr-str-name :addr_str_name
+         addr-city :addr_city
+         addr-state :addr_state
+         addr-postal :addr_postal
+         phone :phone
+         locale :locale
+         summary :summary} new-vendor]
+    (jdbc/update! (:ds component) :Vendors {:name_first name-first
+                                            :name_last name-last
+                                            :password password
+                                            :email email
+                                            :addr_str_num addr-str-num
+                                            :addr_str_name addr-str-name
+                                            :addr_city addr-city
+                                            :addr_state addr-state
+                                            :addr_postal addr-postal
+                                            :phone phone
+                                            :locale locale
+                                            :summary summary}
+                  ["vendor_id = ?" vendor-id]))
   nil)
 

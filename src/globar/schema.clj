@@ -66,6 +66,26 @@
         (db/update-customer db new-cust)
         (db/find-customer-by-id db cust-id)))))
 
+(defn create-vendor
+  "this handles the case where we are creating a vendor for the first time"
+  [db]
+  (fn [_ args _]
+    (log/debug :fn "create-vendor" :args args)
+    (let [email (:email (:new_vendor args))]
+      (db/create-vendor db email)
+      (db/find-vendor-by-email db email))))
+
+(defn update-vendor
+  "this resolver handles the update-vendor mutation"
+  [db]
+  (fn [_ args _]
+    (let [vendor-id (:vendor_id (:upd_vendor args))
+          old-vendor (db/find-customer-by-id db vendor-id)
+          new-vendor (merge old-vendor (:upd_vendor args))]
+      (do
+        (log/debug :fn "update-vendor" :old-vendor old-vendor :new-vendor new-vendor)
+        (db/update-vendor db new-vendor)
+        (db/find-vendor-by-id db vendor-id)))))
 
 (defn customer-vendorlist
   [db]
@@ -115,6 +135,8 @@
      :mutation/rate-vendor (rate-vendor db)
      :mutation/create-customer (create-customer db)
      :mutation/update-customer (update-customer db)
+     :mutation/create-vendor (create-vendor db)
+     :mutation/update-vendor (update-vendor db)
      :Customer/vendors        (customer-vendorlist db)
      :Customer/vendor-ratings (customer-ratings db)
      :Vendor/customers        (vendor-userlist db)
