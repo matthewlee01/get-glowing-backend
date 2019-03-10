@@ -28,7 +28,7 @@
   open a browser tab"
   []
   (alter-var-root #'system component/start-system)
-  (browse-url "http://localhost:8888/")
+;;  (browse-url "http://localhost:8888/")
   :started)
 
 

@@ -1,14 +1,15 @@
 # globar
 
-A Clojure library designed to ... well, that part is up to you.
+The backend server 
 
 ## Usage
 
-FIXME
+To get a system built from scratch you have to:
+1. compile the backend clojure with 'lein uberjar'
+2. build the container images with 'docker-compose build'
+3. start the system with 'docker-compose up'
 
 ## License
 
-Copyright © 2019 FIXME
+Copyright © 2019 J3MC Software
 
-Distributed under the Eclipse Public License either version 1.0 or (at
-your option) any later version.

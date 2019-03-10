@@ -1,0 +1,7 @@
+FROM java
+# assumes that 'lein uberjar' has been run to build the jar file before this
+COPY target/globar-0.1.0-SNAPSHOT-standalone.jar globar-0.1.0-SNAPSHOT-standalone.jar
+ENV PORT 8888
+EXPOSE 8888
+CMD ["java", "-jar", "globar-0.1.0-SNAPSHOT-standalone.jar"]
+

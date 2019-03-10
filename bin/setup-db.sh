@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 
-docker exec -i --user postgres globar_db_1 createdb globardb
+createdb globardb
 
-docker exec -i --user postgres globar_db_1 psql globardb -a  <<__END
+psql globardb -a  <<__END
 create user globar_role password 'j3mc';
 __END
 
-docker exec -i globar_db_1 psql -Uglobar_role globardb -a <<__END
+psql -Uglobar_role globardb -a <<__END
 drop table if exists vendor_rating;
 drop table if exists Customers;
 drop table if exists Vendor;
