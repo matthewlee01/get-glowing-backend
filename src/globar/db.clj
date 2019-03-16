@@ -24,6 +24,7 @@
   (start [this]
     (assoc this
       :ds (pooled-data-source "db" "globardb" "globar_role" "j3mc" 5432)))
+;;      :ds (pooled-data-source "localhost" "globardb" "globar_role" "j3mc" 25432)))
 
   (stop [this]
     (-> ds :datasource .close)

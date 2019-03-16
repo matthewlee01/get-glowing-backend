@@ -1,5 +1,6 @@
 FROM postgres:10.2-alpine
 # copying the setup script to the right place so that it runs when you start this image
 COPY ./bin/setup-db.sh /docker-entrypoint-initdb.d/setup-db.sh
-
+# postgres listens to port 5432 by default
+EXPOSE 80/tcp
 
