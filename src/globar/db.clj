@@ -36,7 +36,7 @@
 ;; this is the string to be used when running in production
 (def prod-connection-string ["db" "globardb" "globar_role" "j3mc" 5432])
 
-(defstate db-conn :start (open-db-connection dev-connection-string)
+(defstate db-conn :start (open-db-connection prod-connection-string)
                   :stop (close-db-connection db-conn))
 
 (defn ^:private query

@@ -1,4 +1,4 @@
-FROM java
+FROM openjdk:13-alpine
 # assumes that 'lein uberjar' has been run to build the jar file before this
 COPY target/globar-0.1.0-SNAPSHOT-standalone.jar globar-0.1.0-SNAPSHOT-standalone.jar
 ENV PORT 8888
