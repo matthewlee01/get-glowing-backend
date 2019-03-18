@@ -1,14 +1,11 @@
 (ns globar.core
   (:require [com.walmartlabs.lacinia :as lacinia]
             [clojure.java.browse :refer [browse-url]]
-            [globar.system :as system]
             [clojure.walk :as walk]
-            [com.stuartsierra.component :as component])
+            [globar.schema :refer [schema-state]]
+            [mount.core :as mount]
+            [globar.server :as server])
   (:gen-class))
-
-;; this creates a new "system", where a system represents all of the components
-;; required for the backend to function properly
-(defonce system (system/new-system))
 
 
 ;; when this function generates a failed to parse graphQL query error,
@@ -17,9 +14,7 @@
   "this function takes a string representing a graphql query,
   executes it, and prints the results to stdout"
   [query-string]
-  (-> system
-      :schema-provider
-      :schema
+  (-> schema-state
       (lacinia/execute query-string nil nil)))
 
 
@@ -27,16 +22,14 @@
   "this function provides a way to start up the system and
   open a browser tab"
   []
-  (alter-var-root #'system component/start-system)
-;;  (browse-url "http://localhost:8888/")
+  (mount/start)
+  (browse-url "http://localhost:8888/")
   :started)
-
-
 
 (defn stop
   "this function stops the running system"
   []
-  (alter-var-root #'system component/stop-system)
+  (mount/stop)
   :stopped)
 
 (defn -main []

@@ -1,31 +1,24 @@
 ;; this module holds the code related to the http server that
 ;; uses pedestal to field http requests
 (ns globar.server
-  (:require [com.stuartsierra.component :as component]
+  (:require [mount.core :refer [defstate]]
             [com.walmartlabs.lacinia.pedestal :as lp]
-            [io.pedestal.http :as http]))
+            [io.pedestal.http :as http]
+            [globar.schema :as schema]))
 
-;; this record implements the Lifecycle protocol to implement
-;; the start and stop behaviour for the http server
-(defrecord Server [schema-provider server port]
+(defn start-server [port]
+  (println "starting http server")
+  (-> schema/schema-state
+      (lp/service-map {:graphiql true
+                       :port port})
+      http/create-server
+      http/start))
 
-  component/Lifecycle
+(defn stop-server [srv]
+  (println "stopping http server")
+  (http/stop srv))
 
-  (start [this]
-    (assoc this :server (-> schema-provider
-                            :schema
-                            (lp/service-map {:graphiql true
-                                             :port port})
-                            http/create-server
-                            http/start)))
+;; this captures the state of the webserver
+(defstate server-state :start (start-server 8888)
+                       :stop (stop-server server-state))
 
-  (stop [this]
-    (http/stop server)
-    (assoc this :server nil)))
-
-
-;; this instantiates a new Server record and establishes
-;; the dependency on :schema-provider
-(defn new-server []
-  {:server (component/using (map->Server {:port 8888})
-                            [:schema-provider])})

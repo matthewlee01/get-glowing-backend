@@ -10,7 +10,8 @@
                  [org.clojure/java.jdbc "0.7.8"]
                  [org.postgresql/postgresql "42.2.5.jre7"]
                  [com.mchange/c3p0 "0.9.5.2"]
-                 [io.aviso/logging "0.3.1"]]
+                 [io.aviso/logging "0.3.1"]
+                 [mount "0.1.16"]]
   :main globar.core
   :aot [globar.core]
   :resource-paths ["dev-resources" "resources"])
