@@ -10,6 +10,7 @@ psql -Uglobar_role globardb -a <<__END
 drop table if exists vendor_rating;
 drop table if exists Customers;
 drop table if exists Vendors;
+drop table if exists Services;
 CREATE OR REPLACE FUNCTION maintain_updated_at()
 RETURNS TRIGGER AS \$\$
 BEGIN
@@ -64,6 +65,18 @@ maintain_updated_at();
 /* this index ensures that all vendor email addresses are unique in the system */
 create unique index idx_ven_email on Vendors(email);
 
+create table Services (
+  vendor_id int,
+  s_name text,
+  s_description text,
+  s_type text,
+  s_price int,
+  s_duration int
+);
+create trigger service_updated_at before update
+on Services for each row execute procedure
+maintain_updated_at();
+
 create table vendor_rating (
   vendor_id int references Vendors(vendor_id),
   cust_id int references Customers(cust_id),
@@ -98,4 +111,15 @@ insert into vendor_rating (vendor_id, cust_id, rating) values
   (1237, 1410, 4),
   (1237, 2812, 4),
   (1237, 37, 5);
-__END
+
+insert into Services (vendor_id, s_name, s_description, s_type, s_price, s_duration) values
+  (1234, 'french manicure', 'covers paint and laquer for 10 fingers', 'nails', 2000, 30),
+  (1234, 'spanish manicure', 'involves hot sauce and salsa', 'nails', 3000, 45),
+  (1235, 'nail trim and polish', 'your pick of 5 colors plus a clear coat', 'nails', 4000, 40),
+  (1235, 'blow', 'refurbish your hair to salon style', 'hair', 3000, 30),
+  (1235, 'trim', 'will give your hair a quick trim', 'hair', 8000, 60),
+  (1235, 'color', 'will pick a color for your hair and give you the full stinky treatment', 'hair', 10000, 90),
+  (1236, 'file and polish', 'will smooth and polish your fingernails', 'nails', 6000, 60),
+  (1237, 'back massage', 'an intense 30 minute upper back massage', 'massage', 8000, 30),
+  (1237, 'full massage', 'will massage your face, back and legs', 'massage', 12000, 60);
+END
