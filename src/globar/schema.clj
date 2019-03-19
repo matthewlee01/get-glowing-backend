@@ -17,6 +17,10 @@
   [_ args _]
   (db/find-vendor-by-email (:email args)))
 
+(defn vendor-list
+  [_ args _]
+  (db/vendor-list (:addr_city args) (:service args)))
+
 (defn rate-vendor
   [_ args _]
   (let [{vendor-id :vendor_id
@@ -117,6 +121,7 @@
   "update resolver symbols in the schema with actual resolver function references"
   {:query/customer-by-email    customer-by-email
    :query/vendor-by-email      vendor-by-email
+   :query/vendor-list          vendor-list
    :mutation/rate-vendor       rate-vendor
    :mutation/create-customer   create-customer
    :mutation/update-customer   update-customer

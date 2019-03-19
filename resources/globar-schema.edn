@@ -123,7 +123,14 @@
          :description "Get a vendor and their list of customers."
          :args
             {:email {:type String}}
-         :resolve :query/vendor-by-email}}
+         :resolve :query/vendor-by-email}
+     :vendor_list
+        {:type (list :Vendor)
+         :description "A list of vendors available in a city."
+         :args
+           {:addr_city {:type (non-null String)}
+            :service {:type String}}
+         :resolve :query/vendor-list}}
 
  :mutations
     {:rate_vendor

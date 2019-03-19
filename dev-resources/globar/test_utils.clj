@@ -28,6 +28,8 @@
   "Creates a new system suitable for testing, and ensures
   that the HTTP port won't conflict with a default running system"
   []
+  ;; reset the db
+  (clojure.java.shell/sh "./bin/reset-db.sh")
   (mount/start-with-states {#'globar.server/server-state {:start #(server/start-server 8889)
                                                           :stop #(server/stop-server server-state)}}))
 (defn stop-test-system!

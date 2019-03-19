@@ -36,7 +36,7 @@
 ;; this is the string to be used when running in production
 (def prod-connection-string ["db" "globardb" "globar_role" "j3mc" 5432])
 
-(defstate db-conn :start (open-db-connection prod-connection-string)
+(defstate db-conn :start (open-db-connection dev-connection-string)
                   :stop (close-db-connection db-conn))
 
 (defn ^:private query
@@ -78,6 +78,13 @@
   [vendor-email]
   (let [result (query ["SELECT * FROM VENDORS WHERE email = ?" vendor-email])]
     (first result)))
+
+(defn vendor-list
+  "returns a list of vendors filtered by their city and their services"
+  [city service]
+  (if service
+    (query ["SELECT * FROM VENDORS WHERE addr_city = ?" city])
+    (query ["SELECT * FROM VENDORS WHERE addr_city = ?" city])))
 
 (defn list-ratings-for-vendor
   "returns a list of ratings that have been submitted for a particular vendor"
