@@ -4,17 +4,18 @@
 
 (deftest test-vendor-query
   (start-test-system!)
-  (let [qstring (str "query{vendor_by_email(email: \"helen@gmail.com\")"
-                              "{vendor_id name_first services {"
-                                      "s_description s_duration s_name s_price s_type}}}")]
-    (try
+  (try
+    (let [qstring (str "query{vendor_by_email(email: \"helen@gmail.com\")"
+                                "{vendor_id name_first services {"
+                                        "s_description s_duration s_name s_price s_type}}}")]
       (is (= 4 (-> (q qstring nil)
                    :data
                    :vendor_by_email
                    :services
-                   count)))
-      (catch Exception e)
-      (finally (stop-test-system!)))))
+                   count))))
+
+    (catch Exception e)
+    (finally (stop-test-system!))))
 
 (deftest test-vendor-creation
   (start-test-system!)
@@ -33,18 +34,21 @@
 
 (deftest test-vendor-list
   (start-test-system!)
-  (let [city "Vancouver"
-        qstring (str "query { vendor_list ( addr_city:\""city"\"){vendor_id addr_city}}")]
-    (try
-
-      ;; when i try to create a bare vendor, does this call succeed?
+  (try
+    (let [qstring (str "query { vendor_list ( addr_city:\"Vancouver\"){vendor_id addr_city}}")]
       (is (= 3 (-> (q qstring nil)
                    :data
                    :vendor_list
-                   count)))
+                   count))))
 
-      (catch Exception e (println "!!!! TEST ABORTED DUE TO EXCEPTION !!!! "))
-      (finally (stop-test-system!)))))
+    (let [qstring "query{vendor_list(addr_city:\"Vancouver\", service:\"nails\"){vendor_id addr_city}}"]
+      (is (= 2 (-> (q qstring nil)
+                   :data
+                   :vendor_list
+                   count))))
+
+    (catch Exception e (println "!!!! TEST ABORTED DUE TO EXCEPTION !!!! "))
+    (finally (stop-test-system!))))
 
 (deftest test-vendor-update
   (start-test-system!)

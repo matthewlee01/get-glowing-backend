@@ -60,31 +60,35 @@
   "this is for internal use because internally we use the id for cross table joins"
   [cust-id]
   (first
-    (query ["SELECT * FROM CUSTOMERS WHERE cust_id = ?" cust-id])))
+    (query ["SELECT * FROM Customers WHERE cust_id = ?" cust-id])))
 
 (defn find-customer-by-email
   "this is the main client facing entrypoint as the email is the primary identifier for humans"
   [cust-email]
-  (let [result (query ["SELECT * FROM CUSTOMERS WHERE email = ?" cust-email])]
+  (let [result (query ["SELECT * FROM Customers WHERE email = ?" cust-email])]
     (first result)))
 
 (defn find-vendor-by-id
   [vendor-id]
   (first
-    (query ["SELECT * FROM VENDORS WHERE vendor_id = ?" vendor-id])))
+    (query ["SELECT * FROM Vendors WHERE vendor_id = ?" vendor-id])))
 
 (defn find-vendor-by-email
   "this is the main client facing entrypoint as the email is the primary identifier for humans"
   [vendor-email]
-  (let [result (query ["SELECT * FROM VENDORS WHERE email = ?" vendor-email])]
+  (let [result (query ["SELECT * FROM Vendors WHERE email = ?" vendor-email])]
     (first result)))
 
 (defn vendor-list
   "returns a list of vendors filtered by their city and their services"
   [city service]
   (if service
-    (query ["SELECT * FROM VENDORS WHERE addr_city = ?" city])
-    (query ["SELECT * FROM VENDORS WHERE addr_city = ?" city])))
+    (query ["SELECT DISTINCT * FROM (SELECT Vendors.* FROM Services
+             INNER JOIN Vendors 
+             ON Services.vendor_id=Vendors.vendor_id 
+             WHERE Vendors.addr_city = ? AND Services.s_type=?) AS FOO" 
+            city service])
+    (query ["SELECT * FROM Vendors WHERE addr_city = ?" city])))
 
 (defn list-services-for-vendor
   "returns a list of services that a particular vendor offers"
