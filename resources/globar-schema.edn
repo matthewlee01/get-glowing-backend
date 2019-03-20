@@ -40,11 +40,22 @@
              :customers {:type (list :Customer)
                          :description "a list of customers who have been served by a vendor."
                          :resolve :Vendor/customers}
+	     :services {:type (list :Service)
+	                :resolve :Vendor/services}
              :ratings {:type (list :VendorRating)
                        :description "List of ratings that have been submitted for this vendor."
                        :resolve :Vendor/vendor-ratings}
              :rating_summary {:type (non-null :VendorRatingSummary)
                               :resolve :Vendor/rating-summary}}}
+     :Service
+       {:description "A service offered by a vendor."
+        :fields
+	  {:vendor_id     {:type (non-null Int)}
+	   :s_name        {:type String}
+	   :s_description {:type String}
+	   :s_type        {:type String}
+	   :s_price       {:type Int}
+	   :s_duration    {:type Int}}}
 
      :VendorRatingSummary
         {:description "Summary of ratings for a vendor."

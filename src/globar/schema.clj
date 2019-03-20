@@ -92,6 +92,11 @@
   [_ _ vendor]
   nil)
 
+(defn vendor-services
+  [_ _ vendor]
+  (db/list-services-for-vendor (:vendor_id vendor))
+  nil)
+
 (defn rating-summary
   [_ _ vendor]
   (let [ratings (map :rating (db/list-ratings-for-vendor (:vendor_id vendor)))
@@ -130,6 +135,7 @@
    :Customer/vendors           customer-vendorlist
    :Customer/vendor-ratings    customer-ratings
    :Vendor/customers           vendor-userlist
+   :Vendor/services            vendor-services
    :Vendor/rating-summary      rating-summary
    :Vendor/vendor-ratings      vendor-ratings
    :VendorRating/vendor        vendor-rating->vendor})

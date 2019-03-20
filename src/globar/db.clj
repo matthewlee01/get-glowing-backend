@@ -86,6 +86,13 @@
     (query ["SELECT * FROM VENDORS WHERE addr_city = ?" city])
     (query ["SELECT * FROM VENDORS WHERE addr_city = ?" city])))
 
+(defn list-services-for-vendor
+  "returns a list of services that a particular vendor offers"
+  [vendor-id]
+  (query ["SELECT vendor_id, s_name, s_description, s_type, s_price, s_duration
+           FROM Services
+           WHERE vendor_id = ?" vendor-id]))
+
 (defn list-ratings-for-vendor
   "returns a list of ratings that have been submitted for a particular vendor"
   [vendor-id]
