@@ -94,8 +94,7 @@
 
 (defn vendor-services
   [_ _ vendor]
-  (db/list-services-for-vendor (:vendor_id vendor))
-  nil)
+  (db/list-services-for-vendor (:vendor_id vendor)))
 
 (defn rating-summary
   [_ _ vendor]

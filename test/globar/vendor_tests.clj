@@ -2,6 +2,20 @@
   (:require [clojure.test :refer :all]
             [globar.test_utils :refer [start-test-system! stop-test-system! q]]))
 
+(deftest test-vendor-query
+  (start-test-system!)
+  (let [qstring (str "query{vendor_by_email(email: \"helen@gmail.com\")"
+                              "{vendor_id name_first services {"
+                                      "s_description s_duration s_name s_price s_type}}}")]
+    (try
+      (is (= 4 (-> (q qstring nil)
+                   :data
+                   :vendor_by_email
+                   :services
+                   count)))
+      (catch Exception e)
+      (finally (stop-test-system!)))))
+
 (deftest test-vendor-creation
   (start-test-system!)
   (let [new-email "vendor@somedomain.net"

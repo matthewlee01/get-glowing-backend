@@ -91,11 +91,11 @@ maintain_updated_at();
    and constrains one review per Customer per vendor */
 create unique index idx_vid_uid on vendor_rating (vendor_id, cust_id);
 
-insert into Vendors (vendor_id, name_first, name_last, summary, addr_city) values
-  (1234, 'Wishful', 'Wanda', 'We make sure your toes don''t look Dumb and Dumber', 'Vancouver'),
-  (1235, 'Helen', 'Hairspray', 'In business since yesterday, we make sure you don''t die from fumes', 'Vancouver'),
-  (1236, 'Jackie', 'Jones', 'Your fast track to a smooth butt', 'Surrey'),
-  (1237, 'Tony', 'Toenails', 'We make sure your face is tastefully decorated for all occaisions', 'Vancouver');
+insert into Vendors (vendor_id, name_first, name_last, email, summary, addr_city) values
+  (1234, 'Wishful', 'Wanda',   'wanda@gmail.com',  'We make sure your toes don''t look Dumb and Dumber', 'Vancouver'),
+  (1235, 'Helen', 'Hairspray', 'helen@gmail.com',  'In business since yesterday, we make sure you don''t die from fumes', 'Vancouver'),
+  (1236, 'Jackie', 'Jones',    'jackie@gmail.com', 'Your fast track to a smooth butt', 'Surrey'),
+  (1237, 'Tony', 'Toenails',   'tony@gmail.com',   'We make sure your face is tastefully decorated for all occaisions', 'Vancouver');
 alter table Vendors alter column vendor_id restart with 1300;
 
 insert into Customers (cust_id, name_first, name_last, password, email) values
