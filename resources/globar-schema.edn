@@ -32,6 +32,7 @@
              :addr_city {:type String}
              :addr_state {:type String}
              :addr_postal {:type String}
+             :profile_pic {:type String}
              :phone {:type String}
              :locale {:type String}
 
