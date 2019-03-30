@@ -56,6 +56,7 @@ create table Vendors (
   locale text,
   summary text,
   radius int,
+  profile_pic text,
   created_at timestamp not null default current_timestamp,
   updated_at timestamp not null default current_timestamp);
 create trigger vendor_updated_at before update
@@ -91,11 +92,11 @@ maintain_updated_at();
    and constrains one review per Customer per vendor */
 create unique index idx_vid_uid on vendor_rating (vendor_id, cust_id);
 
-insert into Vendors (vendor_id, name_first, name_last, email, summary, addr_city) values
-  (1234, 'Wishful', 'Wanda',   'wanda@gmail.com',  'We make sure your toes don''t look Dumb and Dumber', 'Vancouver'),
-  (1235, 'Helen', 'Hairspray', 'helen@gmail.com',  'In business since yesterday, we make sure you don''t die from fumes', 'Vancouver'),
-  (1236, 'Jackie', 'Jones',    'jackie@gmail.com', 'Your fast track to a smooth butt', 'Surrey'),
-  (1237, 'Tony', 'Toenails',   'tony@gmail.com',   'We make sure your face is tastefully decorated for all occaisions', 'Vancouver');
+insert into Vendors (vendor_id, name_first, name_last, email, summary, addr_city, profile_pic) values
+  (1234, 'Wishful', 'Wanda',   'wanda@gmail.com',  'We make sure your toes don''t look Dumb and Dumber', 'Vancouver', 'wanda-profile.jpg'),
+  (1235, 'Helen', 'Hairspray', 'helen@gmail.com',  'In business since yesterday, we make sure you don''t die from fumes', 'Vancouver', 'helen-profile.jpg'),
+  (1236, 'Jackie', 'Jones',    'jackie@gmail.com', 'Your fast track to a smooth butt', 'Surrey', 'jackie-profile.jpg'),
+  (1237, 'Tony', 'Toenails',   'tony@gmail.com',   'We make sure your face is tastefully decorated for all occaisions', 'Vancouver', 'tony-profile.jpg');
 alter table Vendors alter column vendor_id restart with 1300;
 
 insert into Customers (cust_id, name_first, name_last, password, email) values
