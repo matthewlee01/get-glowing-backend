@@ -12,6 +12,7 @@
       (lp/service-map {:graphiql true
                        :port port})
       (assoc ::http/allowed-origins ["http://localhost:3449" "http://localhost:8888"])
+      (assoc ::http/file-path "resources/public")
       http/default-interceptors
       http/create-server
       http/start))
