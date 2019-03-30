@@ -63,6 +63,8 @@ create trigger vendor_updated_at before update
 on Vendors for each row execute procedure
 maintain_updated_at();
 
+create index ven_up_name on Vendors (UPPER(name_last));
+
 /* this index ensures that all vendor email addresses are unique in the system */
 create unique index idx_ven_email on Vendors(email);
 
@@ -93,7 +95,7 @@ maintain_updated_at();
 create unique index idx_vid_uid on vendor_rating (vendor_id, cust_id);
 
 insert into Vendors (vendor_id, name_first, name_last, email, summary, addr_city, profile_pic) values
-  (1234, 'Wishful', 'Wanda',   'wanda@gmail.com',  'We make sure your toes don''t look Dumb and Dumber', 'Vancouver', 'wanda-profile.jpg'),
+  (1234, 'Wishful', 'Wanda',   'wanda@gmail.com',  'We make sure your toes don''t look Dumb and Dumber', 'vancouver', 'wanda-profile.jpg'),
   (1235, 'Helen', 'Hairspray', 'helen@gmail.com',  'In business since yesterday, we make sure you don''t die from fumes', 'Vancouver', 'helen-profile.jpg'),
   (1236, 'Jackie', 'Jones',    'jackie@gmail.com', 'Your fast track to a smooth butt', 'Surrey', 'jackie-profile.jpg'),
   (1237, 'Tony', 'Toenails',   'tony@gmail.com',   'We make sure your face is tastefully decorated for all occaisions', 'Vancouver', 'tony-profile.jpg');

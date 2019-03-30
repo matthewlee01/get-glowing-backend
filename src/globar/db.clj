@@ -86,9 +86,9 @@
     (query ["SELECT DISTINCT * FROM (SELECT Vendors.* FROM Services
              INNER JOIN Vendors 
              ON Services.vendor_id=Vendors.vendor_id 
-             WHERE Vendors.addr_city = ? AND Services.s_type=?) AS FOO" 
+             WHERE UPPER(Vendors.addr_city) = UPPER(?) AND Services.s_type=?) AS FOO" 
             city service])
-    (query ["SELECT * FROM Vendors WHERE addr_city = ?" city])))
+    (query ["SELECT * FROM Vendors WHERE UPPER(addr_city) = UPPER(?)" city])))
 
 (defn list-services-for-vendor
   "returns a list of services that a particular vendor offers"
