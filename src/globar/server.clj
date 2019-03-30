@@ -11,6 +11,8 @@
   (-> schema/schema-state
       (lp/service-map {:graphiql true
                        :port port})
+      (assoc ::http/allowed-origins ["http://localhost:3449" "http://localhost:8888"])
+      http/default-interceptors
       http/create-server
       http/start))
 
