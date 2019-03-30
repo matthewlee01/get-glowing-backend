@@ -136,6 +136,14 @@
          :args
             {:email {:type String}}
          :resolve :query/vendor-by-email}
+
+     :vendor_by_id
+     			{:type :Vendor
+         :description "Get a vendor and their list of customers."
+         :args
+            {:vendor_id {:type Int}}
+         :resolve :query/vendor-by-id}
+
      :vendor_list
         {:type (list :Vendor)
          :description "A list of vendors available in a city."

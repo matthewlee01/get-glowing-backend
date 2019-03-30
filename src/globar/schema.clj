@@ -21,6 +21,10 @@
   [_ args _]
   (db/vendor-list (:addr_city args) (:service args)))
 
+(defn vendor-by-id
+  [_ args _]
+  (db/find-vendor-by-id (:vendor_id args)))
+
 (defn rate-vendor
   [_ args _]
   (let [{vendor-id :vendor_id
@@ -126,6 +130,7 @@
   {:query/customer-by-email    customer-by-email
    :query/vendor-by-email      vendor-by-email
    :query/vendor-list          vendor-list
+   :query/vendor-by-id 								vendor-by-id
    :mutation/rate-vendor       rate-vendor
    :mutation/create-customer   create-customer
    :mutation/update-customer   update-customer
