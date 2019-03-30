@@ -4,10 +4,19 @@ The backend server
 
 ## Usage
 
-To get a system built from scratch you have to:
-1. compile the backend clojure with 'lein uberjar'
-2. build the container images with 'docker-compose build'
-3. start the system with 'docker-compose up'
+### To support front-end development
+To just have a backend available for the front-end to talk to:
+1. get the source: ```git clone http://gitlab.j3mc.ca/dev/globar.git```
+2. build the docker images with the script in the 'bin' folder: ```./build-globar-images.sh```
+3. start the system with the script in the 'bin' folder: ```./docker-up.sh```
+
+### To start the backend server in a repl
+To get an environment up to work on the globar code itself:
+1. follow steps #1 and #2 above
+2. start the database container: ```./docker-run-testdb.sh```
+3. start a repl: ```lein repl```
+4. start the system in the repl: ```(start)```
+5. to stop the system: ```(stop)```
 
 ## License
 
