@@ -12,5 +12,4 @@
 
     <logger name="globar.db" level="DEBUG"/>
     <logger name="globar.schema" level="DEBUG"/>
-
 </configuration>
