@@ -2,7 +2,8 @@
   (:require [mount.core :refer [defstate]]
             [clojure.java.jdbc :as jdbc]
             [io.pedestal.log :as log]
-            [clojure.string :as str])
+            [clojure.string :as str]
+            [globar.config :as config])
   (:import (com.mchange.v2.c3p0 ComboPooledDataSource)))
 
 
@@ -30,13 +31,12 @@
       (-> connection :datasource .close))
     (println "no active connection to close")))
 
-;; this is the string to use when running a local instance of the db that has
-;; been launched with the docker-run-testdb.sh script
-(def dev-connection-string ["localhost" "globardb" "globar_role" "j3mc" 25432])
-;; this is the string to be used when running in production
-(def prod-connection-string ["db" "globardb" "globar_role" "j3mc" 5432])
+(defn connection-string []
+  (if config/debug?
+    ["localhost" "globardb" "globar_role" "j3mc" 25432];; this is the string to use when running a local dev db 
+    ["db" "globardb" "globar_role" "j3mc" 5432])) ;; this is the string to be used when running in production
 
-(defstate db-conn :start (open-db-connection dev-connection-string)
+(defstate db-conn :start (open-db-connection (connection-string))
                   :stop (close-db-connection db-conn))
 
 (defn ^:private query

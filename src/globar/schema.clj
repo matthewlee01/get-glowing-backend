@@ -130,7 +130,7 @@
   {:query/customer-by-email    customer-by-email
    :query/vendor-by-email      vendor-by-email
    :query/vendor-list          vendor-list
-   :query/vendor-by-id 								vendor-by-id
+   :query/vendor-by-id         vendor-by-id
    :mutation/rate-vendor       rate-vendor
    :mutation/create-customer   create-customer
    :mutation/update-customer   update-customer
@@ -147,6 +147,7 @@
 (defn load-schema []
   "this function reads the schema file from disk, replaces resolver symbols
   with function references, and compiles into a lacinia schema"
+  (println "loading schema")
   (-> (io/resource "globar-schema.edn")
       slurp
       edn/read-string

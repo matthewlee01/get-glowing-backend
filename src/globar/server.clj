@@ -4,14 +4,20 @@
   (:require [mount.core :refer [defstate]]
             [com.walmartlabs.lacinia.pedestal :as lp]
             [io.pedestal.http :as http]
-            [globar.schema :as schema]))
+            [globar.schema :as schema]
+            [globar.config :as config]))
+
+(defn CORS-whitelist []
+  (if config/debug?
+    ["http://localhost:3449" "http://localhost:8888"] ;; allow requests from figwheel and the graphiql app
+    ["http://archon.j3mc.ca"]))                     ;; in production we only allow access from our webapp
 
 (defn start-server [port]
-  (println "starting http server")
+  (println "starting http server with schema" schema/schema-state)
   (-> schema/schema-state
       (lp/service-map {:graphiql true
                        :port port})
-      (assoc ::http/allowed-origins ["http://localhost:3449" "http://archon.j3mc.ca"])
+      (assoc ::http/allowed-origins (CORS-whitelist))
       (assoc ::http/file-path "resources/public")
       http/default-interceptors
       http/create-server
