@@ -160,9 +160,9 @@
 
 (defn create-vendor
   "Adds a new vendor object, providing only the email address as the seed info"
-  [email]
-  (log/debug :fn "create-vendor" :email email)
-  (execute ["INSERT INTO VENDORS (email) VALUES (?)" email])
+  [email passwd]
+  (log/debug :fn "create-vendor" :email email :password passwd)
+  (execute ["INSERT INTO VENDORS (email, password) VALUES (?, ?)" email passwd])
   nil)
 
 (defn update-vendor

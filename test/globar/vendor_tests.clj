@@ -20,7 +20,9 @@
 (deftest test-vendor-creation
   (start-test-system!)
   (let [new-email "vendor@somedomain.net"
-        qstring (str "mutation { create_vendor ( new_vendor: { email:\"" new-email "\"}){vendor_id email}}")]
+        new-password "myawesomepassword"
+        qstring (str "mutation { create_vendor ( new_vendor: { email:\"" new-email "\"
+                                                               password:\"" new-password "\"}){vendor_id email}}")]
     (try
 
       ;; when i try to create a bare vendor, does this call succeed?

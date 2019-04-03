@@ -73,8 +73,9 @@
   "this handles the case where we are creating a vendor for the first time"
   [_ args _]
   (log/debug :fn "create-vendor" :args args)
-  (let [email (:email (:new_vendor args))]
-    (db/create-vendor email)
+  (let [email (:email (:new_vendor args))
+        passwd (:password (:new_vendor args))]
+    (db/create-vendor email passwd)
     (db/find-vendor-by-email email)))
 
 (defn update-vendor

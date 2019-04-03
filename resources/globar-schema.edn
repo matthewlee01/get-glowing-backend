@@ -103,7 +103,8 @@
       :InputCreateVendor
        {:description "Required fields to create a new vendor."
         :fields
-           {:email {:type (non-null String)}}}
+           {:email {:type (non-null String)}
+            :password {:type (non-null String)}}}
 
      :InputUpdateVendor
        {:description "Fields you might want to update on the vendor object.  Only the vendor_id is required."
@@ -184,7 +185,7 @@
      :create_vendor
         {:type :Vendor
          :description "This mutation creates a new vendor in the system.
-         The only parameter to be provided is the email address."
+         The two parameters to be provided are the email address and password."
          :args
            {:new_vendor {:type (non-null :InputCreateVendor)}}
          :resolve :mutation/create-vendor}
