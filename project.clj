@@ -11,7 +11,9 @@
                  [org.postgresql/postgresql "42.2.5.jre7"]
                  [com.mchange/c3p0 "0.9.5.2"]
                  [io.aviso/logging "0.3.1"]
-                 [mount "0.1.16"]]
+                 [mount "0.1.16"]
+                 [clojure.java-time "0.3.2"]
+                 [org.threeten/threeten-extra "1.4"]]
   :main globar.core
   :aot [globar.core]
   :resource-paths ["dev-resources" "resources"])
