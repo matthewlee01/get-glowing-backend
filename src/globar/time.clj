@@ -3,16 +3,6 @@
 
 (def LESS_THAN -1)
 
-;;(def c1 {:start (jt/local-time 12 30) :end (jt/local-time 13 30)})
-;;(def c2 {:start (jt/local-time 12 45) :end (jt/local-time 13 15)})
-;;(def c3 {:start (jt/local-time 12 45) :end (jt/local-time 13 45)})
-;;(def c4 {:start (jt/local-time 12 15) :end (jt/local-time 13 45)})
-(def c1 {:start 1230 :end 1330})
-(def c2 {:start 1245 :end 1315})
-(def c3 {:start 1245 :end 1345})
-(def c4 {:start 1215 :end 1345})
-
-
 (defn squish
   "this reduction function takes a collection representing a stack and
   next time chunk to be processed.  if the accumulated collection is
@@ -38,4 +28,17 @@
   (let [sorted-chunks (sort-by :start chunk-coll)]
     (reduce squish [] sorted-chunks)))
 
-(println (merge-chunks [c1 c2 c3 c4]))
+
+(defn nonzero-duration? [[x y]]
+  (not= x y))
+
+(defn net-time
+  "takes two collections, the first representing available time, the second 
+   representing booked time, and returns a collection representing the 
+   net available time.  there should never be booked time that doesn't overlap
+   with available time."
+  [avail booked]
+  (->> (concat (reduce concat avail) (reduce concat booked)) ; flatten into one giant seq
+       (sort)
+       (partition 2)
+       (filter nonzero-duration?)))
