@@ -7,6 +7,7 @@ create user globar_role password 'j3mc';
 __END
 
 psql -Uglobar_role globardb -a <<__END
+drop table if exists vendor_calendar;
 drop table if exists vendor_rating;
 drop table if exists Customers;
 drop table if exists Vendors;
@@ -94,32 +95,18 @@ maintain_updated_at();
    and constrains one review per Customer per vendor */
 create unique index idx_vid_uid on vendor_rating (vendor_id, cust_id);
 
-/* each row of this table represents a static block of time
-   of bookable time for a vendor. */
-create table vendor_available_time (
+/* each row of this table represents the available time and the booked 
+   time in the calendar for a vendor */
+create table vendor_calendar (
   vendor_id int references Vendors(vendor_id),
-  avail_start timestamptz,
-  avail_end timestamptz,
+  date varchar(10),
+  available_edn text,
+  booked_edn text,
   created_at timestamptz not null default current_timestamp,
   updated_at timestamptz not null default current_timestamp
 );
-create trigger vendor_available_time_updated before update
-on vendor_available_time for each row execute procedure
-maintain_updated_at();
-
-/* each row of this table represents a booking made between
-   a customer and a vendor.  there must be corresponding available
-   time at the same period in the vendor_available_time table */
-create table vendor_bookings (
-  vendor_id int references Vendors(vendor_id),
-  cust_id int references Customers(cust_id),
-  book_start timestamptz,
-  book_end timestamptz,
-  created_at timestamptz not null default current_timestamp,
-  updated_at timestamptz not null default current_timestamp
-);
-create trigger vendor_bookings_updated_at before update
-on vendor_bookings for each row execute procedure
+create trigger vendor_calendar before update
+on vendor_calendar for each row execute procedure
 maintain_updated_at();
 
 insert into Vendors (vendor_id, name_first, name_last, email, summary, addr_city, profile_pic) values
@@ -153,11 +140,4 @@ insert into Services (vendor_id, s_name, s_description, s_type, s_price, s_durat
   (1236, 'file and polish', 'will smooth and polish your fingernails', 'nails', 6000, 60),
   (1237, 'back massage', 'an intense 30 minute upper back massage', 'massage', 8000, 30),
   (1237, 'full massage', 'will massage your face, back and legs', 'massage', 12000, 60);
-
-insert into vendor_available_time (vendor_id, avail_start, avail_end) values
-  (1234, '2019-07-18 09:00:00-00', '2019-07-18 11:00:00-00'),
-  (1234, '2019-07-18 13:00:00-00', '2019-07-18 17:30:00-00'),
-  (1234, '2019-07-19 10:00:00-00', '2019-07-19 11:30:00-00'),
-  (1234, '2019-07-19 13:00:00-00', '2019-07-19 14:45:00-00'),
-  (1234, '2019-07-20 08:00:00-00', '2019-07-20 19:00:00-00');
-END
+__END

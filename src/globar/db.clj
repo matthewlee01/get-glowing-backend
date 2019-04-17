@@ -39,7 +39,7 @@
 (defstate db-conn :start (open-db-connection (connection-string))
                   :stop (close-db-connection db-conn))
 
-(defn ^:private query
+(defn query
   "issue a query to the postgres db"
   [statement]
   (let [[sql & params] statement]
@@ -48,7 +48,7 @@
   (jdbc/query db-conn statement))
 
 
-(defn ^:private execute
+(defn execute
   "execute a more complex SQL statement with postgres"
   [statement]
   (let [[sql & params] statement]
