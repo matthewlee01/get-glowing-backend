@@ -1,4 +1,4 @@
-(ns globar.calendar-db
+(ns globar.calendar.calendar-db
   (:require [io.pedestal.log :as log]
             [clojure.string :as str]
             [clojure.edn :as edn]
@@ -12,8 +12,9 @@
     :booked (collection of time chunks)
     :updated-at string}"
   [vendor-id date]
-  (let [raw-result (db/query ["SELECT * FROM Customers WHERE vendor_id = ? AND date = ?" vendor-id date])
+  (let [raw-result (db/query ["SELECT * FROM vendor_calendar WHERE vendor_id = ? AND date = ?" vendor-id date])
         result (first raw-result)]
+    (println result)
     {:date (:date result)
      :available (edn/read-string (:available_edn result))
      :booked (edn/read-string (:booked_edn result))

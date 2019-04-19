@@ -1,4 +1,4 @@
-(ns globar.time
+(ns globar.calendar.time
   (:require [java-time :as jt]))
 
 (def LESS_THAN -1)
@@ -42,3 +42,15 @@
        (sort)
        (partition 2)
        (filter nonzero-duration?)))
+
+(defn calendar-to-string
+  "this function takes a collection of time chunks and returns a string that
+   represents the collection to be stored in the db"
+  [coll])
+
+(defn string-to-calendar
+  "this function reverses calendar-to-string and takes a string from the db
+   and reconstructs the collection of time chunks"
+  [coll-str])
+
+
