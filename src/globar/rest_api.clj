@@ -1,9 +1,10 @@
 (ns globar.rest-api
-  (:require [globar.config :as config]
-            [clojure.java.io :as io]
+  (:require [clojure.java.io :as io]
             [io.pedestal.http.route.definition :refer [defroutes]]
             [io.pedestal.http.ring-middlewares :as ring-mw]
-            [io.pedestal.http.route :as route]))
+            [io.pedestal.log :as log]
+            [io.pedestal.http.body-params :as body-params]
+            [io.pedestal.http :as http]))
 
 (def FORM_PARAM "image")
 (def DEST_DIR "resources/public")
@@ -27,7 +28,37 @@
     {:status 200
      :body (str "File upload was successful\n")}))
 
-(defroutes rest-api-routes
-  [[["/upload" ^:interceptors [(ring-mw/multipart-params)] {:post upload}]]])
+(defn put-calendar
+  [request]
+  (let [vendor-id (get-in request [:path-params :vendor-id])
+        body-data (get-in request [:json-params])
+        date (:date body-data)
+        available (:available body-data)
+        updated-at (:updated-at body-data)]
+    (log/debug :rest-fn :put-calendar :vendor-id vendor-id :date date :available available
+               :updated-at updated-at)
+    ;; need to get rid of this and call the real functions when ready
+    (let [result {:vendor-id vendor-id
+                  :available "((\"11:30\" \"14:00\")(\"15:00\" \"19:00\"))"
+                  :booked  "((\"13:30\" \"14:00\")(\"15:00\" \"15:30\"))"
+                  :updated-at "2019-07-18 05-06-07:00"}]
+      (http/json-response result))))
 
+(defn get-calendar
+  [request]
+  (let [vendor-id (get-in request [:path-params :vendor-id])
+        date (get-in request [:path-params :date])]
+    (log/debug :rest-fn :get-calendar :vendor-id vendor-id :date date)
+    ;; need to get rid of this and call the real functions when ready
+    (let [result {:vendor-id vendor-id
+                  :available "((\"11:30\" \"14:00\")(\"15:00\" \"19:00\"))"
+                  :booked  "((\"13:30\" \"14:00\")(\"15:00\" \"15:30\"))"
+                  :updated-at "2019-07-18 05-06-07:00"}]
+      (http/json-response result))))
+
+
+(defroutes rest-api-routes
+  [[["/upload" ^:interceptors [(ring-mw/multipart-params)] {:post upload}]
+    ["/calendar/:vendor-id" ^:interceptors [(body-params/body-params)] {:post put-calendar}]
+    ["/calendar/:vendor-id/:date" {:get get-calendar}]]])
 
