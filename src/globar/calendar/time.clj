@@ -1,7 +1,9 @@
 (ns globar.calendar.time
-  (:require [java-time :as jt]))
+  (:require [java-time :as jt]
+            [clojure.edn :as edn]))
 
 (def LESS_THAN -1)
+(def COLON_INDEX 2)
 
 (defn squish
   "this reduction function takes a collection representing a stack and
@@ -43,14 +45,49 @@
        (partition 2)
        (filter nonzero-duration?)))
 
+(defn zeroize
+  "adds zeros to clock strings to conform to the time format"
+  [string]
+  (if (= (count string) 1)
+    (str "0" string)
+    string))
+
+(defn local-time-to-string
+  "converts a local-time object to a clock string"
+  [local-time]
+  (let [hour (-> (bean local-time)
+                 (:hour)
+                 (str)
+                 (zeroize))
+        minute (-> (bean local-time)
+                   (:minute)
+                   (str)
+                   (zeroize))]
+    (str hour ":" minute)))
+
 (defn calendar-to-string
   "this function takes a collection of time chunks and returns a string that
    represents the collection to be stored in the db"
-  [coll])
+  [coll]
+  (pr-str
+    (map 
+      (fn [time-chunk]
+        (map local-time-to-string time-chunk)) coll)))
+
+(defn string-to-local-time
+  "converts a clock string to a local-time object"
+  [time-str]
+  (let [hour (edn/read-string (subs time-str 0 COLON_INDEX))
+        minute (edn/read-string (subs time-str (+ COLON_INDEX 1)))]
+    (jt/local-time hour minute)))
 
 (defn string-to-calendar
   "this function reverses calendar-to-string and takes a string from the db
    and reconstructs the collection of time chunks"
-  [coll-str])
+  [coll-str]
+  (let [coll (edn/read-string coll-str)]
+    (map 
+      (fn [time-chunk]
+        (map string-to-local-time time-chunk)) coll)))
 
 
