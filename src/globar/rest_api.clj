@@ -4,7 +4,8 @@
             [io.pedestal.http.ring-middlewares :as ring-mw]
             [io.pedestal.log :as log]
             [io.pedestal.http.body-params :as body-params]
-            [io.pedestal.http :as http]))
+            [io.pedestal.http :as http]
+            [globar.calendar.core :as cc]))
 
 (def FORM_PARAM "image")
 (def DEST_DIR "resources/public")
@@ -30,31 +31,21 @@
 
 (defn put-calendar
   [request]
-  (let [vendor-id (get-in request [:path-params :vendor-id])
+  (let [vendor-id (read-string (get-in request [:path-params :vendor-id]))
         body-data (get-in request [:json-params])
         date (:date body-data)
         available (:available body-data)
         updated-at (:updated-at body-data)]
     (log/debug :rest-fn :put-calendar :vendor-id vendor-id :date date :available available
                :updated-at updated-at)
-    ;; need to get rid of this and call the real functions when ready
-    (let [result {:vendor-id vendor-id
-                  :available "((\"11:30\" \"14:00\")(\"15:00\" \"19:00\"))"
-                  :booked  "((\"13:30\" \"14:00\")(\"15:00\" \"15:30\"))"
-                  :updated-at "2019-07-18 05-06-07:00"}]
-      (http/json-response result))))
+    (http/json-response (cc/write-calendar vendor-id body-data))))
 
 (defn get-calendar
   [request]
-  (let [vendor-id (get-in request [:path-params :vendor-id])
-        date (get-in request [:path-params :date])]
+  (let [vendor-id (read-string (get-in request [:path-params :vendor-id]))
+        date (str (get-in request [:path-params :date]))]
     (log/debug :rest-fn :get-calendar :vendor-id vendor-id :date date)
-    ;; need to get rid of this and call the real functions when ready
-    (let [result {:vendor-id vendor-id
-                  :available "((\"11:30\" \"14:00\")(\"15:00\" \"19:00\"))"
-                  :booked  "((\"13:30\" \"14:00\")(\"15:00\" \"15:30\"))"
-                  :updated-at "2019-07-18 05-06-07:00"}]
-      (http/json-response result))))
+    (http/json-response (cc/read-calendar vendor-id date))))
 
 
 (defroutes rest-api-routes
