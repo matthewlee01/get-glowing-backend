@@ -45,26 +45,6 @@
        (partition 2)
        (filter nonzero-duration?)))
 
-(defn zeroize
-  "adds zeros to clock strings to conform to the time format"
-  [string]
-  (if (= (count string) 1)
-    (str "0" string)
-    string))
-
-(defn local-time-to-string
-  "converts a local-time object to a clock string"
-  [local-time]
-  (let [hour (-> (bean local-time)
-                 (:hour)
-                 (str)
-                 (zeroize))
-        minute (-> (bean local-time)
-                   (:minute)
-                   (str)
-                   (zeroize))]
-    (str hour ":" minute)))
-
 (defn calendar-to-string
   "this function takes a collection of time chunks and returns a string that
    represents the collection to be stored in the db"
@@ -72,13 +52,13 @@
   (pr-str
     (map 
       (fn [time-chunk]
-        (map local-time-to-string time-chunk)) coll)))
+        (map str time-chunk)) coll)))
 
 (defn string-to-local-time
   "converts a clock string to a local-time object"
   [time-str]
-  (let [hour (edn/read-string (subs time-str 0 COLON_INDEX))
-        minute (edn/read-string (subs time-str (+ COLON_INDEX 1)))]
+  (let [hour (read-string (subs time-str 0 COLON_INDEX))
+        minute (read-string (subs time-str (+ COLON_INDEX 1)))]
     (jt/local-time hour minute)))
 
 (defn string-to-calendar
