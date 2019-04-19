@@ -12,4 +12,5 @@
 
     <logger name="globar.db" level="DEBUG"/>
     <logger name="globar.schema" level="DEBUG"/>
+    <logger name="globar.rest-api" level="DEBUG"/>
 </configuration>
