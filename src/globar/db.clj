@@ -31,12 +31,7 @@
       (-> connection :datasource .close))
     (println "no active connection to close")))
 
-(defn connection-string []
-  (if config/debug?
-    ["localhost" "globardb" "globar_role" "j3mc" 25432];; this is the string to use when running a local dev db 
-    ["db" "globardb" "globar_role" "j3mc" 5432])) ;; this is the string to be used when running in production
-
-(defstate db-conn :start (open-db-connection (connection-string))
+(defstate db-conn :start (open-db-connection (config/connection-string))
                   :stop (close-db-connection db-conn))
 
 (defn query
