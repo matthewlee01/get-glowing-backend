@@ -13,4 +13,5 @@
     <logger name="globar.db" level="DEBUG"/>
     <logger name="globar.schema" level="DEBUG"/>
     <logger name="globar.rest-api" level="DEBUG"/>
+    <logger name="globar.calendar.core" level="DEBUG"/>
 </configuration>

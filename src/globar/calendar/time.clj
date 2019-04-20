@@ -45,6 +45,12 @@
        (partition 2)
        (filter nonzero-duration?)))
 
+(defn time-str-to-vec
+  "converts a time string to a vector [hour minute]"
+  [time-str]
+  [(read-string (subs time-str 0 COLON_INDEX))
+   (read-string (subs time-str (+ COLON_INDEX 1)))])
+
 (defn calendar-to-string
   "this function takes a collection of time chunks and returns a string that
    represents the collection to be stored in the db"
