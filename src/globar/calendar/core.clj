@@ -5,7 +5,7 @@
 
 (defn valid-time?
   "checks to make sure time makes sense"
-  [hour minute]
+  [[hour minute]]
   (if (and (< hour 24)
            (< minute 60)
            (>= hour 0)
@@ -22,8 +22,8 @@
         h2 (first time2)
         m1 (second time1)
         m2 (second time2)]
-    (if (and (valid-time? h1 m1)
-             (valid-time? h2 m2)
+    (if (and (valid-time? time1)
+             (valid-time? time2)
              (<= h1 h2)
              (if (and (= h1 h2) (> m1 m2))
                false

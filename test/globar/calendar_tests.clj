@@ -38,8 +38,8 @@
         valid-time [07 45]
         valid-time-chunk '("09:20" "09:50")
         valid-time-coll "((\"02:30\" \"02:55\") (\"03:50\" \"06:15\") (\"13:20\" \"20:45\"))"]
-    (is (= (cc/valid-time? (first invalid-time) (second invalid-time)) false))
-    (is (= (cc/valid-time? (first valid-time) (second valid-time)) true))
+    (is (= (cc/valid-time? invalid-time) false))
+    (is (= (cc/valid-time? valid-time) true))
     (is (= (cc/valid-time-chunk? invalid-time-chunk) false))
     (is (= (cc/valid-time-chunk? valid-time-chunk) true))
     (is (= (cc/valid-time-coll? invalid-time-coll) false))
