@@ -37,10 +37,14 @@
         invalid-time-coll "((\"02:30\" \"05:00\") (\"23:50\" \"06:15\") (\"13:20\" \"20:45\"))"
         valid-time [07 45]
         valid-time-chunk '("09:20" "09:50")
-        valid-time-coll "((\"02:30\" \"02:55\") (\"03:50\" \"06:15\") (\"13:20\" \"20:45\"))"]
+        valid-time-coll "((\"02:30\" \"02:55\") (\"03:50\" \"06:15\") (\"13:20\" \"20:45\"))"
+        invalid-bookings "((\"12:30\" \"13:30\") (\"13:00\" \"19:00\"))"
+        valid-bookings "((\"12:30\" \"13:30\") (\"14:00\" \"16:00\") (\"17:00\" \"19:00\"))"]
     (is (= (cc/valid-time? invalid-time) false))
     (is (= (cc/valid-time? valid-time) true))
     (is (= (cc/valid-time-chunk? invalid-time-chunk) false))
     (is (= (cc/valid-time-chunk? valid-time-chunk) true))
     (is (= (cc/valid-time-coll? invalid-time-coll) false))
-    (is (= (cc/valid-time-coll? valid-time-coll) true))))
+    (is (= (cc/valid-time-coll? valid-time-coll) true))
+    (is (= (cc/valid-bookings? invalid-bookings) false))
+    (is (= (cc/valid-bookings? valid-bookings) true))))

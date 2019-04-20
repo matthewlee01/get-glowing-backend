@@ -11,7 +11,7 @@
            (>= hour 0)
            (>= minute 0))
       true
-      false))
+      (do (log/debug :message "invalid time format") false)))
 
 (defn valid-time-chunk?
   [time-chunk]
@@ -37,6 +37,21 @@
        (map valid-time-chunk?)
        (every? true?)))
 
+(defn overlapping-bookings?
+  [time-coll]
+  (let [merged-coll (ctime/merge-chunks (ctime/string-to-calendar time-coll))]
+    (if (= time-coll (ctime/calendar-to-string merged-coll))
+      false
+      true)))
+
+(defn valid-bookings?
+  [time-coll]
+  (if (valid-time-coll? time-coll)
+    (if (overlapping-bookings? time-coll)
+      false
+      true)
+    (do (log/debug :message "invalid time coll") false)))
+
 (defn read-calendar 
   [vendor-id date]
   (cdb/read-vendor-calendar-day vendor-id date))
@@ -45,3 +60,4 @@
   [vendor-id cal-map]
   (let [{:keys [date available booked updated_at]} cal-map]
     (cdb/upsert-vendor-calendar-day vendor-id date available booked updated_at)))
+
