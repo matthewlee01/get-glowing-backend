@@ -20,7 +20,8 @@ To get an environment up to work on the globar code itself:
 
 ### To inspect the raw database tables
 Run one of the ```list-...``` scripts in the "bin" directory
-eg:
+
+For example:
 ```./list-customers.sh``` will do a select * on the customers table
 
 ## License
