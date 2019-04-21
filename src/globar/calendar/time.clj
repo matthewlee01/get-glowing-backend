@@ -46,6 +46,7 @@
        (filter nonzero-duration?)))
 
 (defn parse-int
+  "converts a string to an int"
   [string]
   (Integer. (re-find #"\d+" string)))
 

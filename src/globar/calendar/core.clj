@@ -14,6 +14,8 @@
       (do (log/debug :message "invalid time format") false)))
 
 (defn valid-time-chunk?
+  "checks each time in a chunk to make sure that it conforms to the format,
+  then checks that the beginning is before the end"
   [time-chunk]
   (log/debug :message (str time-chunk))
   (let [time1 (ctime/time-str-to-vec (first time-chunk))
@@ -32,12 +34,14 @@
       (do (log/debug :message "time chunk failed") false))))
 
 (defn valid-time-coll?
+  "maps over the time-coll to ensure that each time-chunk is correct"
   [time-coll]
   (->> (read-string time-coll)
        (map valid-time-chunk?)
        (every? true?)))
 
 (defn overlapping-bookings?
+  "uses merge-chunks to check if the bookings overlap"
   [time-coll]
   (let [merged-coll (ctime/merge-chunks (ctime/string-to-calendar time-coll))]
     (if (= time-coll (ctime/calendar-to-string merged-coll))
@@ -45,6 +49,8 @@
       true)))
 
 (defn valid-bookings?
+  "checks to ensure that a booking collection has valid times and
+  time chunks, and checks for overlap between bookings"
   [time-coll]
   (if (valid-time-coll? time-coll)
     (if (overlapping-bookings? time-coll)
@@ -53,10 +59,12 @@
     (do (log/debug :message "invalid time coll") false)))
 
 (defn read-calendar 
+  "reads a vendor's calendar-day from the db"
   [vendor-id date]
   (cdb/read-vendor-calendar-day vendor-id date))
 
 (defn write-calendar
+  "upserts a vendor's calendar day with new info"
   [vendor-id cal-map]
   (let [{:keys [date available booked updated_at]} cal-map]
     (cdb/upsert-vendor-calendar-day vendor-id date available booked updated_at)))
