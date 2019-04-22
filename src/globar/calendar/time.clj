@@ -16,10 +16,10 @@
     [interval-2]
     (let [interval-1 (peek coll)
           new-coll (pop coll)]
-      (if (= LESS_THAN (compare (:end interval-1) (:start interval-2)))
+      (if (= LESS_THAN (compare (second interval-1) (first interval-2)))
         (conj new-coll interval-1 interval-2)
-        (if (= LESS_THAN (compare (:end interval-1) (:end interval-2)))
-          (conj new-coll {:start (:start interval-1) :end (:end interval-2)})
+        (if (= LESS_THAN (compare (second interval-1) (second interval-2)))
+          (conj new-coll (list (first interval-1) (second interval-2)))
           (conj new-coll interval-1))))))
 
 (defn merge-chunks
@@ -27,7 +27,7 @@
    and returns a collection of chunks representing a merge of
    all overlapping elements of the input collection"
   [chunk-coll]
-  (let [sorted-chunks (sort-by :start chunk-coll)]
+  (let [sorted-chunks (sort-by first chunk-coll)]
     (reduce squish [] sorted-chunks)))
 
 
@@ -44,6 +44,17 @@
        (sort)
        (partition 2)
        (filter nonzero-duration?)))
+
+(defn parse-int
+  "converts a string to an int"
+  [string]
+  (Integer. (re-find #"\d+" string)))
+
+(defn time-str-to-vec
+  "converts a time string to a vector [hour minute]"
+  [time-str]
+  [(parse-int (subs time-str 0 COLON_INDEX))
+   (parse-int (subs time-str (+ COLON_INDEX 1)))])
 
 (defn calendar-to-string
   "this function takes a collection of time chunks and returns a string that
