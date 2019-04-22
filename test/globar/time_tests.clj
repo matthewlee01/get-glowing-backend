@@ -4,13 +4,13 @@
             [java-time :as jt]))
 
 (deftest test-merge-chunks
-  (let [c1 {:start (jt/local-time 12 30) :end (jt/local-time 13 30)}
-        c2 {:start (jt/local-time 12 45) :end (jt/local-time 13 15)}
-        c3 {:start (jt/local-time 12 45) :end (jt/local-time 13 45)}
-        c4 {:start (jt/local-time 12 15) :end (jt/local-time 13 45)}]
+  (let [c1 [(jt/local-time 12 30) (jt/local-time 13 30)]
+        c2 [(jt/local-time 12 45) (jt/local-time 13 15)]
+        c3 [(jt/local-time 12 45) (jt/local-time 13 45)]
+        c4 [(jt/local-time 12 15) (jt/local-time 13 45)]]
     
     (is (= (gt/merge-chunks [c1 c2 c3 c4])
-           [{:start (jt/local-time 12 15) :end (jt/local-time 13 45)}]))))
+           [[(jt/local-time 12 15) (jt/local-time 13 45)]]))))
 
 (def t1 [(jt/local-time 12 30) (jt/local-time 13 30)])
 (def t2 [(jt/local-time 14 00) (jt/local-time 19 00)])
