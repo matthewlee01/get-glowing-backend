@@ -61,11 +61,11 @@
 (defn read-calendar 
   "reads a vendor's calendar-day from the db"
   [vendor-id date]
-  (cdb/read-vendor-calendar-day vendor-id date))
+  (cdb/read-calendar-day vendor-id date))
 
 (defn write-calendar
   "upserts a vendor's calendar day with new info"
   [vendor-id cal-map]
-  (let [{:keys [date available booked updated_at]} cal-map]
-    (cdb/upsert-vendor-calendar-day vendor-id date available booked updated_at)))
+  (let [{:keys [date available booked updated-at]} cal-map]
+    (cdb/upsert-calendar-day vendor-id date available booked updated-at)))
 
