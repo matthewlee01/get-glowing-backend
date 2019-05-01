@@ -1,4 +1,4 @@
-(ns globar.calendar_tests
+(ns globar.calendar-tests
   (:require [clojure.test :refer :all]
             [globar.test_utils :refer [start-test-system! stop-test-system!]]
             [globar.core :as core]
@@ -7,7 +7,10 @@
             [clojure.edn :as edn]
             [clojure.data.json :as json]))
 
-(deftest test-calendar-read-write
+;; test that we can create a new entry in the calendar table by writing a new
+;; calendar entry, reading it back and testing that the contents are the same
+;; and then test that we can update the entry by issuing another write
+(deftest test-calendar-write-read
   (start-test-system!)
   (let [vendor-id 1234
         date "01/01/01"
@@ -19,17 +22,51 @@
       (is (= (:date test-map) (:date written-map)))
       (is (= (:available test-map (:available written-map))))
       (is (= (:booked test-map (:booked written-map))))
-      (is (= written-map read-map)))))
+      (is (= (:success written-map) true))
+      (is (= written-map read-map))
+      (let [updated-map (assoc read-map :booked "((\"07:30\" \"08:00\") (\"13:20\" \"20:45\") (\"20:45\" \"21:00\"))")
+            re-written-map (cc/write-calendar vendor-id updated-map)]
+        ;; ignore the success flag (?) and the updated-at timestamp
+        (is (= (dissoc updated-map :updated-at)
+               (dissoc re-written-map :updated-at))))))
 
+  (stop-test-system!))
+
+;;"this test creates a row in the calendar table, checks that it was created properly by reading it back.
+;; next it will update the row twice.  the first update should succeed and the second should fail with 
+;; an error indicating that another operation won the race and the operation needs to be retried"
 (deftest test-calendar-calls
-  (core/start)
-  (let [posted-json (sh "curl" "-H" "Content-Type: application/json" "-d" "{\"date\": \"2019-07-18\", \"available\": \"((12:30 1:30)(4:30 9:30))\", \"booked\":\"((1:15 1:45))\", \"updated-at\":\"2019-04-13 14:23:44\"}" "-X" "POST" "http://localhost:8888/calendar/1234")
-        read-json (sh "curl" "http://localhost:8888/calendar/1234/2019-07-18")
-        posted-clj (json/read-str (:out posted-json) :key-fn keyword)
-        read-clj (json/read-str (:out read-json) :key-fn keyword)]
+  (start-test-system!)
+  (println "sending")
+  ;; first test demonstrates that we can write a new record and read back what we write
+  (let [post-result (sh "curl" "-H" "Content-Type: application/json" "-d" "{\"date\": \"2019-07-18\", \"available\": \"((12:30 1:30)(4:30 9:30))\", \"booked\":\"((1:15 1:45))\"}" "-X" "POST" "http://localhost:8889/calendar/1234")
+        get-result (sh "curl" "http://localhost:8889/calendar/1234/2019-07-18")
+        posted-clj (json/read-str (:out post-result) :key-fn keyword)
+        read-clj (json/read-str (:out get-result) :key-fn keyword)]
     (is (= (:date posted-clj) (:date read-clj)))
-    (is (= (:booked posted-clj) (:booked read-clj))))
-  (core/stop))
+    (is (= (:booked posted-clj) (:booked read-clj)))
+    (is (= (:success posted-clj) true))
+
+    ;; the second test demonstrates that we can update the record by posting a modification
+    (let [new-cal (assoc read-clj :booked "((\"12:30\" \"13:00\"))")
+          poopy (println "NEW CAL: " new-cal)
+          post-result (sh "curl" "-H" 
+                          "Content-Type: application/json" 
+                          "-d" (json/write-str new-cal) "-X" 
+                          "POST" "http://localhost:8889/calendar/1234")
+          post-clj (json/read-str (:out post-result) :key-fn keyword)]
+      (is (= (:success post-clj) true))
+      ;; the last test demonstrates that we can't update without re-fetching to
+      ;; avoid update collisions - so recommitting the same record should fail
+      (let [post-result (sh "curl" "-H"
+                            "Content-Type: application/json" 
+                            "-d" (json/write-str new-cal) "-X" 
+                            "POST" "http://localhost:8889/calendar/1234")
+            post-clj (json/read-str (:out post-result) :key-fn keyword)]
+        (is (= (:success post-clj) false))
+        (is (= (:error-msg post-clj) "Update collision - please retry the operation")))))
+
+  (stop-test-system!))
 
 (deftest test-calendar-checks
   (let [invalid-time [26 -1]
