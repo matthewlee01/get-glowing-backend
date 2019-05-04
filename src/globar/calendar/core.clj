@@ -20,16 +20,11 @@
   (log/debug :message (str time-chunk))
   (let [time1 (ctime/time-str-to-vec (first time-chunk))
         time2 (ctime/time-str-to-vec (second time-chunk))
-        h1 (first time1)
-        h2 (first time2)
-        m1 (second time1)
-        m2 (second time2)]
+        lt1 (ctime/string-to-local-time (first time-chunk))
+        lt2 (ctime/string-to-local-time (second time-chunk))]
     (if (and (valid-time? time1)
              (valid-time? time2)
-             (<= h1 h2)
-             (if (and (= h1 h2) (> m1 m2))
-               false
-               true))
+             (> (compare lt2 lt1) 0))
       (do (log/debug :message "time chunk good") true)
       (do (log/debug :message "time chunk failed") false))))
 
