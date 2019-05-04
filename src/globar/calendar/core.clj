@@ -61,11 +61,21 @@
 (defn read-calendar 
   "reads a vendor's calendar-day from the db"
   [vendor-id date]
-  (cdb/read-vendor-calendar-day vendor-id date))
+  (let [result (cdb/read-calendar-day vendor-id date)
+        timestamp (:updated-at result)]
+    ;; replace the timestamp with the string equivalent
+    (assoc result :updated-at (str timestamp))))
 
 (defn write-calendar
   "upserts a vendor's calendar day with new info"
   [vendor-id cal-map]
-  (let [{:keys [date available booked updated_at]} cal-map]
-    (cdb/upsert-vendor-calendar-day vendor-id date available booked updated_at)))
+  (let [{:keys [date available booked updated-at]} cal-map
+        result (if (= nil updated-at)
+                 (cdb/insert-calendar-day vendor-id date available booked)
+                 ;; if the updated-at field is present, convert it to timestamp
+                 (cdb/update-calendar-day vendor-id date available booked
+                               (java.sql.Timestamp/valueOf updated-at)))
+        timestamp (:updated-at result)]
+    ;; replace the timestamp with the string equivalent
+    (assoc result :updated-at (str timestamp))))
 

@@ -18,6 +18,12 @@ To get an environment up to work on the globar code itself:
 4. start the system in the repl: ```(start)```
 5. to stop the system: ```(stop)```
 
+### To inspect the raw database tables
+Run one of the ```list-...``` scripts in the "bin" directory
+
+For example:
+```./list-customers.sh``` will do a select * on the customers table
+
 ## License
 
 Copyright © 2019 J3MC Software
