@@ -7,19 +7,21 @@
 
 (defn read-calendar-day
   "this function reads the database to return a map with the following structure:
-   {:date string
-    :available (string representing time chunks)
-    :booked (string representing time chunks)
-    :updated-at string}"
+   {:date - string
+    :available - a collection of time chunks 
+    :booked - a collection of time chunks 
+    :updated-at - string}"
   [vendor-id date]
 
   (try
     (let [raw-result (db/query ["SELECT * FROM vendor_calendar WHERE vendor_id = ? AND date = ?" vendor-id date])
-          result (first raw-result)]
+          result (first raw-result)
+          available (edn/read-string (:available_edn result))
+          booked (edn/read-string (:booked_edn result))]
       (println result)
       {:date (:date result)
-       :available (:available_edn result)
-       :booked (:booked_edn result)
+       :available available
+       :booked booked
        :updated-at (:updated_at result)
        :success true})
     (catch Exception e
@@ -30,13 +32,15 @@
 (defn insert-calendar-day
   "this function inserts a new row into the vendor_calendar table and returns the most recent values.
    Notably it will return a value for updated-at, which is necessary to do further updates.  If an
-   error is encountered, the returned hash map will contain a :error key"
+   error is encountered, the returned hash map will contain :success false and a :error-msg key"
   [vendor-id date available booked]
   (log/debug :fn :insert-vendor-calendar-day :vendor vendor-id :date date
              :available available :booked booked)
   (try
-    (let [result (db/execute ["INSERT INTO vendor_calendar (vendor_id, date, available_edn, booked_edn)
-                               VALUES (?, ?, ?, ?)" vendor-id date available booked])
+    (let [available-edn (prn-str available)
+          booked-edn (prn-str booked)
+          result (db/execute ["INSERT INTO vendor_calendar (vendor_id, date, available_edn, booked_edn)
+                               VALUES (?, ?, ?, ?)" vendor-id date available-edn booked-edn])
           success? (= 1 (first result))
           latest (read-calendar-day vendor-id date)]
 
@@ -58,11 +62,13 @@
   (log/debug :fn :update-vendor-calendar-day :vendor vendor-id :date date
              :available available :booked booked :updated-at updated-at)
   (try
-    (let [result (db/execute ["UPDATE vendor_calendar SET available_edn = ?, booked_edn = ?
+    (let [available-edn (prn-str available)
+          booked-edn (prn-str booked)
+          result (db/execute ["UPDATE vendor_calendar SET available_edn = ?, booked_edn = ?
                               WHERE vendor_id = ? AND date = ? AND updated_at = ?" 
-                              available
-                              booked
-                              vendor-id,
+                              available-edn
+                              booked-edn
+                              vendor-id
                               date
                               updated-at])
           success? (= 1 (first result))

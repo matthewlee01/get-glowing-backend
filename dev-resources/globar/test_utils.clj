@@ -44,3 +44,12 @@
   (-> schema/schema-state
       (lacinia/execute query variables nil)
       simplify))
+
+
+(defn setup-test-system! [f]
+  (start-test-system!)
+  (try
+    (f)
+    (catch Exception e (str "caught exception: " (.getMessage e)))
+    (finally (stop-test-system!)))
+  (stop-test-system!))
