@@ -1,17 +1,18 @@
 (ns globar.calendar-tests
   (:require [clojure.test :refer :all]
-            [globar.test_utils :refer [start-test-system! stop-test-system!]]
+            [globar.test_utils :refer [setup-test-system!]]
             [globar.core :as core]
             [globar.calendar.core :as cc]
             [clojure.java.shell :refer [sh]]
             [clojure.edn :as edn]
             [clojure.data.json :as json]))
 
+(use-fixtures :each setup-test-system!)
+
 ;; test that we can create a new entry in the calendar table by writing a new
 ;; calendar entry, reading it back and testing that the contents are the same
 ;; and then test that we can update the entry by issuing another write
 (deftest test-calendar-write-read
-  (start-test-system!)
   (let [vendor-id 1234
         date "01/01/01"
         test-map {:date date
@@ -29,14 +30,12 @@
         ;; ignore the success flag (?) and the updated-at timestamp
         (is (= (dissoc updated-map :updated-at)
                (dissoc re-written-map :updated-at))))))
-
-  (stop-test-system!))
+  )
 
 ;;"this test creates a row in the calendar table, checks that it was created properly by reading it back.
 ;; next it will update the row twice.  the first update should succeed and the second should fail with 
 ;; an error indicating that another operation won the race and the operation needs to be retried"
 (deftest test-calendar-calls
-  (start-test-system!)
   (println "sending")
   ;; first test demonstrates that we can write a new record and read back what we write
   (let [post-result (sh "curl" "-H" "Content-Type: application/json" "-d" "{\"date\": \"2019-07-18\", \"available\": \"((12:30 1:30)(4:30 9:30))\", \"booked\":\"((1:15 1:45))\"}" "-X" "POST" "http://localhost:8889/calendar/1234")
@@ -65,8 +64,7 @@
             post-clj (json/read-str (:out post-result) :key-fn keyword)]
         (is (= (:success post-clj) false))
         (is (= (:error-msg post-clj) "Update collision - please retry the operation")))))
-
-  (stop-test-system!))
+  )
 
 (deftest test-calendar-checks
   (let [invalid-time [26 -1]
@@ -85,3 +83,4 @@
     (is (= (cc/valid-time-coll? valid-time-coll) true))
     (is (= (cc/valid-bookings? invalid-bookings) false))
     (is (= (cc/valid-bookings? valid-bookings) true))))
+
