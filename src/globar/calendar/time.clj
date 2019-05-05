@@ -68,8 +68,8 @@
 (defn string-to-local-time
   "converts a clock string to a local-time object"
   [time-str]
-  (let [hour (read-string (subs time-str 0 COLON_INDEX))
-        minute (read-string (subs time-str (+ COLON_INDEX 1)))]
+  (let [hour (parse-int (subs time-str 0 COLON_INDEX))
+        minute (parse-int (subs time-str (+ COLON_INDEX 1)))]
     (jt/local-time hour minute)))
 
 (defn string-to-calendar
