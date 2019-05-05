@@ -101,6 +101,17 @@
   [_ _ vendor]
   (db/list-services-for-vendor (:vendor_id vendor)))
 
+(defn services-summary
+  [_ _ vendor]
+  (let [prices (map :s_price (db/list-services-for-vendor (:vendor_id vendor)))
+        svc-count (count prices)
+        svc-min (apply min prices)
+        svc-max (apply max prices)]
+    {:count svc-count
+     :min svc-min 
+     :max svc-max}))
+                      
+                      
 (defn rating-summary
   [_ _ vendor]
   (let [ratings (map :rating (db/list-ratings-for-vendor (:vendor_id vendor)))
@@ -141,6 +152,7 @@
    :Customer/vendor-ratings    customer-ratings
    :Vendor/customers           vendor-userlist
    :Vendor/services            vendor-services
+   :Vendor/services-summary    services-summary
    :Vendor/rating-summary      rating-summary
    :Vendor/vendor-ratings      vendor-ratings
    :VendorRating/vendor        vendor-rating->vendor})
