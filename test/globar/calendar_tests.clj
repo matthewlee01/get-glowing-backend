@@ -16,8 +16,8 @@
   (let [vendor-id 1234
         date "01/01/01"
         test-map {:date date
-                  :available "((\"02:30\" \"05:00\") (\"23:50\" \"06:15\"))"
-                  :booked "((\"07:30\" \"08:00\") (\"13:20\" \"20:45\"))"}
+                  :available "[[60 180] [240 360]]"
+                  :booked "[[60 120] [300 360]]"}
         written-map (cc/write-calendar vendor-id test-map)]
     (let [read-map (cc/read-calendar vendor-id date)]
       (is (= (:date test-map) (:date written-map)))
@@ -25,7 +25,7 @@
       (is (= (:booked test-map (:booked written-map))))
       (is (= (:success written-map) true))
       (is (= written-map read-map))
-      (let [updated-map (assoc read-map :booked "((\"07:30\" \"08:00\") (\"13:20\" \"20:45\") (\"20:45\" \"21:00\"))")
+      (let [updated-map (assoc read-map :booked "[[0 60] [240 300] [600 660]]")
             re-written-map (cc/write-calendar vendor-id updated-map)]
         ;; ignore the success flag (?) and the updated-at timestamp
         (is (= (dissoc updated-map :updated-at)
@@ -38,7 +38,7 @@
 (deftest test-calendar-calls
   (println "sending")
   ;; first test demonstrates that we can write a new record and read back what we write
-  (let [post-result (sh "curl" "-H" "Content-Type: application/json" "-d" "{\"date\": \"2019-07-18\", \"available\": \"((12:30 1:30)(4:30 9:30))\", \"booked\":\"((1:15 1:45))\"}" "-X" "POST" "http://localhost:8889/calendar/1234")
+  (let [post-result (sh "curl" "-H" "Content-Type: application/json" "-d" "{\"date\": \"2019-07-18\", \"available\": \"[[240 360] [480 540] [600 720]]\", \"booked\":\"[[300 360]]\"}" "-X" "POST" "http://localhost:8889/calendar/1234")
         get-result (sh "curl" "http://localhost:8889/calendar/1234/2019-07-18")
         posted-clj (json/read-str (:out post-result) :key-fn keyword)
         read-clj (json/read-str (:out get-result) :key-fn keyword)]
@@ -47,7 +47,7 @@
     (is (= (:success posted-clj) true))
 
     ;; the second test demonstrates that we can update the record by posting a modification
-    (let [new-cal (assoc read-clj :booked "((\"12:30\" \"13:00\"))")
+    (let [new-cal (assoc read-clj :booked "[[720 780]]")
           poopy (println "NEW CAL: " new-cal)
           post-result (sh "curl" "-H" 
                           "Content-Type: application/json" 
@@ -67,29 +67,27 @@
   )
 
 (deftest test-calendar-checks
-  (let [invalid-time [26 -1]
-        invalid-time-chunk '("07:30" "07:20")
-        invalid-time-coll "((\"02:30\" \"05:00\") (\"23:50\" \"06:15\") (\"13:20\" \"20:45\"))"
-        valid-time [07 45]
-        valid-time-chunk '("09:20" "09:50")
-        valid-time-coll "((\"02:30\" \"02:55\") (\"03:50\" \"06:15\") (\"13:20\" \"20:45\"))"
-        invalid-bookings "((\"12:30\" \"13:30\") (\"13:00\" \"19:00\"))"
-        valid-bookings "((\"12:30\" \"13:30\") (\"14:00\" \"16:00\") (\"17:00\" \"19:00\"))"
-        available-sample1 "((\"02:30\" \"03:45\") (\"12:00\" \"16:30\") (\"18:00\" \"21:00\"))"
-        available-sample2 "((\"02:30\" \"02:55\") (\"13:20\" \"20:45\"))"
-        bookings-sample1 "((\"02:45\" \"03:30\") (\"14:00\" \"16:00\") (\"18:00\" \"19:00\"))"
-        bookings-sample2 "((\"02:30\" \"02:50\") (\"14:40\" \"17:30\") (\"19:20\" \"20:45\"))"]
-    (is (= (cc/valid-time? invalid-time) false))
+  (let [invalid-time -60                                ;; time cannot be negative 
+        invalid-time-chunk [660 240]                    ;; first time must be before second time 
+        invalid-time-coll [[0 120] [420 300] [720 840]] ;; coll contains invalid time chunk
+        valid-time 300
+        valid-time-chunk [480 540]
+        valid-time-coll [[60 180] [300 360] [600 660]]
+        invalid-bookings [[60 180] [120 240]]           ;; bookings cannot overlap 
+        valid-bookings [[120 180] [240 360] [780 840]]
+        available-sample1 [[120 600] [720 840]]
+        available-sample2 [[0 60] [300 420] [840 900]]
+        bookings-sample1 [[300 360] [720 780]]
+        bookings-sample2 [[0 60] [360 420]]]
+    (is (= (cc/valid-time? invalid-time) false))        
     (is (= (cc/valid-time? valid-time) true))
     (is (= (cc/valid-time-chunk? invalid-time-chunk) false))
     (is (= (cc/valid-time-chunk? valid-time-chunk) true))
     (is (= (cc/valid-time-coll? invalid-time-coll) false))
     (is (= (cc/valid-time-coll? valid-time-coll) true))
-    (is (= (cc/valid-bookings? invalid-bookings) false))
-    (is (= (cc/valid-bookings? valid-bookings) true))
-    (is (= (cc/bookings-available? available-sample1 bookings-sample1) true))
-    (is (= (cc/bookings-available? available-sample2 bookings-sample1) false))
+    (is (= (cc/bookings-available? available-sample1 bookings-sample1) true))  
+    (is (= (cc/bookings-available? available-sample2 bookings-sample1) false)) ;; bookings must be fully within available time
     (is (= (cc/valid-calendar? available-sample2 bookings-sample2) true))
-    (is (= (cc/valid-calendar? available-sample1 invalid-bookings) false))))
+    (is (= (cc/valid-calendar? available-sample1 invalid-bookings) false))))   ;; this calendar contains an invalid booking
 
 
