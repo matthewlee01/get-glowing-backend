@@ -4,67 +4,44 @@
             [io.pedestal.log :as log]))
 
 (defn valid-time?
-  "checks to make sure time makes sense"
-  [[hour minute]]
-  (if (and (< hour 24)
-           (< minute 60)
-           (>= hour 0)
-           (>= minute 0))
-      true
-      (do (log/debug :message "invalid time format") false)))
+  "checks to make sure time is within the correct range"
+  [time]
+  (and (>= time 0)
+       (< time 1440))) ;; number of minutes in a day
 
 (defn valid-time-chunk?
   "checks each time in a chunk to make sure that it conforms to the format,
   then checks that the beginning is before the end"
-  [time-chunk]
-  (log/debug :message (str time-chunk))
-  (let [time1 (ctime/time-str-to-vec (first time-chunk))
-        time2 (ctime/time-str-to-vec (second time-chunk))
-        lt1 (ctime/string-to-local-time (first time-chunk))
-        lt2 (ctime/string-to-local-time (second time-chunk))]
-    (if (and (valid-time? time1)
-             (valid-time? time2)
-             (> (compare lt2 lt1) 0))
-      (do (log/debug :message "time chunk good") true)
-      (do (log/debug :message "time chunk failed") false))))
+  [[start-time end-time]]
+  (and (valid-time? start-time)
+       (valid-time? end-time)
+       (< start-time end-time)))
 
 (defn valid-time-coll?
-  "maps over the time-coll to ensure that each time-chunk is correct"
+  "maps over a time-coll to ensure that each time-chunk is correct"
   [time-coll]
-  (->> (read-string time-coll)
-       (map valid-time-chunk?)
+  (->> (map valid-time-chunk? time-coll)
        (every? true?)))
 
-(defn overlapping-bookings?
-  "uses merge-chunks to check if any bookings overlap with each other"
+(defn overlapping-chunks?
+  "uses merge-chunks to check if any time chunks overlap with each other
+  within a collection"
   [time-coll]
-  (let [merged-coll (ctime/merge-chunks (ctime/string-to-calendar time-coll))]
-    (if (= time-coll (ctime/calendar-to-string merged-coll))
-      false
-      true)))
+  (let [merged-coll (ctime/merge-chunks time-coll)]
+    (not (= time-coll merged-coll))))
 
 (defn bookings-available?
   "uses merge-chunks to check that all bookings are within available time"
-  [available-time-str booked-time-str]
-  (let [available-calendar (ctime/string-to-calendar available-time-str)
-        booked-calendar (ctime/string-to-calendar booked-time-str)
-        merged-calendars (ctime/merge-chunks (concat available-calendar booked-calendar))]
-    (= available-calendar merged-calendars)))
-
-(defn valid-bookings?
-  "checks to ensure that a bookings collection has valid times and
-  time chunks, and checks for overlap between bookings"
-  [bookings-time-coll]
-  (if (and (valid-time-coll? bookings-time-coll)
-           (not (overlapping-bookings? bookings-time-coll)))
-    true
-    (do (log/debug :message "invalid time coll") false)))
+  [available-time booked-time]
+  (let [merged-calendars (ctime/merge-chunks (concat available-time booked-time))]
+    (= available-time merged-calendars)))
 
 (defn valid-calendar?
   "checks bookings & available collections for formatting & overlap"
   [available-time-coll bookings-time-coll]
-  (and (valid-bookings? bookings-time-coll)
-       (valid-time-coll? available-time-coll)
+  (and (valid-time-coll? available-time-coll)
+       (valid-time-coll? bookings-time-coll)
+       (not (overlapping-chunks? bookings-time-coll))
        (bookings-available? available-time-coll bookings-time-coll)))
 
 (defn read-calendar 

@@ -19,7 +19,7 @@
       (if (= LESS_THAN (compare (second interval-1) (first interval-2)))
         (conj new-coll interval-1 interval-2)
         (if (= LESS_THAN (compare (second interval-1) (second interval-2)))
-          (conj new-coll (list (first interval-1) (second interval-2)))
+          (conj new-coll [(first interval-1) (second interval-2)])
           (conj new-coll interval-1))))))
 
 (defn merge-chunks
@@ -45,40 +45,40 @@
        (partition 2)
        (filter nonzero-duration?)))
 
-(defn parse-int
-  "converts a string to an int"
-  [string]
-  (Integer. (re-find #"\d+" string)))
+;(defn parse-int
+;  "converts a string to an int"
+;  [string]
+;  (Integer. (re-find #"\d+" string)))
 
-(defn time-str-to-vec
-  "converts a time string to a vector [hour minute]"
-  [time-str]
-  [(parse-int (subs time-str 0 COLON_INDEX))
-   (parse-int (subs time-str (+ COLON_INDEX 1)))])
+;(defn time-str-to-vec
+;  "converts a time string to a vector [hour minute]"
+;  [time-str]
+;  [(parse-int (subs time-str 0 COLON_INDEX))
+;   (parse-int (subs time-str (+ COLON_INDEX 1)))])
 
-(defn calendar-to-string
-  "this function takes a collection of time chunks and returns a string that
-   represents the collection to be stored in the db"
-  [coll]
-  (pr-str
-    (map 
-      (fn [time-chunk]
-        (map str time-chunk)) coll)))
+;(defn calendar-to-string
+;  "this function takes a collection of time chunks and returns a string that
+;   represents the collection to be stored in the db"
+;  [coll]
+;  (pr-str
+;    (map 
+;      (fn [time-chunk]
+;        (map str time-chunk)) coll)))
 
-(defn string-to-local-time
-  "converts a clock string to a local-time object"
-  [time-str]
-  (let [hour (parse-int (subs time-str 0 COLON_INDEX))
-        minute (parse-int (subs time-str (+ COLON_INDEX 1)))]
-    (jt/local-time hour minute)))
+;(defn string-to-local-time
+;  "converts a clock string to a local-time object"
+;  [time-str]
+;  (let [hour (parse-int (subs time-str 0 COLON_INDEX))
+;        minute (parse-int (subs time-str (+ COLON_INDEX 1)))]
+;    (jt/local-time hour minute)))
 
-(defn string-to-calendar
-  "this function reverses calendar-to-string and takes a string from the db
-   and reconstructs the collection of time chunks"
-  [coll-str]
-  (let [coll (edn/read-string coll-str)]
-    (map 
-      (fn [time-chunk]
-        (map string-to-local-time time-chunk)) coll)))
+;(defn string-to-calendar
+;  "this function reverses calendar-to-string and takes a string from the db
+;   and reconstructs the collection of time chunks"
+;  [coll-str]
+;  (let [coll (edn/read-string coll-str)]
+;    (map 
+;      (fn [time-chunk]
+;        (map string-to-local-time time-chunk)) coll)))
 
 
