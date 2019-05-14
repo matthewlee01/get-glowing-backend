@@ -5,7 +5,9 @@
             [io.pedestal.log :as log]
             [io.pedestal.http.body-params :as body-params]
             [io.pedestal.http :as http]
-            [globar.calendar.core :as cc]))
+            [globar.calendar.core :as cc]
+            [globar.db :as db]
+            [fipp.edn :refer [pprint]]))
 
 (def FORM_PARAM "image")
 (def DEST_DIR "resources/public")
@@ -47,9 +49,15 @@
     (log/debug :rest-fn :get-calendar :vendor-id vendor-id :date date)
     (http/json-response (cc/read-calendar vendor-id date))))
 
+(defn create-vendor 
+  [request]
+  (let [new-vendor (get-in request [:json-params])]
+    (pprint new-vendor)  
+    (http/json-response (db/create-vendor new-vendor))))
 
 (defroutes rest-api-routes
   [[["/upload" ^:interceptors [(ring-mw/multipart-params)] {:post upload}]
     ["/calendar/:vendor-id" ^:interceptors [(body-params/body-params)] {:post put-calendar}]
-    ["/calendar/:vendor-id/:date" {:get get-calendar}]]])
+    ["/calendar/:vendor-id/:date" {:get get-calendar}]
+    ["/createvendor" ^:interceptors [(body-params/body-params)] {:post create-vendor}]]])
 
