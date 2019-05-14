@@ -3,7 +3,8 @@
             [clojure.java.jdbc :as jdbc]
             [io.pedestal.log :as log]
             [clojure.string :as str]
-            [globar.config :as config])
+            [globar.config :as config]
+            [fipp.edn :refer [pprint]])
   (:import (com.mchange.v2.c3p0 ComboPooledDataSource)))
 
 
@@ -118,11 +119,32 @@
   nil)
 
 (defn create-customer
-  "Adds a new customer object, providing only the email address as the seed info"
-  [email]
-  (log/debug :fn "create-customer" :email email)
-  (execute ["INSERT INTO CUSTOMERS (email) VALUES (?)" email])
-  nil)
+  "Adds a new customer object, or changes the values of an existing rating if one exists"
+  [new-cust]
+  (let [{ name-first :name_first
+          name-last :name_last
+          password :password
+          email :email
+          addr-str-num :addr_str_num
+          addr-str-name :addr_str_name
+          addr-city :addr_city
+          addr-state :addr_state
+          addr-postal :addr_postal
+          phone :phone
+          locale :locale} new-cust
+        result (jdbc/insert! db-conn :Customers{:name_first name-first
+                                                :name_last name-last
+                                                :password password
+                                                :email email
+                                                :addr_str_num addr-str-num
+                                                :addr_str_name addr-str-name
+                                                :addr_city addr-city
+                                                :addr_state addr-state
+                                                :addr_postal addr-postal
+                                                :phone phone
+                                                :locale locale})]
+    (first result)))
+                  
 
 (defn update-customer
   "Adds a new customer object, or changes the values of an existing rating if one exists"
@@ -138,24 +160,25 @@
          addr-state :addr_state
          addr-postal :addr_postal
          phone :phone
-         locale :locale} new-cust]
-    (jdbc/update! db-conn :Customers {:name_first name-first
-                                      :name_last name-last
-                                      :password password
-                                      :email email
-                                      :addr_str_num addr-str-num
-                                      :addr_str_name addr-str-name
-                                      :addr_city addr-city
-                                      :addr_state addr-state
-                                      :addr_postal addr-postal
-                                      :phone phone
-                                      :locale locale}
-                  ["cust_id = ?" cust-id]))
-  nil)
+         locale :locale} new-cust
+        result (jdbc/update! db-conn 
+                             :Customers 
+                             {:name_first name-first
+                              :name_last name-last
+                              :password password
+                              :email email
+                              :addr_str_num addr-str-num
+                              :addr_str_name addr-str-name
+                              :addr_city addr-city
+                              :addr_state addr-state
+                              :addr_postal addr-postal
+                              :phone phone
+                              :locale locale}
+                             ["cust_id = ?" cust-id])]
+    (println "TODO: add error checking to this!! ")
+    (clojure.pprint/pprint result)))
 
 (defn create-vendor
-  "Takes a new-vendor map, destructures it to get the vendor attributes required to
-  populate a string to send to the jdbc client and update the db"
   [new-vendor]
   (let [{name-first :name_first
          name-last :name_last
@@ -185,3 +208,35 @@
   
 
 
+(defn update-vendor
+  [vendor]
+  (let [{vendor-id :vendor_id
+         name-first :name_first
+         name-last :name_last
+         password :password
+         email :email
+         addr-str-num :addr_str_num
+         addr-str-name :addr_str_name
+         addr-city :addr_city
+         addr-state :addr_state
+         addr-postal :addr_postal
+         phone :phone
+         locale :locale
+         summary :summary} vendor
+         result (jdbc/update! db-conn 
+                              :Vendors 
+                              {:name_first name-first
+                               :name_last name-last
+                               :password password
+                               :email email
+                               :addr_str_num addr-str-num
+                               :addr_str_name addr-str-name
+                               :addr_city addr-city
+                               :addr_state addr-state
+                               :addr_postal addr-postal
+                               :phone phone
+                               :locale locale
+                               :summary summary}
+                              ["vendor_id = ?" vendor-id])]
+    (println "TODO: add error checking to this!! ")
+    (clojure.pprint/pprint result)))

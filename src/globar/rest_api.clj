@@ -49,15 +49,26 @@
     (log/debug :rest-fn :get-calendar :vendor-id vendor-id :date date)
     (http/json-response (cc/read-calendar vendor-id date))))
 
-(defn create-vendor 
+(defn upsert-vendor 
   [request]
-  (let [new-vendor (get-in request [:json-params])]
-    (pprint new-vendor)  
-    (http/json-response (db/create-vendor new-vendor))))
+  (let [vendor (get-in request [:json-params])
+        vendor-id (:vendor_id vendor)]
+    (if (nil? vendor-id)
+      (http/json-response (db/create-vendor vendor))
+      (do (db/update-vendor vendor)
+          (http/json-response (db/find-vendor-by-id vendor-id))))))
+
+(defn upsert-customer
+  [request]
+  (let [customer (get-in request [:json-params])]
+    (if (:cust_id customer)
+      (do (db/update-customer customer)
+          (http/json-response (db/find-customer-by-id (:cust_id customer))))
+      (http/json-response (db/create-customer customer)))))
 
 (defroutes rest-api-routes
   [[["/upload" ^:interceptors [(ring-mw/multipart-params)] {:post upload}]
     ["/calendar/:vendor-id" ^:interceptors [(body-params/body-params)] {:post put-calendar}]
     ["/calendar/:vendor-id/:date" {:get get-calendar}]
-    ["/createvendor" ^:interceptors [(body-params/body-params)] {:post create-vendor}]]])
-
+    ["/vendor" ^:interceptors [(body-params/body-params)] {:post upsert-vendor}]
+    ["/customer" ^:interceptors [(body-params/body-params)] {:post upsert-customer}]]])

@@ -1,6 +1,9 @@
 (ns globar.vendor-tests
   (:require [clojure.test :refer :all]
-            [globar.test_utils :refer [setup-test-system! q]]))
+            [globar.test_utils :refer [setup-test-system! q]]
+            [clojure.java.shell :refer [sh]]
+            [clojure.data.json :as json]
+            [globar.db :as db]))
 
 (use-fixtures :once setup-test-system!)
 
@@ -13,7 +16,6 @@
                               "services_summary {count min max}"
                               "}}")
         result (q qstring nil)]
-    (println "HELLO : " result)
     ;; confirm that there were 4 services found
     (is (= 4 (-> result
                  :data
@@ -52,3 +54,49 @@
                  :vendor_list
                  count)))))
 
+(deftest test-vendor-creation
+  ;; first create a new vendor
+  (let [new-vendor {:name_first "I am the Test user"
+                    :name_last "Andrrson-Coopers"
+                    :email "test@test.com"
+                    :addr_str_num "#2-5985"
+                    :addr_str_name "Canada Way SE"
+                    :addr_city "New Westminster"
+                    :addr_state "BC"
+                    :addr_postal "V5e-3N9"
+                    :phone "778-994-6836"
+                    :locale "Pacific Standard Time"
+                    :summary "This is my story - I wish I had one, but this is all I got!"}
+
+        ;; issue the curl call
+        post-result (sh "curl" "-H" 
+                        "Content-Type: application/json" 
+                        "-d" (json/write-str new-vendor) "-X" 
+                        "POST" "http://localhost:8889/vendor")
+        post-clj (json/read-str (:out post-result) :key-fn keyword)]
+     (is (= new-vendor (dissoc  post-clj 
+                               :created_at 
+                               :radius 
+                               :profile_pic 
+                               :updated_at 
+                               :vendor_id 
+                               :password)))))
+
+(deftest test-vendor-update
+  ;; first create a new customer
+  (let [vendor (db/find-vendor-by-id 1234)
+        updated (assoc vendor :password "hello mr poopy")        
+        upd-ven (dissoc updated :updated_at :created_at)
+        ;; issue the curl call
+        post-result (sh "curl" "-H" 
+                        "Content-Type: application/json" 
+                        "-d" (json/write-str upd-ven) "-X" 
+                        "POST" "http://localhost:8889/vendor")
+        post-clj (json/read-str (:out post-result) :key-fn keyword)]
+
+    ;; confirm that what we wrote is what we get back from the reqeuest
+    (is (= upd-ven (dissoc post-clj 
+                           :created_at 
+                           :updated_at))))) 
+                            
+                            

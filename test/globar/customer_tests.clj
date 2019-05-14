@@ -1,46 +1,55 @@
 (ns globar.customer-tests
    (:require [clojure.test :refer :all]
-            [globar.test_utils :refer [q setup-test-system!]]))
+             [globar.test_utils :refer [q setup-test-system!]]
+             [clojure.java.shell :refer [sh]]
+             [clojure.data.json :as json]
+             [globar.db :as db]
+             [fipp.edn :refer [pprint]]))
 
 (use-fixtures :once setup-test-system!)
 
 (deftest test-customer-creation
-  (let [new-email "billybob@somedomain.net"
-        qstring (str "mutation { create_customer ( new_cust: { email:\"" new-email "\"}){cust_id email}}")]
+  ;; first create a new customer
+  (let [new-customer {:name_first "I am the Test user"
+                      :name_last "Andrrson-Coopers"
+                      :email "test@test.com"
+                      :addr_str_num "#2-5985"
+                      :addr_str_name "Canada Way SE"
+                      :addr_city "New Westminster"
+                      :addr_state "BC"
+                      :addr_postal "V5e-3N9"
+                      :phone "778-994-6836"
+                      :locale "Pacific Standard Time"}
 
-        ;; when i try to create a bare customer, does this call succeed?
-      (is (= new-email (-> (q qstring nil)
-                           :data
-                           :create_customer
-                           :email)))))
+        ;; issue the curl call
+        post-result (sh "curl" "-H" 
+                        "Content-Type: application/json" 
+                        "-d" (json/write-str new-customer) "-X" 
+                        "POST" "http://localhost:8889/customer")
+        post-clj (json/read-str (:out post-result) :key-fn keyword)]
+
+    ;; confirm that what we wrote is what we get back from the reqeuest
+    (is (= new-customer (dissoc post-clj 
+                                :created_at 
+                                :updated_at 
+                                :cust_id 
+                                :password)))))
 
 (deftest test-customer-update
-  (let [email "mrbig123@somedomain.com"
-        updateUser {:upd_cust {:cust_id 37
-                               :name_first "I am the Test user"
-                               :name_last "Andrrson-Coopers"
-                               :email email
-                               :addr_str_num "#2-5985"
-                               :addr_str_name "Canada Way SE"
-                               :addr_city "New Westminster"
-                               :addr_state "BC"
-                               :addr_postal "V5e-3N9"
-                               :phone "778-994-6836"
-                               :locale "Pacific Standard Time"}}]
+  ;; first create a new customer
+  (let [customer (db/find-customer-by-id 37)
+        updated  (assoc customer :password "hello mr poopy")        
+        upd-cust (dissoc updated :updated_at :created_at)
+        ;; issue the curl call
+        post-result (sh "curl" "-H" 
+                        "Content-Type: application/json" 
+                        "-d" (json/write-str upd-cust) "-X" 
+                        "POST" "http://localhost:8889/customer")
+        post-clj (json/read-str (:out post-result) :key-fn keyword)]
 
-                               ;; when i try to update a customer, does this succeed?
-       (let [qstring (str "mutation ($upd_cust:InputUpdateCustomer!)
-                      {update_customer(upd_cust: $upd_cust) {cust_id email}}")]
-         (is (= (:locale updateUser) (-> (q qstring updateUser)
-                                         :data
-                                         :update_customer
-                                         :locale))))
-
-       ;; when i read back the customer i just updated, does it match the data i updated with?
-       (let [qstring (str "query{customer_by_email(email: \"" email "\"){cust_id name_first name_last
-                           email addr_str_num addr_str_name addr_city addr_state addr_postal phone locale}}")]
-         (is (= (:upd_cust updateUser) (-> (q qstring nil)
-                                           :data
-                                           :customer_by_email))))))
-
-
+    ;; confirm that what we wrote is what we get back from the reqeuest
+    (is (= upd-cust (dissoc post-clj 
+                            :created_at 
+                            :updated_at))))) 
+                            
+                            
