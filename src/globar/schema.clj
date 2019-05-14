@@ -86,7 +86,7 @@
         new-vendor (merge old-vendor (:upd_vendor args))]
     (do
       (log/debug :fn "update-vendor" :old-vendor old-vendor :new-vendor new-vendor)
-      (db/update-vendor new-vendor)
+;;      (db/update-vendor new-vendor)
       (db/find-vendor-by-id vendor-id))))
 
 (defn customer-vendorlist

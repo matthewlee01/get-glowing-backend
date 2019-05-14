@@ -154,18 +154,10 @@
   nil)
 
 (defn create-vendor
-  "Adds a new vendor object, providing only the email address as the seed info"
-  [email passwd]
-  (log/debug :fn "create-vendor" :email email :password passwd)
-  (execute ["INSERT INTO VENDORS (email, password) VALUES (?, ?)" email passwd])
-  nil)
-
-(defn update-vendor
   "Takes a new-vendor map, destructures it to get the vendor attributes required to
   populate a string to send to the jdbc client and update the db"
   [new-vendor]
-  (let [{vendor-id :vendor_id
-         name-first :name_first
+  (let [{name-first :name_first
          name-last :name_last
          password :password
          email :email
@@ -176,19 +168,20 @@
          addr-postal :addr_postal
          phone :phone
          locale :locale
-         summary :summary} new-vendor]
-    (jdbc/update! db-conn :Vendors {:name_first name-first
-                                    :name_last name-last
-                                    :password password
-                                    :email email
-                                    :addr_str_num addr-str-num
-                                    :addr_str_name addr-str-name
-                                    :addr_city addr-city
-                                    :addr_state addr-state
-                                    :addr_postal addr-postal
-                                    :phone phone
-                                    :locale locale
-                                    :summary summary}
-                  ["vendor_id = ?" vendor-id]))
-  nil)
+         summary :summary} new-vendor
+         result (jdbc/insert! db-conn :Vendors {:name_first name-first
+                                                :name_last name-last
+                                                :password password
+                                                :email email
+                                                :addr_str_num addr-str-num
+                                                :addr_str_name addr-str-name
+                                                :addr_city addr-city
+                                                :addr_state addr-state
+                                                :addr_postal addr-postal
+                                                :phone phone
+                                                :locale locale
+                                                :summary summary})]
+    (first result)))
+  
+
 

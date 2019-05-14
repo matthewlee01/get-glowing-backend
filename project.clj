@@ -14,7 +14,8 @@
                  [mount "0.1.16"]
                  [clojure.java-time "0.3.2"]
                  [org.threeten/threeten-extra "1.4"]
-                 [io.pedestal/pedestal.jetty "0.5.5"]]
+                 [io.pedestal/pedestal.jetty "0.5.5"]
+                 [fipp "0.6.18"]]
   :main globar.core
   :aot [globar.core]
   :resource-paths ["dev-resources" "resources"])
