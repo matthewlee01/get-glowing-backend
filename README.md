@@ -29,7 +29,7 @@ New unit tests should be added under the `test/globar/` directory
 
 All unit tests should pass before committing new code: `lein test`
 
-To run a single unit test: `lein test :only ` globar.<unit-test-namespace>
+To run a single unit test: `lein test :only globar.<unit-test-namespace>`
 
 ## License
 
