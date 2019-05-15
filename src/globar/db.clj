@@ -176,7 +176,7 @@
                               :locale locale}
                              ["cust_id = ?" cust-id])]
     (println "TODO: add error checking to this!! ")
-    (clojure.pprint/pprint result)))
+    (pprint result)))
 
 (defn create-vendor
   [new-vendor]
@@ -239,4 +239,4 @@
                                :summary summary}
                               ["vendor_id = ?" vendor-id])]
     (println "TODO: add error checking to this!! ")
-    (clojure.pprint/pprint result)))
+    (pprint result)))
