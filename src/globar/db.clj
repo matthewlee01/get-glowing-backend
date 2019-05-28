@@ -64,6 +64,11 @@
   (let [result (query ["SELECT * FROM Customers WHERE email = ?" cust-email])]
     (first result)))
 
+(defn find-customer-by-sub
+  [cust-sub]
+  (let [result (query ["SELECT * FROM Customers WHERE sub = ?" cust-sub])]
+    (first result)))
+
 (defn find-vendor-by-id
   [vendor-id]
   (first
@@ -123,25 +128,33 @@
   [new-cust]
   (let [{ name-first :name_first
           name-last :name_last
+          name :name
           password :password
           email :email
+          email-verified :email_verified
           addr-str-num :addr_str_num
           addr-str-name :addr_str_name
           addr-city :addr_city
           addr-state :addr_state
           addr-postal :addr_postal
           phone :phone
+          sub :sub
+          avatar :avatar
           locale :locale} new-cust
         result (jdbc/insert! db-conn :Customers{:name_first name-first
                                                 :name_last name-last
+                                                :name name
                                                 :password password
                                                 :email email
+                                                :email_verified email-verified
                                                 :addr_str_num addr-str-num
                                                 :addr_str_name addr-str-name
                                                 :addr_city addr-city
                                                 :addr_state addr-state
                                                 :addr_postal addr-postal
                                                 :phone phone
+                                                :sub sub
+                                                :avatar avatar
                                                 :locale locale})]
     (first result)))
                   
