@@ -5,9 +5,18 @@
             [io.pedestal.log :as log]
             [io.pedestal.http.body-params :as body-params]
             [io.pedestal.http :as http]
+            [io.pedestal.interceptor.helpers :refer [defbefore]]
+            [globar.config :as config]
             [globar.calendar.core :as cc]
             [globar.db :as db]
-            [fipp.edn :refer [pprint]]))
+            [cheshire.core :as cheshire]
+            [buddy.core.keys :as keys]
+            [fipp.edn :refer [pprint]])
+  (:import
+            [java.util Base64]
+            [com.auth0.jwt JWT]
+            [com.auth0.jwt.algorithms Algorithm]
+            [com.auth0.client.auth AuthAPI]))
 
 (def FORM_PARAM "image")
 (def DEST_DIR "resources/public")
@@ -66,9 +75,68 @@
           (http/json-response (db/find-customer-by-id (:cust_id customer))))
       (http/json-response (db/create-customer customer)))))
 
+(defn decode64 [str]
+  (String. (.decode (Base64/getDecoder) str)))
+
+(defn encode64 [bytes]
+  (.encodeToString (Base64/getEncoder) bytes))
+
+(defonce pub-key (keys/public-key "pubkey.pem"))
+
+
+
+(defn verify [token pub-key]
+  "verifies the JWT from auth0, returns an identity map if valid
+  nil otherwise"
+  (let [alg (Algorithm/RSA256 pub-key nil)
+        verifier (-> (JWT/require alg)
+                     (.withIssuer (into-array ["https://n00b.auth0.com/"]))
+                     (.build))
+        decoded-jwt (.verify verifier token)
+        payload (-> decoded-jwt
+                    (.getPayload)
+                    (decode64)
+                    (cheshire/parse-string true))]
+
+    (pprint payload)
+    ;; need to add the exception handling logic around this code
+    payload))
+
+(defn login
+  "write the last login time for this user, and
+  create the user record if it doesn't already exist"
+  [request]
+  (let [access-token (get-in request [:json-params :token])
+        a0 (new AuthAPI (:domain config/auth0)
+                        (:client-id config/auth0)
+                        (:client-secret config/auth0))
+        user-info (->> (.userInfo a0 access-token)
+                       (.execute)
+                       (.getValues)
+                       (into {})
+                       (clojure.walk/keywordize-keys))
+        user (db/find-customer-by-sub (:sub user-info))]
+
+    ; if the user doesn't exist, create a new user record
+    (when-not user
+      (db/create-customer {:sub (:sub user-info)
+                           :name_first (:given_name user-info)
+                           :name_last (:family_name user-info)
+                           :name (:name user-info)
+                           :email (:email user-info)
+                           :email_verified (:email_verified user-info)
+                           :locale (:locale user-info)
+                           :avatar (:picture user-info)}))
+
+    ; read the user info and send it back to the client
+    (http/json-response (db/find-customer-by-sub (:sub user-info)))))
+
+
+
 (defroutes rest-api-routes
   [[["/upload" ^:interceptors [(ring-mw/multipart-params)] {:post upload}]
     ["/calendar/:vendor-id" ^:interceptors [(body-params/body-params)] {:post put-calendar}]
     ["/calendar/:vendor-id/:date" {:get get-calendar}]
     ["/vendor" ^:interceptors [(body-params/body-params)] {:post upsert-vendor}]
-    ["/customer" ^:interceptors [(body-params/body-params)] {:post upsert-customer}]]])
+    ["/customer" ^:interceptors [(body-params/body-params)] {:post upsert-customer}]
+    ["/login" ^:interceptors [(body-params/body-params)] {:post login}]]])

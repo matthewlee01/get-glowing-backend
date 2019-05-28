@@ -12,7 +12,11 @@
   ;; first create a new customer
   (let [new-customer {:name_first "I am the Test user"
                       :name_last "Andrrson-Coopers"
+                      :name "Billy the Big Bad Bob"
+                      :sub "social google | some funny; characters@?"
+                      :avatar "http://google.com/some/url/to/a/file.jpg"
                       :email "test@test.com"
+                      :email_verified true
                       :addr_str_num "#2-5985"
                       :addr_str_name "Canada Way SE"
                       :addr_city "New Westminster"
