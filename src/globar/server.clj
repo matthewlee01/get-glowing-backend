@@ -12,7 +12,7 @@
 (defn CORS-whitelist []
   (if config/debug?
     ["http://localhost:3449" "http://localhost:8888"] ;; allow requests from figwheel and the graphiql app
-    ["http://archon.j3mc.ca"]))                     ;; in production we only allow access from our webapp
+    ["http://getglowing.ca"]))                     ;; in production we only allow access from our webapp
 
 
 (defn start-server [port]
