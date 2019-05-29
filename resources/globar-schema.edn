@@ -150,56 +150,12 @@
         :resolve :query/vendor-by-id}
 
      :vendor_list
-        {:type (list :Vendor)
-         :description "A list of vendors available in a city."
-         :args
-           {:addr_city {:type (non-null String)}
-            :service {:type String}}
-         :resolve :query/vendor-list}}
-
- :mutations
-    {:rate_vendor
-        {:type :Vendor
-         :description "Establishes a rating of a vendor by a user.
-         On success (ie: the user and vendor both exist), selects
-         the vendor.  Otherwise selects nil and an error"
-         :args
-            {:vendor_id {:type (non-null Int)}
-             :user_id {:type (non-null Int)}
-             :rating
-                {:type (non-null Int)
-                 :description "Vendor rating as a number between 1 and 5."}}
-         :resolve :mutation/rate-vendor}
-
-     :create_user
-        {:type :User
-         :description "This mutation creates a new user in the system.
-         The only parameter to be provided is the email address."
-         :args
-             {:new_user {:type (non-null :InputCreateUser)}}
-         :resolve :mutation/create-user}
-
-     :update_user
-        {:type :User
-         :description "This mutation updates an existing user in the system."
-         :args
-           {:upd_user {:type (non-null :InputUpdateUser)}}
-         :resolve :mutation/update-user}
-
-     :create_vendor
-        {:type :Vendor
-         :description "This mutation creates a new vendor in the system.
-         The two parameters to be provided are the email address and password."
-         :args
-           {:new_vendor {:type (non-null :InputCreateVendor)}}
-         :resolve :mutation/create-vendor}
-
-     :update_vendor
-        {:type :Vendor
-         :description "This mutation updates an existing vendor in the system."
-         :args
-           {:upd_vendor {:type (non-null :InputUpdateVendor)}}
-         :resolve :mutation/update-vendor}}}
+       {:type (list :Vendor)
+        :description "A list of vendors available in a city."
+        :args
+          {:addr_city {:type (non-null String)}
+           :service {:type String}}
+        :resolve :query/vendor-list}}}
 
 
 
