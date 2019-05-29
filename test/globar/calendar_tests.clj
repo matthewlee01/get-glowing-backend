@@ -29,8 +29,8 @@
             re-written-map (cc/write-calendar vendor-id updated-map)]
         ;; ignore the success flag (?) and the updated-at timestamp
         (is (= (dissoc updated-map :updated-at)
-               (dissoc re-written-map :updated-at))))))
-  )
+               (dissoc re-written-map :updated-at)))))))
+
 
 ;;"this test creates a row in the calendar table, checks that it was created properly by reading it back.
 ;; next it will update the row twice.  the first update should succeed and the second should fail with 
@@ -63,8 +63,8 @@
                             "POST" "http://localhost:8889/calendar/1234")
             post-clj (json/read-str (:out post-result) :key-fn keyword)]
         (is (= (:success post-clj) false))
-        (is (= (:error-msg post-clj) "Update collision - please retry the operation")))))
-  )
+        (is (= (:error-msg post-clj) "Update collision - please retry the operation"))))))
+
 
 (deftest test-calendar-checks
   (let [invalid-time -60                                ;; time cannot be negative 

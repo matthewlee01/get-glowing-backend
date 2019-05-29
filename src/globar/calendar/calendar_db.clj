@@ -16,14 +16,15 @@
   (try
     (let [raw-result (db/query ["SELECT * FROM vendor_calendar WHERE vendor_id = ? AND date = ?" vendor-id date])
           result (first raw-result)
-          available (edn/read-string (:available_edn result))
-          booked (edn/read-string (:booked_edn result))]
-      (println result)
+          available (edn/read-string (:available-edn result))
+          booked (edn/read-string (:booked-edn result))]
+
       {:date (:date result)
        :available available
        :booked booked
-       :updated-at (:updated_at result)
+       :updated-at (:updated-at result)
        :success true})
+
     (catch Exception e
       (log/error :DB-ERROR (prn-str e))
       {:success false

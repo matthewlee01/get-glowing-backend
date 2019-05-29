@@ -22,7 +22,7 @@ To get an environment up to work on the globar code itself:
 Run one of the ```list-...``` scripts in the "bin" directory
 
 For example:
-```./list-customers.sh``` will do a select * on the customers table
+```./list-users.sh``` will do a select * on the Users table
 
 ### Unit Tests
 New unit tests should be added under the `test/globar/` directory

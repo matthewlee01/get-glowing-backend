@@ -10,8 +10,8 @@
         <appender-ref ref="STDOUT"/>
     </root>
 
-    <logger name="globar.db" level="DEBUG"/>
-    <logger name="globar.schema" level="DEBUG"/>
-    <logger name="globar.rest-api" level="DEBUG"/>
-    <logger name="globar.calendar.core" level="DEBUG"/>
+    <logger name="globar.db" level="WARN"/>
+    <logger name="globar.schema" level="WARN"/>
+    <logger name="globar.rest-api" level="WARN"/>
+    <logger name="globar.calendar.core" level="WARN"/>
 </configuration>
