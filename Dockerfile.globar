@@ -1,6 +1,7 @@
 FROM openjdk:13-alpine
 # assumes that 'lein uberjar' has been run to build the jar file before this
 COPY target/globar-0.1.0-SNAPSHOT-standalone.jar globar-0.1.0-SNAPSHOT-standalone.jar
+COPY pubkey.pem pubkey.pem
 ENV RUNNING_IN_DOCKER "true"
 EXPOSE 8888
 CMD ["java", "-jar", "globar-0.1.0-SNAPSHOT-standalone.jar"]
