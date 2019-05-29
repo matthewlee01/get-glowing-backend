@@ -8,7 +8,7 @@
 (use-fixtures :once setup-test-system!)
 
 ; do some tests against the services for a vendor
-(deftest test-vendor-query
+(deftest test-vendor-by-email
   ;; get a a vendor and all the associated services
   (let [qstring (str "query{vendor_by_email(email: \"helen@gmail.com\")"
                               "{vendor_id user_id name_first "
@@ -38,6 +38,39 @@
     (is (= 10000 (-> result
                      :data
                      :vendor_by_email
+                     :services_summary
+                     :max)))))
+
+(deftest test-vendor-by-id
+  ;; get a a vendor and all the associated services
+  (let [qstring (str "query{vendor_by_id(id: 1235)"
+                              "{vendor_id user_id name_first "
+                              "services {s_description s_duration s_name s_price s_type}  "
+                              "services_summary {count min max}"
+                              "}}")
+        result (q qstring nil)]
+    ;; confirm that there were 4 services found
+    (is (= 4 (-> result
+                 :data
+                 :vendor_by_id
+                 :services
+                 count)))
+
+    ;; confirm our understanding of the max and min price for these services
+    (is (= 4 (-> result
+                 :data
+                 :vendor_by_id
+                 :services_summary
+                 :count)))
+    (is (= 3000 (-> result
+                    :data
+                    :vendor_by_id
+                    :services_summary
+                    :min)))
+
+    (is (= 10000 (-> result
+                     :data
+                     :vendor_by_id
                      :services_summary
                      :max)))))
 
