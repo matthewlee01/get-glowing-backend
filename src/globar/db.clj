@@ -41,7 +41,7 @@
   (let [[sql & params] statement]
     (log/debug :sql (str/replace sql #"\s+" " ")
                :params params))
-  (jdbc/query db-conn statement))
+  (jdbc/query db-conn statement {:identifiers #(.replace % \_\-)}))
 
 
 (defn execute
@@ -52,204 +52,170 @@
                :params params))
   (jdbc/execute! db-conn statement {:multi? false}))
 
-(defn find-customer-by-id
+
+(defn find-user-by-id
   "this is for internal use because internally we use the id for cross table joins"
-  [cust-id]
-  (first
-    (query ["SELECT * FROM Customers WHERE cust_id = ?" cust-id])))
+  [user-id]
+  (-> (query ["SELECT * FROM Users WHERE user_id = ?" user-id])
+      first))
 
-(defn find-customer-by-email
+(defn find-user-by-email
   "this is the main client facing entrypoint as the email is the primary identifier for humans"
-  [cust-email]
-  (let [result (query ["SELECT * FROM Customers WHERE email = ?" cust-email])]
-    (first result)))
+  [user-email]
+  (-> (query ["SELECT * FROM Users WHERE email = ?" user-email])
+      first))
 
-(defn find-customer-by-sub
-  [cust-sub]
-  (let [result (query ["SELECT * FROM Customers WHERE sub = ?" cust-sub])]
-    (first result)))
+(defn find-user-by-sub
+  [user-sub]
+  (-> (query ["SELECT * FROM Users WHERE sub = ?" user-sub])
+      first))
 
 (defn find-vendor-by-id
   [vendor-id]
-  (first
-    (query ["SELECT * FROM Vendors WHERE vendor_id = ?" vendor-id])))
+  (-> (query ["SELECT * FROM Vendors WHERE vendor_id = ?" vendor-id])
+      first))
+
+(defn find-vendor-by-user
+  "lookup the vendor record by the associated user id"
+  [user-id]
+  (-> (query ["SELECT * FROM Vendors WHERE user_id = ?" user-id])
+      first))
 
 (defn find-vendor-by-email
   "this is the main client facing entrypoint as the email is the primary identifier for humans"
   [vendor-email]
-  (let [result (query ["SELECT * FROM Vendors WHERE email = ?" vendor-email])]
-    (first result)))
+  (-> (query ["SELECT * FROM Vendors WHERE email = ?" vendor-email])
+      first))
 
-(defn vendor-list
-  "returns a list of vendors filtered by their city and their services"
+(defn vendor-id-list
+  "returns a list of vendor ids filtered by their city and their services"
   [city service]
   (if service
-    (query ["SELECT DISTINCT * FROM (SELECT Vendors.* FROM Services
-             INNER JOIN Vendors 
-             ON Services.vendor_id=Vendors.vendor_id 
-             WHERE UPPER(Vendors.addr_city) = UPPER(?) AND Services.s_type=?) AS FOO" 
+    ; join three tables (services, vendors, users) filter out rows that match
+    ; city and service, and then return the unique vendor ids in the result
+    (query ["SELECT DISTINCT vendor_id FROM (SELECT s.vendor_id FROM Services s
+             INNER JOIN Vendors v
+             ON s.vendor_id=v.vendor_id
+             INNER JOIN Users u
+             ON v.user_id=u.user_id
+             WHERE UPPER(u.addr_city) = UPPER(?) AND s.s_type=?) AS FOO"
             city service])
-    (query ["SELECT * FROM Vendors WHERE UPPER(addr_city) = UPPER(?)" city])))
+    ; join two tables (vendors, users) filter out rows that match the city,
+    ; then return the unique vendor ids in the result
+    (query ["SELECT DISTINCT vendor_id FROM (SELECT v.vendor_id FROM Vendors v
+             INNER JOIN Users u
+             ON v.user_id=u.user_id
+             WHERE UPPER(u.addr_city) = UPPER(?)) AS FOO" city])))
 
 (defn list-services-for-vendor
   "returns a list of services that a particular vendor offers"
   [vendor-id]
   (query ["SELECT vendor_id, s_name, s_description, s_type, s_price, s_duration
-           FROM Services
-           WHERE vendor_id = ?" vendor-id]))
+               FROM Services
+               WHERE vendor_id = ?" vendor-id]))
 
 (defn list-ratings-for-vendor
   "returns a list of ratings that have been submitted for a particular vendor"
   [vendor-id]
-  (query ["SELECT vendor_id, cust_id, rating, created_at, updated_at
-           FROM vendor_rating
-           WHERE vendor_id = ?" vendor-id]))
+  (query ["SELECT vendor_id, user_id, rating, created_at, updated_at
+               FROM vendor_rating
+               WHERE vendor_id = ?" vendor-id]))
 
-(defn list-ratings-for-customer
-  "returns a list of vendor ratings posted by the specified customer"
-  [cust-id]
-  (query ["SELECT vendor_id, cust_id, rating, created_at, updated_at
-           FROM vendor_rating
-           WHERE cust_id = ?" cust-id]))
+(defn list-ratings-for-user
+  "returns a list of vendor ratings posted by the specified user"
+  [user-id]
+  (query ["SELECT vendor_id, user_id, rating, created_at, updated_at
+               FROM vendor_rating
+               WHERE user_id = ?" user-id]))
 
 (defn upsert-vendor-rating
   "Adds a new vendor rating, or changes the value to an existing rating if one exists"
-  [vendor-id cust-id rating]
-  (log/debug :fn upsert-vendor-rating :vendor vendor-id :cust-id cust-id :rating rating)
-  (execute ["INSERT INTO vendor_rating (vendor_id, cust_id, rating)
+  [vendor-id user-id rating]
+  (log/debug :fn upsert-vendor-rating :vendor vendor-id :user-id user-id :rating rating)
+  (execute ["INSERT INTO vendor_rating (vendor_id, user_id, rating)
              VALUES (?, ?, ?)
-             ON CONFLICT (vendor_id, cust_id)
-             DO UPDATE SET rating = EXCLUDED.rating" vendor-id cust-id rating])
+             ON CONFLICT (vendor_id, user_id)
+             DO UPDATE SET rating = EXCLUDED.rating" vendor-id user-id rating])
   (log/debug :message "upsert-vendor-rating completed")
   nil)
 
-(defn create-customer
-  "Adds a new customer object, or changes the values of an existing rating if one exists"
-  [new-cust]
-  (let [{ name-first :name_first
-          name-last :name_last
+(defn create-user
+  "Adds a new user object, or changes the values of an existing rating if one exists"
+  [user-info]
+  (let [{ name-first :given_name
+          name-last :family_name
           name :name
-          password :password
           email :email
           email-verified :email_verified
-          addr-str-num :addr_str_num
-          addr-str-name :addr_str_name
-          addr-city :addr_city
-          addr-state :addr_state
-          addr-postal :addr_postal
-          phone :phone
           sub :sub
-          avatar :avatar
-          locale :locale} new-cust
-        result (jdbc/insert! db-conn :Customers{:name_first name-first
-                                                :name_last name-last
-                                                :name name
-                                                :password password
-                                                :email email
-                                                :email_verified email-verified
-                                                :addr_str_num addr-str-num
-                                                :addr_str_name addr-str-name
-                                                :addr_city addr-city
-                                                :addr_state addr-state
-                                                :addr_postal addr-postal
-                                                :phone phone
-                                                :sub sub
-                                                :avatar avatar
-                                                :locale locale})]
+          avatar :picture
+          locale :locale} user-info
+        result (jdbc/insert! db-conn :Users{:name_first name-first
+                                            :name_last name-last
+                                            :name name
+                                            :email email
+                                            :email_verified email-verified
+                                            :sub sub
+                                            :avatar avatar
+                                            :locale locale}
+                             {:identifiers #(.replace % \_\-)})]
     (first result)))
-                  
 
-(defn update-customer
-  "Adds a new customer object, or changes the values of an existing rating if one exists"
-  [new-cust]
-  (let [{cust-id :cust_id
-         name-first :name_first
-         name-last :name_last
-         password :password
+(defn update-user
+  "Adds a new user object, or changes the values of an existing rating if one exists"
+  [new-user]
+  (let [{user-id :user-id
+         name-first :name-first
+         name-last :name-last
+         name :name
          email :email
-         addr-str-num :addr_str_num
-         addr-str-name :addr_str_name
-         addr-city :addr_city
-         addr-state :addr_state
-         addr-postal :addr_postal
+         email-verified :email-verified
+         addr-str-num :addr-str-num
+         addr-str-name :addr-str-name
+         addr-city :addr-city
+         addr-state :addr-state
+         addr-postal :addr-postal
          phone :phone
-         locale :locale} new-cust
+         locale :locale
+         avatar :avatar
+         sub :sub} new-user
         result (jdbc/update! db-conn 
-                             :Customers 
+                             :Users 
                              {:name_first name-first
                               :name_last name-last
-                              :password password
+                              :name name
                               :email email
+                              :email_verified email-verified
                               :addr_str_num addr-str-num
                               :addr_str_name addr-str-name
                               :addr_city addr-city
                               :addr_state addr-state
                               :addr_postal addr-postal
                               :phone phone
-                              :locale locale}
-                             ["cust_id = ?" cust-id])]
+                              :locale locale
+                              :avatar avatar
+                              :sub sub}
+                             ["user_id = ?" user-id])]
     (println "TODO: add error checking to this!! ")
     (pprint result)))
 
 (defn create-vendor
   [new-vendor]
-  (let [{name-first :name_first
-         name-last :name_last
-         password :password
-         email :email
-         addr-str-num :addr_str_num
-         addr-str-name :addr_str_name
-         addr-city :addr_city
-         addr-state :addr_state
-         addr-postal :addr_postal
-         phone :phone
-         locale :locale
+  (let [{user-id :user-id
          summary :summary} new-vendor
-         result (jdbc/insert! db-conn :Vendors {:name_first name-first
-                                                :name_last name-last
-                                                :password password
-                                                :email email
-                                                :addr_str_num addr-str-num
-                                                :addr_str_name addr-str-name
-                                                :addr_city addr-city
-                                                :addr_state addr-state
-                                                :addr_postal addr-postal
-                                                :phone phone
-                                                :locale locale
-                                                :summary summary})]
+        result (jdbc/insert! db-conn :Vendors {:user_id user-id
+                                                  :summary summary}
+                             {:identifiers #(.replace % \_\-)})]
     (first result)))
-  
-
 
 (defn update-vendor
   [vendor]
-  (let [{vendor-id :vendor_id
-         name-first :name_first
-         name-last :name_last
-         password :password
-         email :email
-         addr-str-num :addr_str_num
-         addr-str-name :addr_str_name
-         addr-city :addr_city
-         addr-state :addr_state
-         addr-postal :addr_postal
-         phone :phone
-         locale :locale
+  (let [{vendor-id :vendor-id
          summary :summary} vendor
          result (jdbc/update! db-conn 
                               :Vendors 
-                              {:name_first name-first
-                               :name_last name-last
-                               :password password
-                               :email email
-                               :addr_str_num addr-str-num
-                               :addr_str_name addr-str-name
-                               :addr_city addr-city
-                               :addr_state addr-state
-                               :addr_postal addr-postal
-                               :phone phone
-                               :locale locale
-                               :summary summary}
+                              {:summary summary}
                               ["vendor_id = ?" vendor-id])]
-    (println "TODO: add error checking to this!! ")
-    (pprint result)))
+    (println "TODO: add error checking to this!! " result)
+    (if (= 0 (first result))
+      (println "ERROR UPDATING VENDOR"))))

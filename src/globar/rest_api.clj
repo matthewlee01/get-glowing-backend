@@ -61,19 +61,19 @@
 (defn upsert-vendor 
   [request]
   (let [vendor (get-in request [:json-params])
-        vendor-id (:vendor_id vendor)]
+        vendor-id (:vendor-id vendor)]
     (if (nil? vendor-id)
       (http/json-response (db/create-vendor vendor))
       (do (db/update-vendor vendor)
           (http/json-response (db/find-vendor-by-id vendor-id))))))
 
-(defn upsert-customer
+(defn upsert-user
   [request]
-  (let [customer (get-in request [:json-params])]
-    (if (:cust_id customer)
-      (do (db/update-customer customer)
-          (http/json-response (db/find-customer-by-id (:cust_id customer))))
-      (http/json-response (db/create-customer customer)))))
+  (let [user (get-in request [:json-params])]
+    (if (:user-id user)
+      (do (db/update-user user)
+          (http/json-response (db/find-user-by-id (:user-id user))))
+      (http/json-response (db/create-user user)))))
 
 (defn decode64 [str]
   (String. (.decode (Base64/getDecoder) str)))
@@ -115,21 +115,14 @@
                        (.getValues)
                        (into {})
                        (clojure.walk/keywordize-keys))
-        user (db/find-customer-by-sub (:sub user-info))]
+        user (db/find-user-by-sub (:sub user-info))]
 
     ; if the user doesn't exist, create a new user record
     (when-not user
-      (db/create-customer {:sub (:sub user-info)
-                           :name_first (:given_name user-info)
-                           :name_last (:family_name user-info)
-                           :name (:name user-info)
-                           :email (:email user-info)
-                           :email_verified (:email_verified user-info)
-                           :locale (:locale user-info)
-                           :avatar (:picture user-info)}))
+      (db/create-user user-info))
 
     ; read the user info and send it back to the client
-    (http/json-response (db/find-customer-by-sub (:sub user-info)))))
+    (http/json-response (db/find-user-by-sub (:sub user-info)))))
 
 
 
@@ -138,5 +131,5 @@
     ["/calendar/:vendor-id" ^:interceptors [(body-params/body-params)] {:post put-calendar}]
     ["/calendar/:vendor-id/:date" {:get get-calendar}]
     ["/vendor" ^:interceptors [(body-params/body-params)] {:post upsert-vendor}]
-    ["/customer" ^:interceptors [(body-params/body-params)] {:post upsert-customer}]
+    ["/user" ^:interceptors [(body-params/body-params)] {:post upsert-user}]
     ["/login" ^:interceptors [(body-params/body-params)] {:post login}]]])
