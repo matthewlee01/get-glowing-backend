@@ -19,18 +19,22 @@
         vendor (db/find-vendor-by-user (:user-id user))]
     (merge user vendor)))
 
-(defn vendor-by-id
-  [_ args _]
-  (let [vendor (db/find-vendor-by-id (:vendor-id args))
+(defn- vendor-by-id-internal
+  [id]
+  (let [vendor (db/find-vendor-by-id id)
         user (db/find-user-by-id (:user-id vendor))]
     (merge user vendor)))
+
+(defn vendor-by-id
+  [_ args _]
+  (vendor-by-id-internal (:id args)))
 
 (defn vendor-list
   [_ args _]
   ; get a list of vendor ids that match the criteria
   (let [id-list (db/vendor-id-list (:addr_city args) (:service args))]
     ; get a vendor object filled out for each id using the vendor-by-id fn
-    (map #(vendor-by-id nil % nil) id-list)))
+    (map #(vendor-by-id-internal (:vendor-id %)) id-list)))
 
 (defn rate-vendor
   [_ args _]

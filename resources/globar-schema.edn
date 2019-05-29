@@ -146,7 +146,7 @@
        {:type :Vendor
         :description "Get a vendor and their list of users"
         :args
-          {:vendor_id {:type Int}}
+          {:id {:type Int}}
         :resolve :query/vendor-by-id}
 
      :vendor_list
