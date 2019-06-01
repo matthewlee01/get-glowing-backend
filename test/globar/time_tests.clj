@@ -18,9 +18,9 @@
     (is (= (gt/day-of-the-week year2 month2 day2) weekdaykey2))))
 
 (deftest test-ymd-conversion
-  (let [[timestr1 ymd1] ["33/11/22" [33 11 22]]
-        [timestr2 ymd2] ["19/05/07" [19 5 7]]
-        [timestr3 weekday3] ["19/4/20" :Saturday]]
+  (let [[timestr1 ymd1] ["2033-11-22" [33 11 22]]
+        [timestr2 ymd2] ["2019-05-07" [19 5 7]]
+        [timestr3 weekday3] ["2019-4-20" :Saturday]]
     (is (= (vec (gt/datestr->ymd timestr1)) ymd1))
     (is (= (vec (gt/datestr->ymd timestr2)) ymd2))
     (is (= (gt/get-weekday timestr3) weekday3))))

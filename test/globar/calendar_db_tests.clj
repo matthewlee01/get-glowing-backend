@@ -11,7 +11,7 @@
 
 (def available-times [t1 t2])
 (def booked-times [b1 b2])
-(def test-date "07-18-2019")
+(def test-date "2019-07-01")
 
 (def expected {:date test-date
                :available available-times
@@ -38,9 +38,8 @@
 
 (deftest test-read-and-write-templates
   (db/update-template 1235 test-template)
-  (let [result (db/read-vendor-template 1235)
-        result-template (read-string (:template result))]
-    (is (= result-template test-template))))
+  (let [result (db/read-vendor-template 1235)]
+    (is (= result test-template))))
 
 ;; now figure out if optimistic locking is working at the db level
 (deftest test-optimistic-locking

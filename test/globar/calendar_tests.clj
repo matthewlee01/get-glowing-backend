@@ -24,12 +24,13 @@
       (is (= (:available test-map (:available written-map))))
       (is (= (:booked test-map (:booked written-map))))
       (is (= (:success written-map) true))
-      (is (= written-map read-map))
+      (is (= (dissoc written-map :updated-at :template)
+             (dissoc read-map :updated-at :template)))
       (let [updated-map (assoc read-map :booked "[[0 60] [240 300] [600 660]]")
             re-written-map (cc/write-calendar vendor-id updated-map)]
         ;; ignore the success flag (?) and the updated-at timestamp
-        (is (= (dissoc updated-map :updated-at)
-               (dissoc re-written-map :updated-at)))))))
+        (is (= (dissoc updated-map :updated-at :template)
+               (dissoc re-written-map :updated-at :template)))))))
 
 
 ;;"this test creates a row in the calendar table, checks that it was created properly by reading it back.
