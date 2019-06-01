@@ -18,6 +18,9 @@
                :booked booked-times
                :success true})
 
+(def test-template {:Monday [0 600]
+                    :Thursday [300 360]})
+
 (use-fixtures :each setup-test-system!)
 
 ;; write to the db, and then read back and confirm that the values are
@@ -32,6 +35,12 @@
     ;; confirm that the other fields are exactly what we tried to write
     (is (= (dissoc result :updated-at)
            expected))))
+
+(deftest test-read-and-write-templates
+  (db/update-template 1235 test-template)
+  (let [result (db/read-vendor-template 1235)
+        result-template (read-string (:template result))]
+    (is (= result-template test-template))))
 
 ;; now figure out if optimistic locking is working at the db level
 (deftest test-optimistic-locking

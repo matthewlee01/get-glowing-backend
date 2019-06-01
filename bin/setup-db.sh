@@ -53,6 +53,7 @@ create table Vendors (
   summary text,
   radius int,
   profile_pic text,
+  template text,
   created_at timestamptz not null default current_timestamp,
   updated_at timestamptz not null default current_timestamp);
 create trigger vendor_updated_at before update

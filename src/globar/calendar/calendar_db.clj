@@ -86,3 +86,28 @@
       {:success false
        :error-msg "An error occurred while trying to update the calendar for this date.  Please contact support for help."})))
 
+(defn read-vendor-template
+  [vendor-id]
+  (try
+    (let [raw-result (db/query ["SELECT template FROM Vendors WHERE vendor_id = ?" vendor-id])
+          result (first raw-result)]
+      (edn/read-string (:template result)))
+    (catch Exception e
+      (log/error :DB-ERROR (prn-str e))
+      {:success false
+       :error-msg "An error ocurred while trying to read a template from the database."})))
+
+(defn update-template
+  [vendor-id template]
+  (try
+    (let [result (db/execute ["UPDATE Vendors SET template = ?
+                              WHERE vendor_id = ?" 
+                              (str template)
+                              vendor-id])
+          success? (= 1 (first result))
+          latest (read-vendor-template vendor-id)]
+      latest)
+    (catch Exception e
+      (log/error :DB-ERROR e)
+      {:success false
+       :error-msg "An error occurred while trying to update your template.  Please contact support for help."})))
