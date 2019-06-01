@@ -44,8 +44,8 @@
   (not= x y))
 
 (defn datestr->ymd [datestring]
-  "takes string with format YY/MM/DD and returns yy mm and dd as and array of integers"
-  (->> (str/split datestring #"(/)")
+  "takes string with format YYYY-MM-DD and returns (yy mm dd) as an array of integers"
+  (->> (str/split (subs datestring 2) #"(-)")
        (map #(Integer/parseInt %))))
 
 (defn day-of-the-week [year month day]

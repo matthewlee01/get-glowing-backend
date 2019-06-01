@@ -110,15 +110,15 @@ insert into Users (user_id, addr_city, name_first, name_last, email, sub) values
   (2812, 'Vancouver', 'nancy', 'drew', 'missyo@abc.com', 'sub7');
 alter table Users alter column user_id restart with 2900;
 
-insert into Vendors (vendor_id, user_id, summary, profile_pic) values
-  (1234, 234, 'We make sure your toes don''t look Dumb and Dumber', 'wanda-profile.jpg'),
-  (1235, 235, 'In business since yesterday, we make sure you don''t die from fumes', 'helen-profile.jpg'),
-  (1236, 236, 'Your fast track to a smooth butt', 'jackie-profile.jpg'),
-  (1237, 237, 'We make sure your face is tastefully decorated for all occaisions', 'tony-profile.jpg');
+insert into Vendors (vendor_id, user_id, summary, profile_pic, template) values
+  (1234, 234, 'We make sure your toes don''t look Dumb and Dumber', 'wanda-profile.jpg', '{:Thursday [[360 420]]}'),
+  (1235, 235, 'In business since yesterday, we make sure you don''t die from fumes', 'helen-profile.jpg', '{:Wednesday [[700 800]]}'),
+  (1236, 236, 'Your fast track to a smooth butt', 'jackie-profile.jpg', '{}'),
+  (1237, 237, 'We make sure your face is tastefully decorated for all occasions', 'tony-profile.jpg', '{:Saturday [[0 60]] :Sunday [[0 60]]}');
 alter table Vendors alter column vendor_id restart with 1300;
 
 insert into vendor_calendar (vendor_id, date, available_edn, booked_edn) values
-  (1234, '2019-07-18', '[[0 600] [1000 1440]]', '[[500 600]]'),
+  (1234, '2019-07-18', '[[0 300] [1000 1440]]', '[[500 600]]'),
   (1235, '2019-07-18', '[[0 600]]', '[[15 45] [500 600]]'),
   (1236, '2019-07-18', '[[0 1439]]', '[[300 360] [400 600]]'),
   (1237, '2019-07-18', '[[600 1200] [1300 1330]]', '[[700 800] [15 30] [60 120]]');

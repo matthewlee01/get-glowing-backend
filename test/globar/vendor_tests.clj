@@ -126,7 +126,8 @@
                                :radius 
                                :profile-pic
                                :updated-at
-                               :vendor-id)))))
+                               :vendor-id
+                               :template)))))
 
 (deftest test-vendor-update
   ;; first create a new vendor

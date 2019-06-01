@@ -45,13 +45,24 @@
        (not (overlapping-chunks? bookings-time-coll))
        (bookings-available? available-time-coll bookings-time-coll)))
 
+(defn get-template
+  [vendor-id]
+  (cdb/read-vendor-template vendor-id))
+
+(defn write-template
+  [vendor-id new-template]
+  (cdb/update-template vendor-id new-template))
+
 (defn read-calendar 
   "reads a vendor's calendar-day from the db"
   [vendor-id date]
   (let [result (cdb/read-calendar-day vendor-id date)
-        timestamp (:updated-at result)]
+        timestamp (:updated-at result)
+        weekday (ctime/get-weekday date)
+        template (weekday (get-template vendor-id))]
     ;; replace the timestamp with the string equivalent
-    (assoc result :updated-at (str timestamp))))
+    (assoc result :updated-at (str timestamp)
+                  :template template)))
 
 (defn write-calendar
   "upserts a vendor's calendar day with new info"
@@ -65,15 +76,6 @@
         timestamp (:updated-at result)]
     ;; replace the timestamp with the string equivalent
     (assoc result :updated-at (str timestamp))))
-
-(defn get-template
-  [vendor-id]
-  (cdb/read-vendor-template vendor-id))
-
-(defn write-template
-  [vendor-id new-template]
-  (cdb/update-template vendor-id new-template))
-
 
 
 
