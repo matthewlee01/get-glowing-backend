@@ -116,6 +116,18 @@ insert into Vendors (vendor_id, user_id, summary, profile_pic) values
   (1237, 237, 'We make sure your face is tastefully decorated for all occaisions', 'tony-profile.jpg');
 alter table Vendors alter column vendor_id restart with 1300;
 
+insert into vendor_calendar (vendor_id, date, available_edn, booked_edn) values
+  (1234, '2019-07-18', '[[0 600] [1000 1440]]', '[[500 600]]'),
+  (1235, '2019-07-18', '[[0 600]]', '[[15 45] [500 600]]'),
+  (1236, '2019-07-18', '[[0 1439]]', '[[300 360] [400 600]]'),
+  (1237, '2019-07-18', '[[600 1200] [1300 1330]]', '[[700 800] [15 30] [60 120]]');
+
+insert into Customers (cust_id, name_first, name_last, password, email) values
+  (37, 'mr. john', 'dough', 'password1', 'curious@gmail.com'),
+  (1410, 'alex', 'attenborough', 'password2', 'bleeding@hotmail.com'),
+  (2812, 'nancy', 'drew', 'password3', 'missyo@abc.com');
+alter table Customers alter column cust_id restart with 2900;
+
 insert into vendor_rating (vendor_id, user_id, rating) values
   (1234, 37, 3),
   (1234, 1410, 5),
