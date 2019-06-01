@@ -91,3 +91,11 @@
     (is (= (cc/valid-calendar? available-sample1 invalid-bookings) false))))   ;; this calendar contains an invalid booking
 
 
+(deftest test-templates
+ (let [vendor-id 1236
+       test-template {:Sunday [[100 200] [500 600]]
+                      :Tuesday [[600 700] [1000 1300]]}
+       written-template (cc/write-template vendor-id test-template)
+       read-template (cc/get-template vendor-id)]
+    (is (= written-template read-template))))
+   

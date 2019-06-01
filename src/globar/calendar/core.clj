@@ -1,5 +1,6 @@
 (ns globar.calendar.core
-  (:require [globar.calendar.calendar-db :as cdb]
+  (:require [clojure.edn :as edn]
+            [globar.calendar.calendar-db :as cdb]
             [globar.calendar.time :as ctime]
             [io.pedestal.log :as log]))
 
@@ -64,4 +65,16 @@
         timestamp (:updated-at result)]
     ;; replace the timestamp with the string equivalent
     (assoc result :updated-at (str timestamp))))
+
+(defn get-template
+  [vendor-id]
+  (cdb/read-vendor-template vendor-id))
+
+(defn write-template
+  [vendor-id new-template]
+  (cdb/update-template vendor-id new-template))
+
+
+
+
 
