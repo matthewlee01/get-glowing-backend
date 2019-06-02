@@ -14,12 +14,12 @@
 ;; and then test that we can update the entry by issuing another write
 (deftest test-calendar-write-read
   (let [vendor-id 1234
-        date "01/01/01"
+        date "2001-01-01"
         test-map {:date date
                   :available "[[60 180] [240 360]]"
                   :booked "[[60 120] [300 360]]"}
         written-map (cc/write-calendar vendor-id test-map)]
-    (let [read-map (cc/read-calendar vendor-id date)]
+    (let [read-map (cc/read-calendar-day vendor-id date)]
       (is (= (:date test-map) (:date written-map)))
       (is (= (:available test-map (:available written-map))))
       (is (= (:booked test-map (:booked written-map))))
@@ -37,18 +37,22 @@
 ;; next it will update the row twice.  the first update should succeed and the second should fail with 
 ;; an error indicating that another operation won the race and the operation needs to be retried"
 (deftest test-calendar-calls
-  (println "sending")
   ;; first test demonstrates that we can write a new record and read back what we write
   (let [post-result (sh "curl" "-H" "Content-Type: application/json" "-d" "{\"date\": \"2019-07-18\", \"available\": \"[[240 360] [480 540] [600 720]]\", \"booked\":\"[[300 360]]\"}" "-X" "POST" "http://localhost:8889/calendar/1234")
+        ;; now read the calendar back
         get-result (sh "curl" "http://localhost:8889/calendar/1234/2019-07-18")
+        ;; convert json to clojure data
         posted-clj (json/read-str (:out post-result) :key-fn keyword)
-        read-clj (json/read-str (:out get-result) :key-fn keyword)]
-    (is (= (:date posted-clj) (:date read-clj)))
-    (is (= (:booked posted-clj) (:booked read-clj)))
+        read-clj (json/read-str (:out get-result) :key-fn keyword)
+        ;; we just want the day in question, not the two adjacent days
+        read-cal (get-in read-clj [:day-of :calendar])]
+    (println "read after write: " read-cal)
+    (is (= (:date posted-clj) (:date read-cal)))
+    (is (= (:booked posted-clj) (:booked read-cal)))
     (is (= (:success posted-clj) true))
 
     ;; the second test demonstrates that we can update the record by posting a modification
-    (let [new-cal (assoc read-clj :booked "[[720 780]]")
+    (let [new-cal (assoc read-cal :booked "[[720 780]]")
           poopy (println "NEW CAL: " new-cal)
           post-result (sh "curl" "-H" 
                           "Content-Type: application/json" 
