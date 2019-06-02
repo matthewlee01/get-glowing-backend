@@ -1,8 +1,7 @@
 (ns globar.calendar.core
-  (:require [clojure.edn :as edn]
-            [globar.calendar.calendar-db :as cdb]
+  (:require [globar.calendar.calendar-db :as cdb]
             [globar.calendar.time :as ctime]
-            [io.pedestal.log :as log]))
+            [java-time :as jt]))
 
 (defn valid-time?
   "checks to make sure time is within the correct range"
@@ -53,7 +52,7 @@
   [vendor-id new-template]
   (cdb/update-template vendor-id new-template))
 
-(defn read-calendar 
+(defn read-calendar-day
   "reads a vendor's calendar-day from the db"
   [vendor-id date]
   (let [result (cdb/read-calendar-day vendor-id date)
@@ -63,6 +62,32 @@
     ;; replace the timestamp with the string equivalent
     (assoc result :updated-at (str timestamp)
                   :template template)))
+
+(defn day-before
+  [date]
+  (let [java-day-before (jt/minus (jt/local-date date) (jt/days 1))]
+    (jt/format "yyyy-MM-dd" java-day-before)))
+
+(defn day-after
+  [date]
+  (let [java-day-after (jt/plus (jt/local-date date) (jt/days 1))]
+    (jt/format "yyyy-MM-dd" java-day-after)))
+
+(defn read-calendar
+  "reads 3 calendar days from the db"
+  [vendor-id date]
+  (let [date-before (day-before date)
+        date-after (day-after date)
+        cal-before (read-calendar-day vendor-id date-before)
+        cal-day (read-calendar-day vendor-id date)
+        cal-after (read-calendar-day vendor-id date-after)]
+
+    {:day-before {:date date-before
+                  :calendar cal-before}
+     :day-of {:date date
+              :calendar cal-day}
+     :day-after {:date date-after
+                 :calendar cal-after}}))
 
 (defn write-calendar
   "upserts a vendor's calendar day with new info"
