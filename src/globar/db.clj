@@ -201,10 +201,9 @@
 
 (defn create-vendor
   [new-vendor]
-  (let [{user-id :user-id
-         summary :summary} new-vendor
+  (let [{:keys [user-id summary]} new-vendor
         result (jdbc/insert! db-conn :Vendors {:user_id user-id
-                                                  :summary summary}
+                                               :summary summary}
                              {:identifiers #(.replace % \_\-)})]
     (first result)))
 
