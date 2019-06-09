@@ -51,12 +51,14 @@
 (defn services-summary
   [_ _ vendor]
   (let [prices (map :s-price (db/list-services-for-vendor (:vendor-id vendor)))
-        svc-count (count prices)
-        svc-min (apply min prices)
-        svc-max (apply max prices)]
-    {:count svc-count
-     :min svc-min 
-     :max svc-max}))
+        svc-count (count prices)]
+    (if (> svc-count 0)
+      (let [svc-min (apply min prices)
+            svc-max (apply max prices)]
+         {:count svc-count
+          :min svc-min
+          :max svc-max})
+      {})))
                       
                       
 (defn rating-summary
@@ -109,15 +111,4 @@
               (util/attach-resolvers (resolver-map)))]
     (schema/compile s {:default-field-resolver schema/hyphenating-default-field-resolver})))
 
-(defn load-schema2 []
-  "this function reads the schema file from disk, replaces resolver symbols
-  with function references, and compiles into a lacinia schema"
-  (println "loading schema")
-  (-> (io/resource "globar-schema.edn")
-      slurp
-      edn/read-string
-      (util/attach-resolvers (resolver-map))
-      (schema/compile {:default-field-resolver schema/hyphenating-default-field-resolver})))
-
-
-(defstate schema-state :start (load-schema2))
+(defstate schema-state :start (load-schema))

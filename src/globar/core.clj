@@ -4,7 +4,8 @@
             [clojure.walk :as walk]
             [globar.schema :refer [schema-state]]
             [mount.core :as mount]
-            [globar.server :as server])
+            [globar.server :as server]
+            [globar.load :as load])
   (:gen-class))
 
 
@@ -31,6 +32,9 @@
   []
   (mount/stop)
   :stopped)
+
+(defn load-vendors []
+  (load/load-vendors))
 
 (defn -main []
   (start))

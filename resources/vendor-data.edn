@@ -1,0 +1,38 @@
+[
+ {:first-name "Billy"
+  :last-name "Bob"
+  :email "bb@gmail.com"
+  :city "Vancouver"
+  :summary "Any old summary will do"
+  :services [{:name "french manicure"
+              :description "a manicure that is french"
+              :type "nails"
+              :price 2000
+              :duration 20}
+             {:name "another service"
+              :description "this is the description of the service"
+              :type "nails"
+              :price 4000
+              :duration 40}]}
+ {:first-name "Andy"
+  :last-name "Adamson"
+  :email "andya@microsoft.com"
+  :city "New Westminster"
+  :summary "Some kind of summary"
+  :services [{:name "my service"
+              :description "this is a great service"
+              :type "nails"
+              :price 3000
+              :duration 60}
+             {:name "my second service"
+              :description "this is a long form description of the service"
+              :type "nails"
+              :price 4500
+              :duration 40}
+             {:name "my third service"
+              :description "this is another longer description of the service"
+              :type "nails"
+              :price 8000
+              :duration 45}]}]
+
+

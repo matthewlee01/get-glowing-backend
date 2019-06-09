@@ -4,7 +4,7 @@
   (:require [mount.core :refer [defstate]]
             [com.walmartlabs.lacinia.pedestal :as lp]
             [io.pedestal.http :as http]
-            [globar.schema :as schema]
+            [globar.schema :refer [schema-state]]
             [globar.config :as config]
             [globar.rest-api :as rest-api]
             [io.pedestal.http.route :as route]))
@@ -16,8 +16,8 @@
 
 
 (defn start-server [port]
-  (println "starting http server with schema" schema/schema-state)
-  (-> schema/schema-state
+  (println "starting http server with schema" schema-state)
+  (-> schema-state
       (lp/service-map {:graphiql true
                        :port port})
       (assoc ::http/allowed-origins (CORS-whitelist))

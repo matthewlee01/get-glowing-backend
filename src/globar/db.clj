@@ -147,17 +147,31 @@
           name :name
           email :email
           email-verified :email_verified
-          sub :sub
-          avatar :picture
-          locale :locale} user-info
-        result (jdbc/insert! db-conn :Users{:name_first name-first
-                                            :name_last name-last
-                                            :name name
-                                            :email email
-                                            :email_verified email-verified
-                                            :sub sub
-                                            :avatar avatar
-                                            :locale locale}
+          addr-str-num :addr-str-num
+          addr-str-name :addr-str-name
+          addr-city :addr-city
+          addr-state :addr-state
+          addr-postal :addr-postal
+          phone :phone
+          locale :locale
+          avatar :avatar
+          sub :sub} user-info
+        result (jdbc/insert! db-conn
+                             :Users
+                             {:name_first name-first
+                              :name_last name-last
+                              :name name
+                              :email email
+                              :email_verified email-verified
+                              :addr_str_num addr-str-num
+                              :addr_str_name addr-str-name
+                              :addr_city addr-city
+                              :addr_state addr-state
+                              :addr_postal addr-postal
+                              :phone phone
+                              :locale locale
+                              :avatar avatar
+                              :sub sub}
                              {:identifiers #(.replace % \_\-)})]
     (first result)))
 
@@ -201,9 +215,10 @@
 
 (defn create-vendor
   [new-vendor]
-  (let [{:keys [user-id summary]} new-vendor
+  (let [{:keys [user-id summary profile-pic]} new-vendor
         result (jdbc/insert! db-conn :Vendors {:user_id user-id
-                                               :summary summary}
+                                               :summary summary
+                                               :profile_pic profile-pic}
                              {:identifiers #(.replace % \_\-)})]
     (first result)))
 
@@ -218,3 +233,31 @@
     (println "TODO: add error checking to this!! " result)
     (if (= 0 (first result))
       (println "ERROR UPDATING VENDOR"))))
+
+(defn create-service
+  [new-service]
+  (println "new service is: " new-service)
+  (let [{:keys [vendor-id s-name s-description s-type s-price s-duration]} new-service
+        result (jdbc/insert! db-conn
+                             :Services {:vendor_id vendor-id
+                                        :s_name s-name
+                                        :s_description s-description
+                                        :s_type s-type
+                                        :s_price s-price
+                                        :s_duration s-duration}
+                             {:identifiers #(.replace % \_\-)})]
+    (first result)))
+
+(defn update-service
+  [service]
+  (let [{:keys [vendor-id s-name s-description s-type s-price s-duration]} service
+        result (jdbc/update! db-conn
+                             :Services {:s_name s-name
+                                        :s_description s-description
+                                        :s_type s-type
+                                        :s_price s-price
+                                        :s_duration s-duration}
+                             ["vendor_id = ?" vendor-id])]
+    (println "TODO: add error checking to this!! " result)
+    (if (= 0 (first result))
+      (println "ERROR UPDATING SERVICE"))))
