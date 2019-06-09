@@ -126,7 +126,9 @@
           ; if the user doesn't exist, create a new user record
           (when-not user
             ;; change the name from auth0 from picture->avatar as that's what we use
-            (db/create-user (clojure.set/rename-keys user-info {:picture :avatar})))
+            (db/create-user (clojure.set/rename-keys user-info {:picture :avatar
+                                                                :given_name :name-first
+                                                                :family_name :name-last})))
 
           ; read the user info and send it back to the client
           (http/json-response (db/find-user-by-sub (:sub user-info)))))
