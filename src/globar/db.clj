@@ -142,8 +142,8 @@
 (defn create-user
   "Adds a new user object, or changes the values of an existing rating if one exists"
   [user-info]
-  (let [{ name-first :given_name
-          name-last :family_name
+  (let [{ name-first :name-first
+          name-last :name-last
           name :name
           email :email
           email-verified :email_verified
