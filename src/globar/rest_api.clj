@@ -83,46 +83,55 @@
 
 (defonce pub-key (keys/public-key "pubkey.pem"))
 
-
-
-(defn verify [token pub-key]
+(defn verify [token]
   "verifies the JWT from auth0, returns an identity map if valid
-  nil otherwise"
-  (let [alg (Algorithm/RSA256 pub-key nil)
-        verifier (-> (JWT/require alg)
-                     (.withIssuer (into-array ["https://n00b.auth0.com/"]))
-                     (.build))
-        decoded-jwt (.verify verifier token)
-        payload (-> decoded-jwt
-                    (.getPayload)
-                    (decode64)
-                    (cheshire/parse-string true))]
+  nil otherwise - note this references a global var pub-key"
+  (try
+    (let [alg (Algorithm/RSA256 pub-key nil)
+          verifier (-> (JWT/require alg)
+                       (.withIssuer (into-array ["https://n00b.auth0.com/"]))
+                       (.build))
+          decoded-jwt (.verify verifier token)
+          payload (-> decoded-jwt
+                      (.getPayload)
+                      (decode64)
+                      (cheshire/parse-string true))]
 
-    (pprint payload)
-    ;; need to add the exception handling logic around this code
-    payload))
+      true)
+    (catch Exception e
+      (log/debug ::verify "failed to verify incoming user token" :token token)
+      false)))
 
 (defn login
   "write the last login time for this user, and
   create the user record if it doesn't already exist"
   [request]
+
+  ;; first need to validate the signature on this token
   (let [access-token (get-in request [:json-params :token])
-        a0 (new AuthAPI (:domain config/auth0)
-                        (:client-id config/auth0)
-                        (:client-secret config/auth0))
-        user-info (->> (.userInfo a0 access-token)
-                       (.execute)
-                       (.getValues)
-                       (into {})
-                       (clojure.walk/keywordize-keys))
-        user (db/find-user-by-sub (:sub user-info))]
+        token-valid? (verify access-token)]
+    (if token-valid?
+      (do
+        (let [access-token (get-in request [:json-params :token])
+              a0 (new AuthAPI (:domain config/auth0)
+                              (:client-id config/auth0)
+                              (:client-secret config/auth0))
+              user-info (->> (.userInfo a0 access-token)
+                             (.execute)
+                             (.getValues)
+                             (into {})
+                             (clojure.walk/keywordize-keys))
+              user (db/find-user-by-sub (:sub user-info))]
 
-    ; if the user doesn't exist, create a new user record
-    (when-not user
-      (db/create-user user-info))
+          ; if the user doesn't exist, create a new user record
+          (when-not user
+            ;; change the name from auth0 from picture->avatar as that's what we use
+            (db/create-user (clojure.set/rename-keys user-info {:picture :avatar})))
 
-    ; read the user info and send it back to the client
-    (http/json-response (db/find-user-by-sub (:sub user-info)))))
+          ; read the user info and send it back to the client
+          (http/json-response (db/find-user-by-sub (:sub user-info)))))
+      {:status 403})))
+
 
 
 

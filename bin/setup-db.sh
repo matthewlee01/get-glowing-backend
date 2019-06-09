@@ -123,12 +123,6 @@ insert into vendor_calendar (vendor_id, date, available_edn, booked_edn) values
   (1236, '2019-07-18', '[[0 1439]]', '[[300 360] [400 600]]'),
   (1237, '2019-07-18', '[[600 1200] [1300 1330]]', '[[700 800] [15 30] [60 120]]');
 
-insert into Customers (cust_id, name_first, name_last, password, email) values
-  (37, 'mr. john', 'dough', 'password1', 'curious@gmail.com'),
-  (1410, 'alex', 'attenborough', 'password2', 'bleeding@hotmail.com'),
-  (2812, 'nancy', 'drew', 'password3', 'missyo@abc.com');
-alter table Customers alter column cust_id restart with 2900;
-
 insert into vendor_rating (vendor_id, user_id, rating) values
   (1234, 37, 3),
   (1234, 1410, 5),

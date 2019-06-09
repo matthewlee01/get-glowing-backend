@@ -15,7 +15,7 @@
                   :family_name    "Andrrson-Coopers"
                   :name           "Billy the Big Bad Bob"
                   :sub            "social google | some funny; characters@?"
-                  :picture        "http://google.com/some/url/to/a/file.jpg"
+                  :avatar         "http://google.com/some/url/to/a/file.jpg"
                   :email          "test@test.com"
                   :email_verified true
                   :locale         "Pacific Standard Time"}
@@ -32,7 +32,7 @@
     (is (= (:family_name new-user) (:name-last post-clj)))
     (is (= (:name new-user) (:name post-clj)))
     (is (= (:sub new-user) (:sub post-clj)))
-    (is (= (:picture new-user) (:avatar post-clj)))
+    (is (= (:avatar new-user) (:avatar post-clj)))
     (is (= (:email new-user) (:email post-clj)))
     (is (= (:email_verified new-user) (:email-verified post-clj)))
     (is (= (:locale new-user) (:locale post-clj)))))
