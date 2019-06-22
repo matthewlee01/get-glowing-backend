@@ -61,5 +61,6 @@
   "this function loads a list of vendors from the filesystem"
   []
   (let [vendor-list (load-edn "resources/vendor-data.edn")]
+    (println "read edn file, found it contains: " (count vendor-list) " entries.")
     (map create-vendor vendor-list)))
 

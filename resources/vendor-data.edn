@@ -1,38 +1,112 @@
 [
- {:first-name "Billy"
-  :last-name "Bob"
-  :email "bb@gmail.com"
+ {:first-name "Amelia"
+  :last-name "Allen"
+  :email "aallen@gmail.com"
   :city "Vancouver"
-  :summary "Any old summary will do"
-  :services [{:name "french manicure"
-              :description "a manicure that is french"
-              :type "nails"
-              :price 2000
-              :duration 20}
-             {:name "another service"
-              :description "this is the description of the service"
-              :type "nails"
-              :price 4000
-              :duration 40}]}
- {:first-name "Andy"
-  :last-name "Adamson"
-  :email "andya@microsoft.com"
-  :city "New Westminster"
-  :summary "Some kind of summary"
-  :services [{:name "my service"
-              :description "this is a great service"
-              :type "nails"
+  :summary "Making women feel beautiful and their best self is my calling."
+  :services [{:name "blow out"
+              :description "Wash, dry and style. No hot tools"
+              :type "hair"
               :price 3000
-              :duration 60}
-             {:name "my second service"
-              :description "this is a long form description of the service"
-              :type "nails"
+              :duration 30}
+             {:name "blow out with hot tool"
+              :description "Wash, dry and curl or straightening iron style"
+              :type "hair"
+              :price 4000
+              :duration 45}]}
+ {:first-name "Clara"
+  :last-name "Clark"
+  :email "cclark@gmail.com"
+  :city "Vancouver"
+  :summary "I have been trained at Blanche MacDonald and have been styling people's hair for over 10 years."
+  :services [{:name "blow out"
+              :description "I will wash then dry and style your hair to whatever look you'd like. Hot tools included"
+              :type "hair"
               :price 4500
+              :duration 45}
+             {:name "blow out with braid"
+              :description "I will wash then dry and style your hair with the addition of a braid."
+              :type "hair"
+              :price 5000
+              :duration 60}]}
+ {:first-name "Denise"
+  :last-name "Devon"
+  :email "ddevon@gmail.com"
+  :city "Vancouver"
+  :summary "Trained at Vancouver Film School and have been working in films for over 5 years."
+  :services [{:name "full face makeup"
+              :description "from start to finish, a full made up look. Includes false lash application. Must supply own lashes."
+              :type "makeup"
+              :price 3000
+              :duration 30}
+             {:name "dry style"
+              :description "Curl or straighten. No wash or drying. Please have clean dry hair upon arrival. Hot tools included. No updos."
+              :type "hair"
+              :price 3000
+              :duration 30}]}
+ {:first-name "Emily"
+  :last-name "Etherton"
+  :email "eetherton@gmail.com"
+  :city "Vancouver"
+  :summary "I'm a self taught beauty obsessed stylist that has done many weddings and photo shoots for over 7 years."
+  :services [{:name "dry style"
+              :description "I will style your clean dry hair into whatever look you'd like. Hot tools included."
+              :type "hair"
+              :price 3500
+              :duration 30}
+             {:name "blow ou"
+              :description "Wash, dry and style. No curling or straightening irons."
+              :type "hair"
+              :price 3500
+              :duration 30}
+             {:name "dry style plus updos"
+              :description "I will style your clean dry hair into whatever undo you'd like. Hot tools included."
+              :type "hair"
+              :price 4500
+              :duration 45}]}
+ {:first-name "Felicity"
+  :last-name "Fischer"
+  :email "ffischer@gmail.com"
+  :city "Vancouver"
+  :summary "A highly experienced beauty expert with over 20 years in salons and professional shoots"
+  :services [{:name "full glam makeup"
+              :description "from bare face to complete glam, I will transform your face to look your best self. Lashes included."
+              :type "makeup"
+              :price 5000
+              :duration 45}
+             {:name "lash applicatio"
+              :description "lash application. Please note this is not individual lash extensions but false lash application. Please supply your own lashes."
+              :type "makeup"
+              :price 1500
+              :duration 10}
+             {:name "casual makeup"
+              :description "a slightly less full makeup look than the full glam but definitely a great option for dates or any other special occasion. Includes full makeup, lashes not included."
+              :type "makeup"
+              :price 4000
+              :duration 30}]}
+ {:first-name "Gillian"
+  :last-name "Greer"
+  :email "ggreer@gmail.com"
+  :city "Vancouver"
+  :summary "Full time mom and part time stylist for over 10 years"
+  :services [{:name "hair and makeup combo"
+              :description "Hair styling includes waves, straightening, braids or updos. Your makeover includes all makeup application including false lashes which I will provide. The perfect service for a special event!"
+              :type "hair and makeup"
+              :price 10000
+              :duration 90}]}
+ {:first-name "Hali"
+  :last-name "Hausberg"
+  :email "hhausberg@gmail.com"
+  :city "Vancouver"
+  :summary "Trained at the top beauty school in Paris and have been working in a salon part time in Vancouver for 5 years"
+  :services [{:name "blow out"
+              :description "Wash, blow dry and style. Includes curling and straightening iron if desired."
+              :type "hair"
+              :price 4000
               :duration 40}
-             {:name "my third service"
-              :description "this is another longer description of the service"
-              :type "nails"
-              :price 8000
-              :duration 45}]}]
-
+             {:name "dry blow out"
+              :description "Dry styling of hair including curls or straightening. Hot tools included."
+              :type "hair"
+              :price 3000
+              :duration 30}]}]
 
