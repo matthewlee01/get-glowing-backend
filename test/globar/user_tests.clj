@@ -11,8 +11,8 @@
 
 (deftest test-user-creation
   ;; first create a new user
-  (let [new-user {:given_name     "I am the Test user"
-                  :family_name    "Andrrson-Coopers"
+  (let [new-user {:name-first     "I am the Test user"
+                  :name-last    "Andrrson-Coopers"
                   :name           "Billy the Big Bad Bob"
                   :sub            "social google | some funny; characters@?"
                   :avatar         "http://google.com/some/url/to/a/file.jpg"
@@ -28,8 +28,8 @@
         post-clj (json/read-str (:out post-result) :key-fn keyword)]
 
     ;; confirm that what we wrote is what we get back from the reqeuest
-    (is (= (:given_name new-user) (:name-first post-clj)))
-    (is (= (:family_name new-user) (:name-last post-clj)))
+    (is (= (:name-first new-user) (:name-first post-clj)))
+    (is (= (:name-last new-user) (:name-last post-clj)))
     (is (= (:name new-user) (:name post-clj)))
     (is (= (:sub new-user) (:sub post-clj)))
     (is (= (:avatar new-user) (:avatar post-clj)))
