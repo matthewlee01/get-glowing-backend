@@ -215,11 +215,26 @@
 
 (defn create-vendor
   [new-vendor]
-  (let [{:keys [user-id summary profile-pic]} new-vendor
+  (let [{:keys [user-id 
+                summary 
+                profile-pic 
+                addr_city 
+                addr_str_num 
+                addr_str_name
+                addr_postal
+                addr_state]} new-vendor
+        updated-user (-> (find-user-by-id user-id)
+                         (assoc :addr-city addr_city
+                                :addr-str-name addr_str_name
+                                :addr-str-num addr_str_num
+                                :addr-postal addr_postal
+                                :addr-state addr_state)
+                         (update-user))
         result (jdbc/insert! db-conn :Vendors {:user_id user-id
                                                :summary summary
                                                :profile_pic profile-pic}
                              {:identifiers #(.replace % \_\-)})]
+
     (first result)))
 
 (defn update-vendor
