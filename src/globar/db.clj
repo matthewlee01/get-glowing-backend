@@ -217,18 +217,9 @@
   [new-vendor]
   (let [{:keys [user-id 
                 summary 
-                profile-pic 
-                addr_city 
-                addr_str_num 
-                addr_str_name
-                addr_postal
-                addr_state]} new-vendor
+                profile-pic]}new-vendor
         updated-user (-> (find-user-by-id user-id)
-                         (assoc :addr-city addr_city
-                                :addr-str-name addr_str_name
-                                :addr-str-num addr_str_num
-                                :addr-postal addr_postal
-                                :addr-state addr_state)
+                         (merge new-vendor)
                          (update-user))
         result (jdbc/insert! db-conn :Vendors {:user_id user-id
                                                :summary summary
