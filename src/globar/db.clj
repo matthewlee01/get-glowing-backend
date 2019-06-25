@@ -217,7 +217,7 @@
   [new-vendor]
   (let [{:keys [user-id 
                 summary 
-                profile-pic]}new-vendor
+                profile-pic]} new-vendor
         updated-user (-> (find-user-by-id user-id)
                          (merge new-vendor)
                          (update-user))
