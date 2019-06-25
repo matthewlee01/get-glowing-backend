@@ -66,7 +66,8 @@ create table Services (
   s_description text,
   s_type text,
   s_price int,
-  s_duration int
+  s_duration int,
+  s_id int
 );
 create trigger service_updated_at before update
 on Services for each row execute procedure
@@ -147,14 +148,14 @@ insert into vendor_rating (vendor_id, user_id, rating) values
   (1237, 2812, 4),
   (1237, 37, 5);
 
-insert into Services (vendor_id, s_name, s_description, s_type, s_price, s_duration) values
-  (1234, 'french manicure', 'covers paint and laquer for 10 fingers', 'nails', 2000, 30),
-  (1234, 'spanish manicure', 'involves hot sauce and salsa', 'nails', 3000, 45),
-  (1235, 'nail trim and polish', 'your pick of 5 colors plus a clear coat', 'nails', 4000, 40),
-  (1235, 'blow', 'refurbish your hair to salon style', 'hair', 3000, 30),
-  (1235, 'trim', 'will give your hair a quick trim', 'hair', 8000, 60),
-  (1235, 'color', 'will pick a color for your hair and give you the full stinky treatment', 'hair', 10000, 90),
-  (1236, 'file and polish', 'will smooth and polish your fingernails', 'nails', 6000, 60),
-  (1237, 'back massage', 'an intense 30 minute upper back massage', 'massage', 8000, 30),
-  (1237, 'full massage', 'will massage your face, back and legs', 'massage', 12000, 60);
+insert into Services (vendor_id, s_name, s_description, s_type, s_price, s_duration, s_id) values
+  (1234, 'french manicure', 'covers paint and laquer for 10 fingers', 'nails', 2000, 30, 123400),
+  (1234, 'spanish manicure', 'involves hot sauce and salsa', 'nails', 3000, 45, 123401),
+  (1235, 'nail trim and polish', 'your pick of 5 colors plus a clear coat', 'nails', 4000, 40, 123500),
+  (1235, 'blow', 'refurbish your hair to salon style', 'hair', 3000, 30, 123501),
+  (1235, 'trim', 'will give your hair a quick trim', 'hair', 8000, 60, 123502),
+  (1235, 'color', 'will pick a color for your hair and give you the full stinky treatment', 'hair', 10000, 90, 123403),
+  (1236, 'file and polish', 'will smooth and polish your fingernails', 'nails', 6000, 60, 123600),
+  (1237, 'back massage', 'an intense 30 minute upper back massage', 'massage', 8000, 30, 123700),
+  (1237, 'full massage', 'will massage your face, back and legs', 'massage', 12000, 60, 123701);
 __END
