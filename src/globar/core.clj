@@ -5,7 +5,8 @@
             [globar.schema :refer [schema-state]]
             [mount.core :as mount]
             [globar.server :as server]
-            [globar.load :as load])
+            [globar.load :refer [load-vendors]]
+            [globar.config :as config])
   (:gen-class))
 
 
@@ -24,7 +25,8 @@
   open a browser tab"
   []
   (mount/start)
-  (browse-url "http://localhost:8888/")
+  (if config/debug?
+    (browse-url "http://localhost:8888/"))
   :started)
 
 (defn stop
@@ -33,8 +35,8 @@
   (mount/stop)
   :stopped)
 
-(defn load-vendors []
-  (load/load-vendors))
+(defn load-sample-vendors[]
+  (load-vendors))
 
 (defn -main []
   (start))

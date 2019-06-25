@@ -6,6 +6,8 @@ services:
         dockerfile: Dockerfile.postgres
     networks:
         - mynet
+    volumes:
+        - postgres-data:/var/lib/postgresql/data
 
   app:
     build: 
@@ -18,3 +20,5 @@ services:
 networks:
     mynet:
         driver: bridge
+volumes:
+    postgres-data:
