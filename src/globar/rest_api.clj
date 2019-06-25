@@ -75,6 +75,20 @@
           (http/json-response (db/find-user-by-id (:user-id user))))
       (http/json-response (db/create-user user)))))
 
+
+;only works for writing, updating is wip
+(defn upsert-booking
+  [request]
+  (let [{:keys [vendor-id time booking-id date] :as booking} (:json-params request)]
+    (if (nil? booking-id)
+	     (do (cc/write-calendar vendor-id (-> (cc/read-calendar vendor-id date)
+	     	                                    (get-in [:day-of :calendar])
+	     	                                    (update-in [:booked] conj time)
+                                           (update-in [:booked] vec)
+	     	                                    (assoc :date date)))
+          (http/json-response (db/create-booking booking)))
+      (http/json-response (db/update-booking booking))))) ;updating only supports cancelling the booking
+
 (defn decode64 [str]
   (String. (.decode (Base64/getDecoder) str)))
 
@@ -143,4 +157,5 @@
     ["/calendar/:vendor-id/:date" {:get get-calendar}]
     ["/vendor" ^:interceptors [(body-params/body-params)] {:post upsert-vendor}]
     ["/user" ^:interceptors [(body-params/body-params)] {:post upsert-user}]
-    ["/login" ^:interceptors [(body-params/body-params)] {:post login}]]])
+    ["/login" ^:interceptors [(body-params/body-params)] {:post login}]
+    ["/booking" ^:interceptors [(body-params/body-params)] {:post upsert-booking}]]])

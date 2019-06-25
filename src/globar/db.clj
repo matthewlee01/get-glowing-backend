@@ -139,6 +139,11 @@
   (log/debug :message "upsert-vendor-rating completed")
   nil)
 
+(defn find-booking-by-id
+  [booking-id]
+  (-> (query ["SELECT * FROM Bookings WHERE booking_id = ?" booking-id])
+      first))
+
 (defn create-user
   "Adds a new user object, or changes the values of an existing rating if one exists"
   [user-info]
@@ -267,3 +272,32 @@
     (println "TODO: add error checking to this!! " result)
     (if (= 0 (first result))
       (println "ERROR UPDATING SERVICE"))))
+
+(defn create-booking
+  [booking]
+  (let [{:keys [vendor-id user-id time date service]} booking
+        result (jdbc/insert! db-conn
+                             :Bookings {:vendor_id vendor-id
+                                        :user_id user-id
+                                        :time (prn-str time)
+                                        :date date
+                                        :service service
+                                        :cancelled false}
+                             {:identifiers #(.replace % \_\-)})]
+    (first result)))
+
+(defn update-booking
+ [new-booking-info]
+ (let [{:keys [booking-id]} new-booking-info
+       {:keys [vendor-id user-id time date service cancelled]} (-> (find-booking-by-id booking-id)
+                                                                   (merge new-booking-info))
+       result (jdbc/update! db-conn
+                             :Bookings {:vendor_id vendor-id
+                                        :user_id user-id
+                                        :time time
+                                        :date date
+                                        :service service
+                                        :cancelled cancelled}
+                             ["booking_id = ?" booking-id])]
+       (log/debug result)
+       ))
