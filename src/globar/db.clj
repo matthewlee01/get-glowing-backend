@@ -110,7 +110,7 @@
 (defn list-services-for-vendor
   "returns a list of services that a particular vendor offers"
   [vendor-id]
-  (query ["SELECT vendor_id, s_name, s_description, s_type, s_price, s_duration
+  (query ["SELECT vendor_id, s_name, s_description, s_type, s_price, s_duration, s_id
                FROM Services
                WHERE vendor_id = ?" vendor-id]))
 

@@ -81,11 +81,11 @@
   [request]
   (let [{:keys [vendor-id time booking-id date] :as booking} (:json-params request)]
     (if (nil? booking-id)
-	     (do (cc/write-calendar vendor-id (-> (cc/read-calendar vendor-id date)
-	     	                                    (get-in [:day-of :calendar])
-	     	                                    (update-in [:booked] conj time)
+      (do (cc/write-calendar vendor-id (-> (cc/read-calendar vendor-id date)
+                                           (get-in [:day-of :calendar])
+                                           (update-in [:booked] conj time)
                                            (update-in [:booked] vec)
-	     	                                    (assoc :date date)))
+                                           (assoc :date date)))
           (http/json-response (db/create-booking booking)))
       (http/json-response (db/update-booking booking))))) ;updating only supports cancelling the booking
 

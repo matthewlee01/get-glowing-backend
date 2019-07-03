@@ -61,7 +61,8 @@
            :s_description {:type String}
            :s_type        {:type String}
            :s_price       {:type Int}
-           :s_duration    {:type Int}}}
+           :s_duration    {:type Int}
+           :s_id          {:type Int}}}
      :ServicesSummary
         {:description "Summary statistics for a vendor's services"
          :fields
