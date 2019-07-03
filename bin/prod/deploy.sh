@@ -1,9 +1,14 @@
 #!/usr/bin/env bash
 
+# this script compiles all of the clojure, rebuilds all of the docker images, shuts
+# down all of the running containers, and then starts new containers based off the
+# new images.  the idea is that this script can be run in production after pulling
+# new code from the repo.
+
 # build the backend images
 echo "------------------------------------------------------------------------"
 echo "building backend images"
-cd ~/work/globar/bin &&
+cd ~/work/globar/bin/prod &&
 ./build-globar-images.sh &&
 
 # build the frontend
@@ -17,8 +22,8 @@ cd ~/work/archon/bin &&
 echo
 echo "------------------------------------------------------------------------"
 echo "stopping backend containers"
-cd ~/work/globar/bin &&
-./docker-down.sh &&
+cd ~/work/globar/bin/prod &&
+./globar-down.sh &&
 
 # stop the frontend nginx
 echo
@@ -37,8 +42,8 @@ docker system prune -f &&
 echo
 echo "------------------------------------------------------------------------"
 echo "starting the backend containers"
-cd ~/work/globar/bin &&
-./docker-up.sh &&
+cd ~/work/globar/bin/prod &&
+./globar-up.sh &&
 
 # start nginx
 echo

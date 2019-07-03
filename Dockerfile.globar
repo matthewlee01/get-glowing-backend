@@ -2,7 +2,7 @@ FROM openjdk:13-alpine
 # assumes that 'lein uberjar' has been run to build the jar file before this
 COPY target/globar-0.1.0-SNAPSHOT-standalone.jar globar-0.1.0-SNAPSHOT-standalone.jar
 COPY resources/vendor-data.edn ./resources/vendor-data.edn
-COPY bin/alpine-install-telnet.sh alpine-install-telnet.sh
+COPY bin/telnet-to-repl.sh telnet-to-repl.sh
 COPY pubkey.pem pubkey.pem
 ENV RUNNING_IN_DOCKER "true"
 EXPOSE 8888
