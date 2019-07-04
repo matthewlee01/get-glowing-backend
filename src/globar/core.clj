@@ -27,6 +27,8 @@
   (mount/start)
   (if config/debug?
     (browse-url "http://localhost:8888/"))
+  (if config/production?
+    (println "************** STARTING SERVER IN PRODUCTION MODE **********************"))
   :started)
 
 (defn stop
