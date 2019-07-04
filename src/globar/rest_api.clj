@@ -75,19 +75,19 @@
           (http/json-response (db/find-user-by-id (:user-id user))))
       (http/json-response (db/create-user user)))))
 
-
 ;only works for writing, updating is wip
 (defn upsert-booking
   [request]
-  (let [{:keys [vendor-id time booking-id date] :as booking} (:json-params request)]
-    (if (nil? booking-id)
-      (do (cc/write-calendar vendor-id (-> (cc/read-calendar vendor-id date)
-                                           (get-in [:day-of :calendar])
-                                           (update-in [:booked] conj time)
-                                           (update-in [:booked] vec)
-                                           (assoc :date date)))
-          (http/json-response (db/create-booking booking)))
-      (http/json-response (db/update-booking booking))))) ;updating only supports cancelling the booking
+  (let [{:keys [vendor-id time booking-id date] :as booking} (:json-params request)
+        cal-day (get-in (cc/read-calendar vendor-id date) [:day-of :calendar])
+        new-cal-day (cc/insert-booking cal-day time)
+        total-available (cc/get-total-available new-cal-day)]
+    (if (cc/valid-calendar? total-available (:booked new-cal-day))
+      (if (nil? booking-id) ;;checks if booking already exists, then creates/updates accordingly
+        (do (cc/write-calendar vendor-id (assoc new-cal-day :date date))
+            (http/json-response (db/create-booking booking)))
+        (http/json-response (db/update-booking booking))) ;;update functionality needs to be expanded
+      (http/json-response {:error "booking could not be added to calendar"}))))
 
 (defn decode64 [str]
   (String. (.decode (Base64/getDecoder) str)))

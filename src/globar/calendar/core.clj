@@ -73,6 +73,22 @@
   (let [java-day-after (jt/plus (jt/local-date date) (jt/days 1))]
     (jt/format "yyyy-MM-dd" java-day-after)))
 
+(defn insert-booking
+  [cal-map new-booking]
+  (let [updated-bookings (-> (:booked cal-map)
+                             (conj new-booking))]
+    (->> updated-bookings
+         (sort-by first)
+         (vec)
+         (assoc cal-map :booked))))
+
+(defn get-total-available
+  [cal-map]
+  (-> (:available cal-map)
+      (concat (:template cal-map))
+      (vec)
+      (ctime/merge-chunks)))
+
 (defn read-calendar
   "reads 3 calendar days from the db"
   [vendor-id date]
