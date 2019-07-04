@@ -299,5 +299,5 @@
                                         :service service
                                         :cancelled cancelled}
                              ["booking_id = ?" booking-id])]
-       result
-       ))
+   result))
+       
