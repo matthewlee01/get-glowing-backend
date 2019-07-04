@@ -20,8 +20,8 @@ To get an environment up to work on the globar code itself:
 
 ### To populate the sample vendors
 To load the sample vendors from the .edn file
-1. start the containers to bring up the production mode system ```bin/docker-up.sh```
-2. start a shell inside the docker container running the globar server ```docker exec -it globar_app_1 sh```
+1. start the containers to bring up the production mode system: ```bin/docker-up.sh```
+2. start a shell inside the docker container running the globar server: ```docker exec -it globar_app_1 sh```
 3. run the script to install telnet and connect a repl to the globar server: ```./telnet-to-repl.sh```
 4. at the repl prompt, change to the globar.core directory and run the function that loads the sample data: ```(in-ns 'globar.core) (load-sample-vendors)```
 
@@ -37,6 +37,13 @@ New unit tests should be added under the `test/globar/` directory
 All unit tests should pass before committing new code: `lein test`
 
 To run a single unit test: `lein test :only globar.<unit-test-namespace>`
+
+### Production
+To deploy to the production machine, the source lives in work/archon and work/globar directories and the PRODUCTION variable is set in the .bashrc file.  This is copied into the globar_app container to signal that this is the production environment.
+Steps to deploy:
+1. ```git pull``` in globar, then another ```git pull``` in archon
+2. goto globar/bin/prod and run ```deploy.sh```
+3. do a ```docker logs globar_app_1``` to check for the PRODUCTION log emitted
 
 ## License
 
