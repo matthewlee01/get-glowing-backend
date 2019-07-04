@@ -17,6 +17,8 @@ services:
       - 8888:8888
     networks:
       - mynet
+    environment:
+      - PRODUCTION
 networks:
     mynet:
         driver: bridge

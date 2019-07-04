@@ -9,18 +9,13 @@
             [globar.rest-api :as rest-api]
             [io.pedestal.http.route :as route]))
 
-(defn CORS-whitelist []
-  (if config/debug?
-    ["http://localhost:3449" "http://localhost:8888"] ;; allow requests from figwheel and the graphiql app
-    ["http://getglowing.ca"]))                     ;; in production we only allow access from our webapp
-
 
 (defn start-server [port]
   (println "starting http server with schema" schema-state)
   (-> schema-state
       (lp/service-map {:graphiql true
                        :port port})
-      (assoc ::http/allowed-origins (CORS-whitelist))
+      (assoc ::http/allowed-origins (config/CORS-whitelist))
       (assoc ::http/file-path "resources/public")
       (update-in [::http/routes] #(concat (route/expand-routes %) rest-api/rest-api-routes))
       http/default-interceptors
