@@ -111,10 +111,10 @@
                       (decode64)
                       (cheshire/parse-string true))]
 
-      true)
+      payload) 
     (catch Exception e
       (log/debug ::verify "failed to verify incoming user token" :token token)
-      false)))
+      nil)))
 
 (defn login
   "write the last login time for this user, and
@@ -148,8 +148,33 @@
           (http/json-response (db/find-user-by-sub (:sub user-info)))))
       {:status 403})))
 
+(defn find-user-from-token [token]
+  "given an access token, return the associated user in our system"
+  [token]
+  (when-let [payload (verify token)]
+      (db/find-user-by-sub (:sub payload))))
 
+;; this interceptor is responsible for ensuring that the token passed as part of the
+;; request is valid, and that the user-id of the token matches that found in the request
+(def authorization-interceptor
+  {:name ::authorization-interceptor
+   :enter (fn [context]
+            (let [access-token (get-in context [:request :json-params :access-token])
+                  user-id (get-in context [:request :json-params :user-id])
+                  token-user (find-user-from-token access-token)]
 
+              ;; this fancy statement check two conditions: none of the access-token, user-id or token-user are nil
+              ;; and that the user specified in the token is the same user specified in the request
+              (if (and (every? some? [access-token user-id token-user])
+                       (= (:user-id token-user) user-id)) 
+                (do
+                  (log/debug ::authorization-interceptor "ACCESS GRANTED")
+                  context)
+                (do
+                  (log/debug ::authorization-interceptor "ACCESS DENIED")
+                  (assoc context :response {:status 403
+                                            :headers {}
+                                            :body {}})))))})
 
 (defroutes rest-api-routes
   [[["/upload" ^:interceptors [(ring-mw/multipart-params)] {:post upload}]
@@ -158,4 +183,4 @@
     ["/vendor" ^:interceptors [(body-params/body-params)] {:post upsert-vendor}]
     ["/user" ^:interceptors [(body-params/body-params)] {:post upsert-user}]
     ["/login" ^:interceptors [(body-params/body-params)] {:post login}]
-    ["/booking" ^:interceptors [(body-params/body-params)] {:post upsert-booking}]]])
+    ["/booking" ^:interceptors [(body-params/body-params) authorization-interceptor] {:post upsert-booking}]]])

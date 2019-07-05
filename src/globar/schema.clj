@@ -5,7 +5,7 @@
             [com.walmartlabs.lacinia.schema :as schema]
             [com.walmartlabs.lacinia.resolve :refer [resolve-as]]
             [mount.core :refer [defstate]]
-            [globar.db :as db]
+            [globar.db :as db :refer [db-conn]]
             [clojure.edn :as edn]
             [io.pedestal.log :as log]))
 
