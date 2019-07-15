@@ -147,6 +147,7 @@
 (defn create-user
   "Adds a new user object, or changes the values of an existing rating if one exists"
   [user-info]
+  (log/debug ::create-user user-info)
   (let [{ name-first :name-first
           name-last :name-last
           name :name
@@ -183,6 +184,7 @@
 (defn update-user
   "Adds a new user object, or changes the values of an existing rating if one exists"
   [new-user]
+  (log/debug ::update-user new-user)
   (let [{user-id :user-id
          name-first :name-first
          name-last :name-last

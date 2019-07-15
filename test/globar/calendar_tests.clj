@@ -19,7 +19,7 @@
         test-map {:date date
                   :available "[[60 180] [240 360]]"
                   :booked "[[60 120] [300 360]]"}
-        written-map (cc/write-calendar vendor-id test-map)]
+        written-map (cc/write-calendar-day vendor-id test-map)]
     (let [read-map (cc/read-calendar-day vendor-id date)]
       (is (= (:date test-map) (:date written-map)))
       (is (= (:available test-map (:available written-map))))
@@ -28,7 +28,7 @@
       (is (= (dissoc written-map :updated-at :template)
              (dissoc read-map :updated-at :template)))
       (let [updated-map (assoc read-map :booked "[[0 60] [240 300] [600 660]]")
-            re-written-map (cc/write-calendar vendor-id updated-map)]
+            re-written-map (cc/write-calendar-day vendor-id updated-map)]
         ;; ignore the success flag (?) and the updated-at timestamp
         (is (= (dissoc updated-map :updated-at :template)
                (dissoc re-written-map :updated-at :template)))))))
@@ -54,7 +54,6 @@
 
     ;; the second test demonstrates that we can update the record by posting a modification
     (let [new-cal (assoc read-cal :booked "[[720 780]]")
-          poopy (println "NEW CAL: " new-cal)
           post-result (sh "curl" "-H" 
                           "Content-Type: application/json" 
                           "-d" (json/write-str new-cal) "-X" 

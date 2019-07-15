@@ -80,7 +80,7 @@
         weekday (ctime/get-weekday date)
         template (weekday (get-template vendor-id))]
     ;; replace the timestamp with the string equivalent
-    (assoc result :updated-at timestamp
+    (assoc result :updated-at (str timestamp)
                   :template template)))
 
 (defn day-before
@@ -117,7 +117,7 @@
      :day-after {:date date-after
                  :calendar cal-after}}))
 
-(defn write-calendar
+(defn write-calendar-day
   "upserts a vendor's calendar day with new info"
   [vendor-id cal-map]
   (let [{:keys [date available booked updated-at]} cal-map

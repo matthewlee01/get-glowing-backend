@@ -9,6 +9,7 @@ __END
 psql -Uglobar_role globardb -a <<__END
 drop table if exists vendor_calendar;
 drop table if exists vendor_rating;
+drop table if exists Bookings;
 drop table if exists Vendors;
 drop table if exists Services;
 drop table if exists Users;

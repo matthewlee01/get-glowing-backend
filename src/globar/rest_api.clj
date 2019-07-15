@@ -50,7 +50,7 @@
         updated-at (:updated-at body-data)]
     (log/debug :rest-fn :put-calendar :vendor-id vendor-id :date date :available available
                :updated-at updated-at)
-    (http/json-response (cc/write-calendar vendor-id body-data))))
+    (http/json-response (cc/write-calendar-day vendor-id body-data))))
 
 (defn get-calendar
   [request]
@@ -85,7 +85,7 @@
                         (assoc :date date))]
     (if (s/valid? ::cc/valid-calendar new-cal-day)
       (if (nil? booking-id) ;;checks if booking already exists, then creates/updates accordingly
-        (do (cc/write-calendar vendor-id new-cal-day)
+        (do (cc/write-calendar-day vendor-id new-cal-day)
             (http/json-response (db/create-booking booking)))
         (http/json-response (db/update-booking booking))) ;;update functionality needs to be expanded
       (http/json-response {:error (s/explain-str ::cc/valid-calendar new-cal-day)
