@@ -5,7 +5,8 @@
             [globar.calendar.core :as cc]
             [clojure.java.shell :refer [sh]]
             [clojure.edn :as edn]
-            [clojure.data.json :as json]))
+            [clojure.data.json :as json]
+            [clojure.spec.alpha :as s]))
 
 (use-fixtures :each setup-test-system!)
 
@@ -78,23 +79,24 @@
         valid-time 300
         valid-time-chunk [480 540]
         valid-time-coll [[60 180] [300 360] [600 660]]
-        invalid-bookings [[60 180] [120 240]]           ;; bookings cannot overlap 
-        valid-bookings [[120 180] [240 360] [780 840]]
-        available-sample1 [[120 600] [720 840]]
-        available-sample2 [[0 60] [300 420] [840 900]]
-        bookings-sample1 [[300 360] [720 780]]
-        bookings-sample2 [[0 60] [360 420]]]
-    (is (= (cc/valid-time? invalid-time) false))        
-    (is (= (cc/valid-time? valid-time) true))
-    (is (= (cc/valid-time-chunk? invalid-time-chunk) false))
-    (is (= (cc/valid-time-chunk? valid-time-chunk) true))
-    (is (= (cc/valid-time-coll? invalid-time-coll) false))
-    (is (= (cc/valid-time-coll? valid-time-coll) true))
-    (is (= (cc/bookings-available? available-sample1 bookings-sample1) true))  
-    (is (= (cc/bookings-available? available-sample2 bookings-sample1) false)) ;; bookings must be fully within available time
-    (is (= (cc/valid-calendar? available-sample2 bookings-sample2) true))
-    (is (= (cc/valid-calendar? available-sample1 invalid-bookings) false))))   ;; this calendar contains an invalid booking
-
+        overlapping-bookings [[60 180] [120 240]]
+        good-calendar {:available [[60 120] [240 600]]
+                       :booked [[60 120] [540 660]]
+                       :template [[300 660]]
+                       :date "2020-01-03"}
+        bad-calendar {:available [[3 [5 89]] ["3" "9"] [12]]
+                      :booked overlapping-bookings
+                      :template 2345
+                      :date "12-12-2012"}]        
+    (is (= (s/valid? ::cc/time invalid-time) false))        
+    (is (= (s/valid? ::cc/time valid-time) true))
+    (is (= (s/valid? ::cc/time-chunk invalid-time-chunk) false))
+    (is (= (s/valid? ::cc/time-chunk valid-time-chunk) true))
+    (is (= (s/valid? ::cc/time-collection invalid-time-coll) false))
+    (is (= (s/valid? ::cc/time-collection valid-time-coll) true))
+    (is (= (s/valid? ::cc/valid-calendar good-calendar) true))
+    (is (= (s/valid? ::cc/valid-calendar bad-calendar) false))
+    (is (= (s/valid? ::cc/valid-calendar "i am a monkey man. they call me mr monkey man.") false))))
 
 (deftest test-templates
  (let [vendor-id 1236

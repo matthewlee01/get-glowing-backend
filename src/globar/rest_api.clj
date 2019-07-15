@@ -11,7 +11,8 @@
             [globar.db :as db]
             [cheshire.core :as cheshire]
             [buddy.core.keys :as keys]
-            [fipp.edn :refer [pprint]])
+            [fipp.edn :refer [pprint]]
+            [clojure.spec.alpha :as s])
   (:import
             [java.util Base64]
             [com.auth0.jwt JWT]
@@ -80,14 +81,15 @@
   [request]
   (let [{:keys [vendor-id time booking-id date] :as booking} (:json-params request)
         cal-day (get-in (cc/read-calendar vendor-id date) [:day-of :calendar])
-        new-cal-day (cc/insert-booking cal-day time)
-        total-available (cc/get-total-available new-cal-day)]
-    (if (cc/valid-calendar? total-available (:booked new-cal-day))
+        new-cal-day (-> (cc/insert-booking cal-day time)
+                        (assoc :date date))]
+    (if (s/valid? ::cc/valid-calendar new-cal-day)
       (if (nil? booking-id) ;;checks if booking already exists, then creates/updates accordingly
-        (do (cc/write-calendar vendor-id (assoc new-cal-day :date date))
+        (do (cc/write-calendar vendor-id new-cal-day)
             (http/json-response (db/create-booking booking)))
         (http/json-response (db/update-booking booking))) ;;update functionality needs to be expanded
-      (http/json-response {:error "booking could not be added to calendar"}))))
+      (http/json-response {:error (s/explain-str ::cc/valid-calendar new-cal-day)
+                           :date date}))))
 
 (defn decode64 [str]
   (String. (.decode (Base64/getDecoder) str)))

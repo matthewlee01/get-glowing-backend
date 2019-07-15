@@ -1,48 +1,68 @@
 (ns globar.calendar.core
   (:require [globar.calendar.calendar-db :as cdb]
             [globar.calendar.time :as ctime]
-            [java-time :as jt]))
+            [java-time :as jt]
+            [clojure.spec.alpha :as s]))
 
-(defn valid-time?
-  "checks to make sure time is within the correct range"
-  [time]
-  (and (>= time 0)
-       (< time 1440))) ;; number of minutes in a day
+(def MIN_TIME 0)
+(def MAX_TIME 1440) ;;number of minutes in a day
+(def DATE_REGEX #"([12]\d{3}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01]))") ;;yyyy-MM-dd
 
-(defn valid-time-chunk?
-  "checks each time in a chunk to make sure that it conforms to the format,
-  then checks that the beginning is before the end"
-  [[start-time end-time]]
-  (and (valid-time? start-time)
-       (valid-time? end-time)
-       (< start-time end-time)))
+(defn get-total-available
+  "takes a cal map and returns the sum of the available and template time"
+  [cal-map]
+  (-> (:available cal-map)
+      (concat (:template cal-map))
+      (vec)
+      (ctime/merge-chunks)))
 
-(defn valid-time-coll?
-  "maps over a time-coll to ensure that each time-chunk is correct"
-  [time-coll]
-  (->> (map valid-time-chunk? time-coll)
-       (every? true?)))
-
-(defn overlapping-chunks?
+(defn distinct-time-chunks?
   "uses merge-chunks to check if any time chunks overlap with each other
   within a collection"
   [time-coll]
   (let [merged-coll (ctime/merge-chunks time-coll)]
-    (not (= time-coll merged-coll))))
+    (= time-coll merged-coll)))
 
 (defn bookings-available?
   "uses merge-chunks to check that all bookings are within available time"
-  [available-time booked-time]
-  (let [merged-calendars (ctime/merge-chunks (concat available-time booked-time))]
-    (= available-time merged-calendars)))
+  [cal-map]
+  (let [booked (:booked cal-map)
+        total-available (get-total-available cal-map)
+        merged-time (ctime/merge-chunks (concat total-available booked))]
+    (= merged-time total-available)))
 
-(defn valid-calendar?
-  "checks bookings & available collections for formatting & overlap"
-  [available-time-coll bookings-time-coll]
-  (and (valid-time-coll? available-time-coll)
-       (valid-time-coll? bookings-time-coll)
-       (not (overlapping-chunks? bookings-time-coll))
-       (bookings-available? available-time-coll bookings-time-coll)))
+(s/def ::time  ;;describes a valid time value
+  (s/and integer?
+         #(>= % MIN_TIME)
+         #(< % MAX_TIME)))
+
+(s/def ::time-chunk ;;describes a valid time chunk
+  (s/and vector?
+         #(= (count %) 2)  
+         (s/coll-of ::time)  
+         #(< (first %) (second %))))  
+
+(s/def ::time-collection ;;describes a valid time collection
+  (s/and vector?
+         (s/coll-of ::time-chunk))) 
+
+(s/def ::available
+  (s/nilable ::time-collection))
+
+(s/def ::template
+  (s/nilable ::time-collection))
+
+(s/def ::booked
+  (s/nilable (s/and ::time-collection
+                    distinct-time-chunks?)))
+
+(s/def ::date
+  (s/and string?
+         #(re-matches DATE_REGEX %)))
+         
+(s/def ::valid-calendar
+  (s/and (s/keys :req-un [::available ::booked ::template ::date])
+         bookings-available?))
 
 (defn get-template
   [vendor-id]
@@ -81,13 +101,6 @@
          (sort-by first)
          (vec)
          (assoc cal-map :booked))))
-
-(defn get-total-available
-  [cal-map]
-  (-> (:available cal-map)
-      (concat (:template cal-map))
-      (vec)
-      (ctime/merge-chunks)))
 
 (defn read-calendar
   "reads 3 calendar days from the db"
