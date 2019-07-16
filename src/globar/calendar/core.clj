@@ -80,7 +80,9 @@
         weekday (ctime/get-weekday date)
         template (weekday (get-template vendor-id))]
     ;; replace the timestamp with the string equivalent
-    (assoc result :updated-at (str timestamp)
+    (assoc result :updated-at (if timestamp
+                                (str timestamp)
+                                nil)
                   :template template)))
 
 (defn day-before
@@ -125,7 +127,7 @@
                  (cdb/insert-calendar-day vendor-id date available booked)
                  ;; if the updated-at field is present, convert it to timestamp
                  (cdb/update-calendar-day vendor-id date available booked
-                               (java.sql.Timestamp/valueOf (str updated-at))))
+                               (java.sql.Timestamp/valueOf updated-at)))
         timestamp (:updated-at result)]
     ;; replace the timestamp with the string equivalent
     (assoc result :updated-at (str timestamp))))

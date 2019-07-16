@@ -6,6 +6,7 @@
             [clojure.java.shell :refer [sh]]
             [clojure.edn :as edn]
             [clojure.data.json :as json]
+            [globar.rest-api :as ra]
             [clojure.spec.alpha :as s]))
 
 (use-fixtures :each setup-test-system!)
@@ -71,6 +72,14 @@
         (is (= (:error-msg post-clj) "Update collision - please retry the operation"))))))
 
 
+(deftest test-booking-template
+  (let [request {:json-params {:time [360 419]
+                               :vendor-id 1234
+                               :date "2019-07-25"
+                               :service 123400
+                               :user-id 234}}]
+    (is (= (:status (ra/upsert-booking request)) 200))))
+                               
 (deftest test-calendar-checks
   (let [invalid-time -60                                ;; time cannot be negative 
         invalid-time-chunk [660 240]                    ;; first time must be before second time 
