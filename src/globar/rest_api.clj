@@ -118,36 +118,41 @@
       (log/debug ::verify "failed to verify incoming user token" :token token)
       nil)))
 
+(defn userinfo-from-token [token]
+  "call auth0 to get user-info based on the id specified by an access token"
+  (let [a0 (new AuthAPI (:domain config/auth0)
+                        (:client-id config/auth0)
+                        (:client-secret config/auth0))
+        user-info (->> (.userInfo a0 token)
+                       (.execute)
+                       (.getValues)
+                       (into {})
+                       clojure.walk/keywordize-keys)]
+    user-info))
+
 (defn login
   "write the last login time for this user, and
   create the user record if it doesn't already exist"
   [request]
-
   ;; first need to validate the signature on this token
-  (let [access-token (get-in request [:json-params :token])
-        token-valid? (verify access-token)]
-    (if token-valid?
-      (do
-        (let [access-token (get-in request [:json-params :token])
-              a0 (new AuthAPI (:domain config/auth0)
-                              (:client-id config/auth0)
-                              (:client-secret config/auth0))
-              user-info (->> (.userInfo a0 access-token)
-                             (.execute)
-                             (.getValues)
-                             (into {})
-                             (clojure.walk/keywordize-keys))
-              user (db/find-user-by-sub (:sub user-info))]
+  (let [access-token (get-in request [:json-params :token])]
+    (if-let [token-valid? (verify access-token)]
+      (let [user-info (userinfo-from-token access-token)
+            user (db/find-user-by-sub (:sub user-info))]
 
           ; if the user doesn't exist, create a new user record
           (when-not user
-            ;; change the name from auth0 from picture->avatar as that's what we use
-            (db/create-user (clojure.set/rename-keys user-info {:picture :avatar
-                                                                :given_name :name-first
-                                                                :family_name :name-last})))
+              ;; change the name from auth0 from picture->avatar as that's what we use
+              (db/create-user (-> ( clojure.set/rename-keys user-info {:picture :avatar
+                                                                       :given_name :name-first
+                                                                       :family_name :name-last})
+                                  (assoc :is-vendor false))))
 
-          ; read the user info and send it back to the client
-          (http/json-response (db/find-user-by-sub (:sub user-info)))))
+          ; now that the user exists in our db either way, 
+          ; read the user and send it back to the client
+          (http/json-response (db/find-user-by-sub (:sub user-info))))
+       
+      ;; the call to verify failed so fail the login
       {:status 403})))
 
 (defn find-user-from-token [token]

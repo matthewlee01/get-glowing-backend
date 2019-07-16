@@ -29,6 +29,7 @@ create table Users (
   name text,
   email text not null,
   email_verified boolean,
+  is_vendor boolean default false not null,
   addr_str_num text,
   addr_str_name text,
   addr_city text,

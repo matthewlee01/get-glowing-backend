@@ -17,7 +17,7 @@
                   :sub            "social google | some funny; characters@?"
                   :avatar         "http://google.com/some/url/to/a/file.jpg"
                   :email          "test@test.com"
-                  :email_verified true
+                  :email-verified true
                   :locale         "Pacific Standard Time"}
 
         ;; issue the curl call
@@ -34,7 +34,7 @@
     (is (= (:sub new-user) (:sub post-clj)))
     (is (= (:avatar new-user) (:avatar post-clj)))
     (is (= (:email new-user) (:email post-clj)))
-    (is (= (:email_verified new-user) (:email-verified post-clj)))
+    (is (= (:email-verified new-user) (:email-verified post-clj)))
     (is (= (:locale new-user) (:locale post-clj)))))
 
 (deftest test-user-update
