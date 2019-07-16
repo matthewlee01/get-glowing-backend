@@ -148,36 +148,21 @@
   "Adds a new user object, or changes the values of an existing rating if one exists"
   [user-info]
   (log/debug ::create-user user-info)
-  (let [{ name-first :name-first
-          name-last :name-last
-          name :name
-          email :email
-          email-verified :email_verified
-          addr-str-num :addr-str-num
-          addr-str-name :addr-str-name
-          addr-city :addr-city
-          addr-state :addr-state
-          addr-postal :addr-postal
-          phone :phone
-          locale :locale
-          avatar :avatar
-          sub :sub} user-info
-        result (jdbc/insert! db-conn
-                             :Users
-                             {:name_first name-first
-                              :name_last name-last
-                              :name name
-                              :email email
-                              :email_verified email-verified
-                              :addr_str_num addr-str-num
-                              :addr_str_name addr-str-name
-                              :addr_city addr-city
-                              :addr_state addr-state
-                              :addr_postal addr-postal
-                              :phone phone
-                              :locale locale
-                              :avatar avatar
-                              :sub sub}
+  (let [field-spec (select-keys user-info [:name-first :name-last :name :email :email-verified
+                                           :is-vendor :addr-str-num :addr-str-name :addr-city
+                                           :addr-state :addr-postal :phone :locale :avatar :sub])
+        db-field-spec (clojure.set/rename-keys field-spec
+                                               {:name-first :name_first
+                                                :name-last :name_last
+                                                :email-verified :email_verified
+                                                :is-vendor :is_vendor
+                                                :addr-str-num :addr_str_num
+                                                :addr-str-name :addr_str_name
+                                                :addr-city :addr_city
+                                                :addr-state :addr_state
+                                                :addr-postal :addr_postal})
+        result (jdbc/insert! db-conn :Users 
+                             db-field-spec
                              {:identifiers #(.replace % \_\-)})]
     (first result)))
 
@@ -185,40 +170,22 @@
   "Adds a new user object, or changes the values of an existing rating if one exists"
   [new-user]
   (log/debug ::update-user new-user)
-  (let [{user-id :user-id
-         name-first :name-first
-         name-last :name-last
-         name :name
-         email :email
-         email-verified :email-verified
-         addr-str-num :addr-str-num
-         addr-str-name :addr-str-name
-         addr-city :addr-city
-         addr-state :addr-state
-         addr-postal :addr-postal
-         phone :phone
-         locale :locale
-         avatar :avatar
-         sub :sub} new-user
-        result (jdbc/update! db-conn 
-                             :Users 
-                             {:name_first name-first
-                              :name_last name-last
-                              :name name
-                              :email email
-                              :email_verified email-verified
-                              :addr_str_num addr-str-num
-                              :addr_str_name addr-str-name
-                              :addr_city addr-city
-                              :addr_state addr-state
-                              :addr_postal addr-postal
-                              :phone phone
-                              :locale locale
-                              :avatar avatar
-                              :sub sub}
-                             ["user_id = ?" user-id])]
-    (println "TODO: add error checking to this!! ")
-    (pprint result)))
+  (let [field-spec (select-keys new-user [:name-first :name-last :name :email :email-verified
+                                          :is-vendor :addr-str-num :addr-str-name :addr-city
+                                          :addr-state :addr-postal :phone :locale :avatar :sub])
+        db-field-spec (clojure.set/rename-keys field-spec
+                                            {:name-first :name_first
+                                             :name-last :name_last
+                                             :email-verified :email_verified
+                                             :is-vendor :is_vendor
+                                             :addr-str-num :addr_str_num
+                                             :addr-str-name :addr_str_name
+                                             :addr-city :addr_city
+                                             :addr-state :addr_state
+                                             :addr-postal :addr_postal})]
+
+    (jdbc/update! db-conn :Users db-field-spec ["user_id = ?" (:user-id new-user)])
+    (println "TODO: add error checking to this!! ")))
 
 (defn create-vendor
   [new-vendor]
@@ -227,6 +194,7 @@
                 profile-pic]} new-vendor
         updated-user (-> (find-user-by-id user-id)
                          (merge new-vendor)
+                         (assoc :is-vendor true) ;; set the vendor flag on the associated user object
                          (update-user))
         result (jdbc/insert! db-conn :Vendors {:user_id user-id
                                                :summary summary
