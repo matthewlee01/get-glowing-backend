@@ -139,7 +139,7 @@ alter table Vendors alter column vendor_id restart with 1300;
 insert into vendor_calendar (vendor_id, date, available_edn, booked_edn) values
   (1234, '2019-07-18', '[[0 299] [1000 1439]]', '[[60 119]]'),
   (1235, '2019-07-18', '[[0 599]]', '[[0 59] [540 599]]'),
-  (1236, '2019-07-18', '[[0 1439]]', '[[300 359] [400 599]]'),
+  (1236, '2019-07-18', '[[0 1439]]', '[[300 359] [420 599]]'),
   (1237, '2019-07-18', '[[600 1199] [1300 1329]]', '[[600 659] [720 779]]');
 
 insert into vendor_rating (vendor_id, user_id, rating) values
