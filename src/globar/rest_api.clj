@@ -1,5 +1,6 @@
 (ns globar.rest-api
   (:require [clojure.java.io :as io]
+            [globar.calendar.error-parsing :as ep]
             [io.pedestal.http.route.definition :refer [defroutes]]
             [io.pedestal.http.ring-middlewares :as ring-mw]
             [io.pedestal.log :as log]
@@ -90,8 +91,9 @@
         (do (cc/write-calendar-day vendor-id new-cal-day)
             (http/json-response (db/create-booking booking)))
         (http/json-response (db/update-booking booking))) ;;update functionality needs to be expanded
-      (http/json-response {:error (s/explain-str ::cc/valid-calendar new-cal-day)
-                           :date date}))))
+      (http/json-response {:error (->> new-cal-day
+                                       (s/explain-str ::cc/valid-calendar)
+                                       (ep/get-error-data ep/ERROR_MSG_SET_EN))}))))
 
 (defn decode64 [str]
   (String. (.decode (Base64/getDecoder) str)))
