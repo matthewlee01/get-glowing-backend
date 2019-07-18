@@ -20,7 +20,7 @@
             [com.auth0.client.auth AuthAPI]))
 
 (def FORM_PARAM "image")
-(def DEST_DIR "resources/public")
+(def DEST_DIR "resources/public/images")
 
 (defn stream->bytes [input-stream]
   (loop [buffer (.read input-stream) accum []]
@@ -30,16 +30,18 @@
 
 (defn upload 
   [request]
+  "upload a file - should be a photo?"
   (let [form-data (get-in request [:params FORM_PARAM])
-        file-name (:filename form-data)
+        src-file-name (:filename form-data)
+        src-file-type (last (clojure.string/split src-file-name #"\."))
+        new-file-name (str (java.util.UUID/randomUUID) "." src-file-type)
         input-file (:tempfile form-data)
         file-bytes (with-open [input-stream (io/input-stream input-file)]
                      (stream->bytes input-stream))]
     ;; copy the file to the destination
-    (io/copy input-file (io/file DEST_DIR file-name))
+    (io/copy input-file (io/file DEST_DIR new-file-name))
 
-    {:status 200
-     :body (str "File upload was successful\n")}))
+    (http/json-response {:filename new-file-name})))
 
 (defn put-calendar
   [request]
