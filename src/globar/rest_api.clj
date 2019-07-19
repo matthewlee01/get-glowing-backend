@@ -13,15 +13,15 @@
             [cheshire.core :as cheshire]
             [buddy.core.keys :as keys]
             [fipp.edn :refer [pprint]]
-            [clojure.spec.alpha :as s])
+            [clojure.spec.alpha :as s]
+            [globar.images.db :as image-db]
+            [ring.util.codec :as codec])
   (:import
             [java.util Base64]
             [com.auth0.jwt JWT]
             [com.auth0.jwt.algorithms Algorithm]
             [com.auth0.client.auth AuthAPI]))
 
-(def FORM_PARAM "image")
-(def DEST_DIR "resources/public/images")
 
 (defn stream->bytes [input-stream]
   (loop [buffer (.read input-stream) accum []]
@@ -32,17 +32,21 @@
 (defn upload 
   [request]
   "upload a file - should be a photo?"
-  (let [form-data (get-in request [:params FORM_PARAM])
-        src-file-name (:filename form-data)
-        src-file-type (last (clojure.string/split src-file-name #"\."))
-        new-file-name (str (java.util.UUID/randomUUID) "." src-file-type)
-        input-file (:tempfile form-data)
+  (let [form-params (:params request)
+        src-file (get form-params (:file-field config/image-config))
+        service-id (Integer/parseInt (get form-params (:service-id-field  config/image-config)))
+        desc (codec/url-decode (get form-params (:description-field config/image-config)))
+        src-filename (:filename src-file)
+        src-filetype (last (clojure.string/split src-filename #"\."))
+        new-filename (str (java.util.UUID/randomUUID) "." src-filetype)
+        input-file (:tempfile src-file)
         file-bytes (with-open [input-stream (io/input-stream input-file)]
                      (stream->bytes input-stream))]
     ;; copy the file to the destination
-    (io/copy input-file (io/file DEST_DIR new-file-name))
-
-    (http/json-response {:filename new-file-name})))
+    (io/copy input-file (io/file (:dest-dir config/image-config) new-filename))
+    ;; write a new row to the images table
+    (image-db/create-image {:vendor-id 1234 :service-id service-id :description desc :filename new-filename})    
+    (http/json-response {:filename new-filename})))
 
 (defn put-calendar
   [request]
