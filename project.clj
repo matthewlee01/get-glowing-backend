@@ -18,7 +18,8 @@
                  [fipp "0.6.18"]
                  [com.auth0/auth0 "1.13.2"]
                  [com.auth0/java-jwt "3.8.1"]
-                 [buddy/buddy-sign "2.2.0"]]
+                 [buddy/buddy-sign "2.2.0"]
+                 [ring/ring-codec "1.1.2"]]
   :main globar.core
   :aot [globar.core]
   :resource-paths ["dev-resources" "resources"])
