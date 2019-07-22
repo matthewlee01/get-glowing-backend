@@ -97,6 +97,25 @@
       (http/json-response {:error (s/explain-str ::cc/valid-calendar new-cal-day)
                            :date date}))))
 
+(defn get-services [request]
+  "Returns the services for the vendor who issued the request"
+  (let [vendor (get-in request [:vendor])]
+    (println "get-services: " request)
+    (http/json-response (db/list-services-for-vendor (:vendor-id vendor)))))
+
+(defn upsert-service [request]
+  "Create or modify a service definition record"
+  (println "got here")
+         
+  (let [vendor (:vendor request) 
+        service (-> (get-in request [:json-params :service])
+;;                    (update-in [:s-price] #(Integer/parseInt %))
+;;                    (update-in [:s-duration] #(Integer/parseInt %))
+                    (assoc :vendor-id (:vendor-id vendor)))]
+    (http/json-response (if (:service-id service) 
+                          (db/update-service service)
+                          (db/create-service service)))))                      
+
 (defn decode64 [str]
   (String. (.decode (Base64/getDecoder) str)))
 
@@ -189,6 +208,24 @@
                                             :headers {}
                                             :body {}})))))})
 
+(def ven-authz-interceptor
+  {:name ::ven-authz-interceptor
+   :enter (fn [context]
+            (let [access-token (get-in context [:request :json-params :access-token])
+                  user (find-user-from-token access-token)
+                  vendor (db/find-vendor-by-user (:user-id user))]
+
+              (if vendor
+                (do
+                  (println "found vendor: " vendor)
+                  (log/debug ::ven-authz-interceptor "ACCESS GRANTED")
+                  (assoc-in context [:request :vendor] vendor))
+                (do
+                  (log/debug ::ven-authz-interceptor "ACCESS DENIED")
+                  (println "access denied")
+                  (assoc context :response {:status 403
+                                            :headers {}
+                                            :body {}})))))})
 (defroutes rest-api-routes
   [[["/upload" ^:interceptors [(ring-mw/multipart-params)] {:post upload}]
     ["/calendar/:vendor-id" ^:interceptors [(body-params/body-params)] {:post put-calendar}]
@@ -196,4 +233,6 @@
     ["/vendor" ^:interceptors [(body-params/body-params)] {:post upsert-vendor}]
     ["/user" ^:interceptors [(body-params/body-params)] {:post upsert-user}]
     ["/login" ^:interceptors [(body-params/body-params)] {:post login}]
-    ["/booking" ^:interceptors [(body-params/body-params) authorization-interceptor] {:post upsert-booking}]]])
+    ["/booking" ^:interceptors [(body-params/body-params) authorization-interceptor] {:post upsert-booking}]
+    ["/services" ^:interceptors [(body-params/body-params) ven-authz-interceptor] {:post get-services}]
+    ["/service" ^:interceptors [(body-params/body-params) ven-authz-interceptor] {:post upsert-service}]]])
