@@ -110,6 +110,7 @@
 (defn list-services-for-vendor
   "returns a list of services that a particular vendor offers"
   [vendor-id]
+  (println "list-services-for-vendor: " vendor-id)
   (query ["SELECT vendor_id, s_name, s_description, s_type, s_price, s_duration, service_id
                FROM Services
                WHERE vendor_id = ?" vendor-id]))
@@ -217,28 +218,36 @@
 
 (defn create-service
   [new-service]
-  (println "new service is: " new-service)
-  (let [{:keys [vendor-id s-name s-description s-type s-price s-duration]} new-service
+  (log/debug :function-name ::create-service :new-service new-service)
+  (let [field-spec (select-keys new-service [:vendor-id :s-name :s-description :s-type :s-price :s-duration])
+        db-field-spec (clojure.set/rename-keys field-spec
+                                               {:vendor-id :vendor_id
+                                                :s-name :s_name
+                                                :s-description :s_description
+                                                :s-type :s_type
+                                                :s-price :s_price
+                                                :s-duration :s_duration})
         result (jdbc/insert! db-conn
-                             :Services {:vendor_id vendor-id
-                                        :s_name s-name
-                                        :s_description s-description
-                                        :s_type s-type
-                                        :s_price s-price
-                                        :s_duration s-duration}
+                             :Services 
+                             db-field-spec
                              {:identifiers #(.replace % \_\-)})]
     (first result)))
 
 (defn update-service
   [service]
-  (let [{:keys [vendor-id s-name s-description s-type s-price s-duration]} service
+  (log/debug :function-name ::update-service :service service)
+  (let [field-spec (select-keys service [:vendor-id :s-name :s-description :s-type :s-price :s-duration])
+        db-field-spec (clojure.set/rename-keys field-spec
+                                               {:vendor-id :vendor_id
+                                                :s-name :s_name
+                                                :s-description :s_description
+                                                :s-type :s_type
+                                                :s-price :s_price
+                                                :s-duration :s_duration})
         result (jdbc/update! db-conn
-                             :Services {:s_name s-name
-                                        :s_description s-description
-                                        :s_type s-type
-                                        :s_price s-price
-                                        :s_duration s-duration}
-                             ["vendor_id = ?" vendor-id])]
+                             :Services                              
+                             db-field-spec
+                             ["vendor_id = ? and service_id = ?" (:vendor-id service) (:service-id service)])]
     (println "TODO: add error checking to this!! " result)
     (if (= 0 (first result))
       (println "ERROR UPDATING SERVICE"))))
