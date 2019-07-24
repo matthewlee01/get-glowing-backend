@@ -66,6 +66,16 @@
     (log/debug :rest-fn :get-calendar :vendor-id vendor-id :date date)
     (http/json-response (cc/read-calendar vendor-id date))))
 
+(defn v-get-calendar
+  [request]
+  (let [vendor-id (get-in request [:vendor :vendor-id])
+        date (get-in request [:json-params :date])]
+    (http/json-response (assoc (cc/read-calendar vendor-id date) :vendor-id vendor-id))))
+
+(defn v-get-bookings
+  [request]
+  (http/json-response (db/list-bookings-for-vendor (get-in request [:vendor :vendor-id]))))
+
 (defn upsert-vendor 
   [request]
   (let [vendor (get-in request [:json-params])
@@ -102,17 +112,12 @@
 (defn get-services [request]
   "Returns the services for the vendor who issued the request"
   (let [vendor (get-in request [:vendor])]
-    (println "get-services: " request)
     (http/json-response (db/list-services-for-vendor (:vendor-id vendor)))))
 
 (defn upsert-service [request]
   "Create or modify a service definition record"
-  (println "got here")
-         
   (let [vendor (:vendor request) 
         service (-> (get-in request [:json-params :service])
-;;                    (update-in [:s-price] #(Integer/parseInt %))
-;;                    (update-in [:s-duration] #(Integer/parseInt %))
                     (assoc :vendor-id (:vendor-id vendor)))]
     (http/json-response (if (:service-id service) 
                           (db/update-service service)
@@ -236,5 +241,8 @@
     ["/user" ^:interceptors [(body-params/body-params)] {:post upsert-user}]
     ["/login" ^:interceptors [(body-params/body-params)] {:post login}]
     ["/booking" ^:interceptors [(body-params/body-params) authorization-interceptor] {:post upsert-booking}]
+    ["/v_calendar" ^:interceptors [(body-params/body-params) ven-authz-interceptor] {:post v-get-calendar}]
+    ["/v_bookings" ^:interceptors [(body-params/body-params) ven-authz-interceptor] {:post v-get-bookings}]
     ["/services" ^:interceptors [(body-params/body-params) ven-authz-interceptor] {:post get-services}]
     ["/service" ^:interceptors [(body-params/body-params) ven-authz-interceptor] {:post upsert-service}]]])
+

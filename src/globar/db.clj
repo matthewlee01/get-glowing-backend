@@ -110,9 +110,15 @@
 (defn list-services-for-vendor
   "returns a list of services that a particular vendor offers"
   [vendor-id]
-  (println "list-services-for-vendor: " vendor-id)
   (query ["SELECT vendor_id, s_name, s_description, s_type, s_price, s_duration, service_id
                FROM Services
+               WHERE vendor_id = ?" vendor-id]))
+
+(defn list-bookings-for-vendor
+  "returns a list of bookings for a specific vendor"
+  [vendor-id]
+  (query ["SELECT vendor_id, booking_id, vendor_id, user_id, time, date, service
+               FROM Bookings
                WHERE vendor_id = ?" vendor-id]))
 
 (defn list-ratings-for-vendor
