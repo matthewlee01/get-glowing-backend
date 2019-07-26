@@ -117,9 +117,13 @@
 (defn list-bookings-for-vendor
   "returns a list of bookings for a specific vendor"
   [vendor-id]
-  (query ["SELECT vendor_id, booking_id, vendor_id, user_id, time, date, service
-               FROM Bookings
-               WHERE vendor_id = ?" vendor-id]))
+  (->> (query ["SELECT vendor_id, booking_id, user_id, start_time, end_time, date, service
+                    FROM Bookings
+                    WHERE vendor_id = ?
+                    ORDER BY date, start_time" vendor-id])
+       (map #(update % :date str))
+       (map #(assoc % :time [(:start-time %) (:end-time %)]))
+       (map #(dissoc % :start-time :end-time))))
 
 (defn list-ratings-for-vendor
   "returns a list of ratings that have been submitted for a particular vendor"
@@ -149,8 +153,12 @@
 (defn find-booking-by-id
   [booking-id]
   (-> (query ["SELECT * FROM Bookings WHERE booking_id = ?" booking-id])
-      first))
-
+      first
+      (update :date str)
+      (#(assoc % :time [(:start-time %) (:end-time %)]))
+      (dissoc :start-time :end-time)))
+                
+  
 (defn create-user
   "Adds a new user object, or changes the values of an existing rating if one exists"
   [user-info]
@@ -264,8 +272,9 @@
         result (jdbc/insert! db-conn
                              :Bookings {:vendor_id vendor-id
                                         :user_id user-id
-                                        :time (prn-str time)
-                                        :date date
+                                        :start_time (first time)
+                                        :end_time (second time)
+                                        :date (java.sql.Date/valueOf date)
                                         :service service
                                         :cancelled false}
                              {:identifiers #(.replace % \_\-)})]
@@ -279,8 +288,9 @@
        result (jdbc/update! db-conn
                              :Bookings {:vendor_id vendor-id
                                         :user_id user-id
-                                        :time time
-                                        :date date
+                                        :start_time (first time)
+                                        :end_time (second time)
+                                        :date (java.sql.Date/valueOf date)
                                         :service service
                                         :cancelled cancelled}
                              ["booking_id = ?" booking-id])]

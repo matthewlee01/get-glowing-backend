@@ -17,8 +17,8 @@
         _ (db/update-booking update-call) ;updates previously made booking
         updated-booking (db/find-booking-by-id booking-id)
         cancelled? (:cancelled updated-booking)]
-        (is (= booking1 found-booking))
-        (is (not= booking1 updated-booking))
-        (is (= cancelled? true)))
-  )
+    (is (= (:booking-id booking1) (:booking-id found-booking)))
+    (is (not= booking1 updated-booking))
+    (is (= cancelled? true))))
+  
   
