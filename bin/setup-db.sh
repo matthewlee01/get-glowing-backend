@@ -114,7 +114,7 @@ create table Bookings (
   start_time int not null,
   end_time int not null,
   date date not null,
-  service text,
+  service int not null,
   cancelled boolean,
   created_at timestamptz not null default current_timestamp,
   updated_at timestamptz not null default current_timestamp
