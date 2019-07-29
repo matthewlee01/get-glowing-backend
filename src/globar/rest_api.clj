@@ -1,6 +1,6 @@
 (ns globar.rest-api
   (:require [clojure.java.io :as io]
-            [globar.calendar.error-parsing :as ep]
+            [globar.error-parsing :as ep]
             [io.pedestal.http.route.definition :refer [defroutes]]
             [io.pedestal.http.ring-middlewares :as ring-mw]
             [io.pedestal.log :as log]
@@ -9,6 +9,7 @@
             [io.pedestal.interceptor.helpers :refer [defbefore]]
             [globar.config :as config]
             [globar.calendar.core :as cc]
+            [globar.services.core :as sc]
             [globar.db :as db]
             [cheshire.core :as cheshire]
             [buddy.core.keys :as keys]
@@ -108,20 +109,6 @@
       (http/json-response {:error (->> new-cal-day
                                        (s/explain-str ::cc/valid-calendar)
                                        (ep/get-error-data ep/ERROR_MSG_SET_EN))}))))
-
-(defn get-services [request]
-  "Returns the services for the vendor who issued the request"
-  (let [vendor (get-in request [:vendor])]
-    (http/json-response (db/list-services-for-vendor (:vendor-id vendor)))))
-
-(defn upsert-service [request]
-  "Create or modify a service definition record"
-  (let [vendor (:vendor request) 
-        service (-> (get-in request [:json-params :service])
-                    (assoc :vendor-id (:vendor-id vendor)))]
-    (http/json-response (if (:service-id service) 
-                          (db/update-service service)
-                          (db/create-service service)))))                      
 
 (defn decode64 [str]
   (String. (.decode (Base64/getDecoder) str)))
@@ -243,6 +230,6 @@
     ["/booking" ^:interceptors [(body-params/body-params) authorization-interceptor] {:post upsert-booking}]
     ["/v_calendar" ^:interceptors [(body-params/body-params) ven-authz-interceptor] {:post v-get-calendar}]
     ["/v_bookings" ^:interceptors [(body-params/body-params) ven-authz-interceptor] {:post v-get-bookings}]
-    ["/services" ^:interceptors [(body-params/body-params) ven-authz-interceptor] {:post get-services}]
-    ["/service" ^:interceptors [(body-params/body-params) ven-authz-interceptor] {:post upsert-service}]]])
+    ["/services" ^:interceptors [(body-params/body-params) ven-authz-interceptor] {:post sc/get-services}]
+    ["/service" ^:interceptors [(body-params/body-params) ven-authz-interceptor] {:post sc/upsert-service}]]])
 
