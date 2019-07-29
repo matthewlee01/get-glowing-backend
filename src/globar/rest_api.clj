@@ -11,6 +11,8 @@
             [globar.calendar.core :as cc]
             [globar.services.core :as sc]
             [globar.db :as db]
+            [globar.ven-reg.core :as vr-c]
+            [globar.ven-reg.db :as vr-db]
             [cheshire.core :as cheshire]
             [buddy.core.keys :as keys]
             [fipp.edn :refer [pprint]]
@@ -81,10 +83,14 @@
   [request]
   (let [vendor (get-in request [:json-params])
         vendor-id (:vendor-id vendor)]
-    (if (nil? vendor-id)
-      (http/json-response (db/create-vendor vendor))
-      (do (db/update-vendor vendor)
-          (http/json-response (db/find-vendor-by-id vendor-id))))))
+    (if (s/valid? ::vr-c/valid-vendor vendor)
+        (if (nil? vendor-id)
+          (http/json-response (vr-db/create-vendor vendor))
+          (do (vr-db/update-vendor vendor)
+              (http/json-response (db/find-vendor-by-id vendor-id))))
+        (http/json-response {:error (->> vendor
+                                       (s/explain-str ::vr-c/valid-vendor)
+                                       (ep/get-error-data ep/ERROR_MSG_SET_EN))}))))
 
 (defn upsert-user
   [request]
