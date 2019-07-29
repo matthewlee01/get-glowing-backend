@@ -1,4 +1,4 @@
-(ns globar.calendar.error-parsing
+(ns globar.error-parsing
   (:require [clojure.string :as str]))
 
 (defn includes-str?
