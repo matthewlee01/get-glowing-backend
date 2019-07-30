@@ -10,8 +10,9 @@
             [io.pedestal.http :as http]
             [io.pedestal.interceptor.helpers :refer [defbefore]]
             [globar.config :as config]
-            [globar.calendar.core :as cc]
-            [globar.services.core :as sc]
+            [globar.bookings.core :as b-c]
+            [globar.calendar.core :as c-c]
+            [globar.services.core :as s-c]
             [globar.db :as db]
             [globar.ven-reg.core :as vr-c]
             [globar.ven-reg.db :as vr-db]
@@ -53,47 +54,6 @@
     (image-db/create-image {:vendor-id 1234 :service-id service-id :description desc :filename new-filename})    
     (http/json-response {:filename new-filename})))
 
-(defn put-calendar
-  [request]
-  (let [vendor-id (read-string (get-in request [:path-params :vendor-id]))
-        body-data (get-in request [:json-params])
-        date (:date body-data)
-        available (:available body-data)
-        updated-at (:updated-at body-data)]
-    (log/debug :rest-fn :put-calendar :vendor-id vendor-id :date date :available available
-               :updated-at updated-at)
-    (http/json-response (cc/write-calendar-day vendor-id body-data))))
-
-(defn get-calendar
-  [request]
-  (let [vendor-id (read-string (get-in request [:path-params :vendor-id]))
-        date (str (get-in request [:path-params :date]))]
-    (log/debug :rest-fn :get-calendar :vendor-id vendor-id :date date)
-    (http/json-response (cc/read-calendar vendor-id date))))
-
-(defn v-get-calendar
-  [request]
-  (let [vendor-id (get-in request [:vendor :vendor-id])
-        date (get-in request [:json-params :date])]
-    (http/json-response (assoc (cc/read-calendar vendor-id date) :vendor-id vendor-id))))
-
-(defn v-get-bookings
-  [request]
-  (http/json-response (db/list-bookings-for-vendor (get-in request [:vendor :vendor-id]))))
-
-(defn upsert-vendor 
-  [request]
-  (let [vendor (get-in request [:json-params])
-        vendor-id (:vendor-id vendor)]
-    (if (s/valid? ::vr-c/valid-vendor vendor)
-        (if (nil? vendor-id)
-          (http/json-response (vr-db/create-vendor vendor))
-          (do (vr-db/update-vendor vendor)
-              (http/json-response (db/find-vendor-by-id vendor-id))))
-        (http/json-response {:error (->> vendor
-                                       (s/explain-str ::vr-c/valid-vendor)
-                                       (ep/get-error-data ep/ERROR_MSG_SET_EN v-ep/get-error-code))}))))
-
 (defn upsert-user
   [request]
   (let [user (get-in request [:json-params])]
@@ -101,22 +61,6 @@
       (do (db/update-user user)
           (http/json-response (db/find-user-by-id (:user-id user))))
       (http/json-response (db/create-user user)))))
-
-;only works for writing, updating is wip
-(defn upsert-booking
-  [request]
-  (let [{:keys [vendor-id time booking-id date] :as booking} (:json-params request)
-        cal-day (get-in (cc/read-calendar vendor-id date) [:day-of :calendar])
-        new-cal-day (-> (cc/insert-booking cal-day time)
-                        (assoc :date date))]
-    (if (s/valid? ::cc/valid-calendar new-cal-day)
-      (if (nil? booking-id) ;;checks if booking already exists, then creates/updates accordingly
-        (do (cc/write-calendar-day vendor-id new-cal-day)
-            (http/json-response (db/create-booking booking)))
-        (http/json-response (db/update-booking booking))) ;;update functionality needs to be expanded
-      (http/json-response {:error (->> new-cal-day
-                                       (s/explain-str ::cc/valid-calendar)
-                                       (ep/get-error-data ep/ERROR_MSG_SET_EN c-ep/get-error-code))}))))
 
 (defn decode64 [str]
   (String. (.decode (Base64/getDecoder) str)))
@@ -230,14 +174,14 @@
                                             :body {}})))))})
 (defroutes rest-api-routes
   [[["/upload" ^:interceptors [(ring-mw/multipart-params)] {:post upload}]
-    ["/calendar/:vendor-id" ^:interceptors [(body-params/body-params)] {:post put-calendar}]
-    ["/calendar/:vendor-id/:date" {:get get-calendar}]
-    ["/vendor" ^:interceptors [(body-params/body-params)] {:post upsert-vendor}]
+    ["/calendar/:vendor-id" ^:interceptors [(body-params/body-params)] {:post c-c/put-calendar}]
+    ["/calendar/:vendor-id/:date" {:get c-c/get-calendar}]
+    ["/vendor" ^:interceptors [(body-params/body-params)] {:post vr-c/upsert-vendor}]
     ["/user" ^:interceptors [(body-params/body-params)] {:post upsert-user}]
     ["/login" ^:interceptors [(body-params/body-params)] {:post login}]
-    ["/booking" ^:interceptors [(body-params/body-params) authorization-interceptor] {:post upsert-booking}]
-    ["/v_calendar" ^:interceptors [(body-params/body-params) ven-authz-interceptor] {:post v-get-calendar}]
-    ["/v_bookings" ^:interceptors [(body-params/body-params) ven-authz-interceptor] {:post v-get-bookings}]
-    ["/services" ^:interceptors [(body-params/body-params) ven-authz-interceptor] {:post sc/get-services}]
-    ["/service" ^:interceptors [(body-params/body-params) ven-authz-interceptor] {:post sc/upsert-service}]]])
+    ["/booking" ^:interceptors [(body-params/body-params) authorization-interceptor] {:post b-c/upsert-booking}]
+    ["/v_calendar" ^:interceptors [(body-params/body-params) ven-authz-interceptor] {:post c-c/v-get-calendar}]
+    ["/v_bookings" ^:interceptors [(body-params/body-params) ven-authz-interceptor] {:post b-c/v-get-bookings}]
+    ["/services" ^:interceptors [(body-params/body-params) ven-authz-interceptor] {:post s-c/get-services}]
+    ["/service" ^:interceptors [(body-params/body-params) ven-authz-interceptor] {:post s-c/upsert-service}]]])
 

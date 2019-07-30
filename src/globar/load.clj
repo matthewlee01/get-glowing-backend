@@ -1,5 +1,6 @@
 (ns globar.load
   (:require [globar.db :as db]
+            [globar.services.db :as s-db]
             [globar.ven-reg.db :as vr-db]
             [io.pedestal.log :as log]
             [clojure.java.io :as io]
@@ -26,7 +27,7 @@
                      :s-type type
                      :s-price price
                      :s-duration duration}]
-    (db/create-service new-service)))
+    (s-db/create-service new-service)))
 
 (defn generate-UUID [] (.toString (java.util.UUID/randomUUID)))
 

@@ -2,11 +2,12 @@
   (:require [clojure.test :refer :all]
             [globar.test_utils :refer [setup-test-system!]]
             [globar.core :as core]
-            [globar.calendar.core :as cc]
+            [globar.calendar.core :as c-c]
             [clojure.java.shell :refer [sh]]
             [clojure.edn :as edn]
             [clojure.data.json :as json]
             [globar.rest-api :as ra]
+            [globar.bookings.core :as b-c]
             [globar.calendar.error-parsing :as c-ep]
             [globar.error-parsing :as ep]
             [clojure.spec.alpha :as s]))
@@ -22,8 +23,8 @@
         test-map {:date date
                   :available "[[60 180] [240 360]]"
                   :booked "[[60 120] [300 360]]"}
-        written-map (cc/write-calendar-day vendor-id test-map)]
-    (let [read-map (cc/read-calendar-day vendor-id date)]
+        written-map (c-c/write-calendar-day vendor-id test-map)]
+    (let [read-map (c-c/read-calendar-day vendor-id date)]
       (is (= (:date test-map) (:date written-map)))
       (is (= (:available test-map (:available written-map))))
       (is (= (:booked test-map (:booked written-map))))
@@ -31,7 +32,7 @@
       (is (= (dissoc written-map :updated-at :template)
              (dissoc read-map :updated-at :template)))
       (let [updated-map (assoc read-map :booked "[[0 60] [240 300] [600 660]]")
-            re-written-map (cc/write-calendar-day vendor-id updated-map)]
+            re-written-map (c-c/write-calendar-day vendor-id updated-map)]
         ;; ignore the success flag (?) and the updated-at timestamp
         (is (= (dissoc updated-map :updated-at :template)
                (dissoc re-written-map :updated-at :template)))))))
@@ -80,7 +81,7 @@
                                :date "2019-07-25"
                                :service 123400
                                :user-id 234}}]
-    (is (= (:status (ra/upsert-booking request)) 200))))
+    (is (= (:status (b-c/upsert-booking request)) 200))))
                                
 (deftest test-calendar-checks
   (let [invalid-time -60                                ;; time cannot be negative 
@@ -98,19 +99,19 @@
                       :booked overlapping-bookings
                       :template 2345
                       :date "12-12-2012"}]        
-    (is (= (s/valid? ::cc/time invalid-time) false))        
-    (is (= (s/valid? ::cc/time valid-time) true))
-    (is (= (s/valid? ::cc/time-chunk invalid-time-chunk) false))
-    (is (= (s/valid? ::cc/time-chunk valid-time-chunk) true))
-    (is (= (s/valid? ::cc/time-collection invalid-time-coll) false))
-    (is (= (s/valid? ::cc/time-collection valid-time-coll) true))
-    (is (= (s/valid? ::cc/valid-calendar good-calendar) true))
-    (is (= (s/valid? ::cc/valid-calendar bad-calendar) false))
-    (is (= (s/valid? ::cc/valid-calendar "i am a monkey man. they call me mr monkey man.") false))
+    (is (= (s/valid? ::c-c/time invalid-time) false))        
+    (is (= (s/valid? ::c-c/time valid-time) true))
+    (is (= (s/valid? ::c-c/time-chunk invalid-time-chunk) false))
+    (is (= (s/valid? ::c-c/time-chunk valid-time-chunk) true))
+    (is (= (s/valid? ::c-c/time-collection invalid-time-coll) false))
+    (is (= (s/valid? ::c-c/time-collection valid-time-coll) true))
+    (is (= (s/valid? ::c-c/valid-calendar good-calendar) true))
+    (is (= (s/valid? ::c-c/valid-calendar bad-calendar) false))
+    (is (= (s/valid? ::c-c/valid-calendar "i am a monkey man. they call me mr monkey man.") false))
     (let [bad-bookings-cal (assoc good-calendar :booked overlapping-bookings)
           error-msg "Sorry, that time is already booked. Please try a different time."
           error-code :101
-          spec-error (s/explain-str ::cc/valid-calendar bad-bookings-cal)
+          spec-error (s/explain-str ::c-c/valid-calendar bad-bookings-cal)
           generated-error-data (ep/get-error-data ep/ERROR_MSG_SET_EN c-ep/get-error-code spec-error)]
       (is (= error-msg (:message generated-error-data)))
       (is (= error-code (:code generated-error-data))))
@@ -120,19 +121,19 @@
           malformed-cal "i am not a calendar. i am a monkey man."
           bad-time-cal (assoc good-calendar :booked [[-23 120]])
           bad-time-chunk-cal (assoc good-calendar :template [[600 500]])]
-      (is (= (c-ep/get-error-code (s/explain-str ::cc/valid-calendar incomplete-cal)) :201))
-      (is (= (c-ep/get-error-code (s/explain-str ::cc/valid-calendar bad-date-cal)) :102))
-      (is (= (c-ep/get-error-code (s/explain-str ::cc/valid-calendar unavailable-cal)) :100))
-      (is (= (c-ep/get-error-code (s/explain-str ::cc/valid-calendar malformed-cal)) :200))
-      (is (= (c-ep/get-error-code (s/explain-str ::cc/valid-calendar bad-time-cal)) :212))
-      (is (= (c-ep/get-error-code (s/explain-str ::cc/valid-calendar bad-time-chunk-cal)) :209)))))
+      (is (= (c-ep/get-error-code (s/explain-str ::c-c/valid-calendar incomplete-cal)) :201))
+      (is (= (c-ep/get-error-code (s/explain-str ::c-c/valid-calendar bad-date-cal)) :102))
+      (is (= (c-ep/get-error-code (s/explain-str ::c-c/valid-calendar unavailable-cal)) :100))
+      (is (= (c-ep/get-error-code (s/explain-str ::c-c/valid-calendar malformed-cal)) :200))
+      (is (= (c-ep/get-error-code (s/explain-str ::c-c/valid-calendar bad-time-cal)) :212))
+      (is (= (c-ep/get-error-code (s/explain-str ::c-c/valid-calendar bad-time-chunk-cal)) :209)))))
           
 
 (deftest test-templates
  (let [vendor-id 1236
        test-template {:Sunday [[100 200] [500 600]]
                       :Tuesday [[600 700] [1000 1300]]}
-       written-template (cc/write-template vendor-id test-template)
-       read-template (cc/get-template vendor-id)]
+       written-template (c-c/write-template vendor-id test-template)
+       read-template (c-c/get-template vendor-id)]
     (is (= written-template read-template))))
    

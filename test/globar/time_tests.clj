@@ -1,13 +1,18 @@
 (ns globar.time-tests
   (:require [clojure.test :refer :all]
-            [globar.calendar.time :as gt]))
+            [globar.calendar.core :as c-c]
+            [globar.calendar.time :as gt]
+            [clojure.spec.alpha :as s]))
 
 (deftest test-merge-chunks
   (let [c1 [120 180]
         c2 [140 150]
         c3 [160 240]
         c4 [220 300]]
-    
+    (is (s/valid? ::c-c/time-chunk c1))
+    (is (s/valid? ::c-c/time-chunk c2))
+    (is (s/valid? ::c-c/time-chunk c3))
+    (is (s/valid? ::c-c/time-chunk c4))
     (is (= (gt/merge-chunks [c1 c2 c3 c4])
            [[120 300]]))))
 

@@ -1,6 +1,8 @@
 (ns globar.calendar.core
-  (:require [globar.calendar.calendar-db :as cdb]
+  (:require [globar.calendar.calendar-db :as c-db]
             [globar.calendar.time :as ctime]
+            [io.pedestal.http :as http]
+            [io.pedestal.log :as log]
             [java-time :as jt]
             [clojure.spec.alpha :as s]))
 
@@ -64,18 +66,20 @@
   (s/and (s/keys :req-un [::available ::booked ::template ::date])
          bookings-available?))
 
+
+
 (defn get-template
   [vendor-id]
-  (cdb/read-vendor-template vendor-id))
+  (c-db/read-vendor-template vendor-id))
 
 (defn write-template
   [vendor-id new-template]
-  (cdb/update-template vendor-id new-template))
+  (c-db/update-template vendor-id new-template))
 
 (defn read-calendar-day
   "reads a vendor's calendar-day from the db"
   [vendor-id date]
-  (let [result (cdb/read-calendar-day vendor-id date)
+  (let [result (c-db/read-calendar-day vendor-id date)
         timestamp (:updated-at result)
         weekday (ctime/get-weekday date)
         template (weekday (get-template vendor-id))]
@@ -124,14 +128,34 @@
   [vendor-id cal-map]
   (let [{:keys [date available booked updated-at]} cal-map
         result (if (= nil updated-at)
-                 (cdb/insert-calendar-day vendor-id date available booked)
+                 (c-db/insert-calendar-day vendor-id date available booked)
                  ;; if the updated-at field is present, convert it to timestamp
-                 (cdb/update-calendar-day vendor-id date available booked
+                 (c-db/update-calendar-day vendor-id date available booked
                                (java.sql.Timestamp/valueOf updated-at)))
         timestamp (:updated-at result)]
     ;; replace the timestamp with the string equivalent
     (assoc result :updated-at (str timestamp))))
 
+(defn put-calendar
+  [request]
+  (let [vendor-id (read-string (get-in request [:path-params :vendor-id]))
+        body-data (get-in request [:json-params])
+        date (:date body-data)
+        available (:available body-data)
+        updated-at (:updated-at body-data)]
+    (log/debug :rest-fn :put-calendar :vendor-id vendor-id :date date :available available
+               :updated-at updated-at)
+    (http/json-response (write-calendar-day vendor-id body-data))))
 
+(defn get-calendar
+  [request]
+  (let [vendor-id (read-string (get-in request [:path-params :vendor-id]))
+        date (str (get-in request [:path-params :date]))]
+    (log/debug :rest-fn :get-calendar :vendor-id vendor-id :date date)
+    (http/json-response (read-calendar vendor-id date))))
 
-
+(defn v-get-calendar
+  [request]
+  (let [vendor-id (get-in request [:vendor :vendor-id])
+        date (get-in request [:json-params :date])]
+    (http/json-response (assoc (read-calendar vendor-id date) :vendor-id vendor-id))))
