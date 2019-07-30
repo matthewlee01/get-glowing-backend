@@ -1,6 +1,8 @@
 (ns globar.rest-api
   (:require [clojure.java.io :as io]
             [globar.error-parsing :as ep]
+            [globar.calendar.error-parsing :as c-ep]
+            [globar.ven-reg.error-parsing :as v-ep]
             [io.pedestal.http.route.definition :refer [defroutes]]
             [io.pedestal.http.ring-middlewares :as ring-mw]
             [io.pedestal.log :as log]
@@ -90,7 +92,7 @@
               (http/json-response (db/find-vendor-by-id vendor-id))))
         (http/json-response {:error (->> vendor
                                        (s/explain-str ::vr-c/valid-vendor)
-                                       (ep/get-error-data ep/ERROR_MSG_SET_EN))}))))
+                                       (ep/get-error-data ep/ERROR_MSG_SET_EN v-ep/get-error-code))}))))
 
 (defn upsert-user
   [request]
@@ -114,7 +116,7 @@
         (http/json-response (db/update-booking booking))) ;;update functionality needs to be expanded
       (http/json-response {:error (->> new-cal-day
                                        (s/explain-str ::cc/valid-calendar)
-                                       (ep/get-error-data ep/ERROR_MSG_SET_EN))}))))
+                                       (ep/get-error-data ep/ERROR_MSG_SET_EN c-ep/get-error-code))}))))
 
 (defn decode64 [str]
   (String. (.decode (Base64/getDecoder) str)))
