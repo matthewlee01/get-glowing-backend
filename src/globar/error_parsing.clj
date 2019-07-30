@@ -25,46 +25,33 @@
      :212 :invalid-data-msg
      :213 :invalid-data-msg
      :214 :invalid-data-msg
+     :300 :invalid-data-msg
+     :301 :invalid-data-msg
+     :302 :invalid-data-msg
+     :303 :invalid-data-msg
+     :304 :invalid-data-msg
+     :305 :invalid-data-msg
+     :306 :invalid-data-msg
+     :307 :invalid-data-msg
+     :308 :invalid-data-msg
+     :309 :invalid-data-msg
+     :310 :invalid-data-msg
+     :311 :invalid-data-msg
+     :312 :vendor-not-found-msg
      :000 :unknown-error-msg})
 
 (def ERROR_MSG_SET_EN 
   {:unavailable-booking-msg "Sorry, that booking is not available. Please try a different time."
    :overlapping-bookings-msg "Sorry, that time is already booked. Please try a different time."
    :bad-date-msg "Sorry, the date you tried to book is invalid. Please ensure that your date is formatted as YYYY-MM-DD!"
-   :invalid-data-msg "Sorry, but something went wrong while registering your booking. Please take note of your error code and contact us for assistance."
+   :invalid-data-msg "Sorry, but something went wrong while registering your data. Please take note of your error code and contact us for assistance."
+   :vendor-not-found-msg "Sorry, but the vendor you are trying to access couldn't be found. Please try again, or contact us if the problem persists."
    :unknown-error-msg "Sorry, an unknown error occurred. Please try again, or contact us if the problem persists."})
-    
-(defn get-error-code
-  [spec-str]
-  "takes a spec error data string and converts it to an error code.
-  :100 errors are calendar data problems
-  :200 errors are calendar structure problems
-  :000 is unknown error"
-  (condp includes-str? spec-str
-    "failed: bookings-available?" :100
-    "failed: distinct-time-chunks? in: [:booked]" :101
-    "failed: (re-matches DATE_REGEX %)" :102
-    "failed: map?" :200
-    "failed: (contains? % :template)" :201
-    "failed: (contains? % :date)" :202
-    "failed: (contains? % :available)" :203
-    "failed: (contains? % :booked)" :204
-    "failed: vector? in: [:available]" :205
-    "failed: vector? in: [:booked]" :206
-    "failed: vector? in: [:template]" :207
-    "failed: string? in: [:date]" :208
-    "failed: (< (first %) (second %))" :209
-    "failed: (= (count %) 2)" :210
-    "failed: (< % MAX_TIME)" :211
-    "failed: (>= % MIN_TIME)" :212
-    "spec: :globar.calendar.core/time" :213
-    "spec: :globar.calendar.core/time-chunk" :214
-    :000))
 
 (defn get-error-data
-  [error-msg-map spec-str]
-  "takes a spec error data string and an error message set and converts it to info for the client to display"
-  (let [error-code (get-error-code spec-str)
+  [error-msg-map error-parser spec-str]
+  "takes a spec error data string, an error parser, and an error message set and converts it to info for the client to display"
+  (let [error-code (error-parser spec-str)
         error-key (error-code ERROR_CODE_KEY)
         error-msg (error-key error-msg-map)]
     {:code error-code

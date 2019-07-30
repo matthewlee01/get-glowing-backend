@@ -7,7 +7,8 @@
             [clojure.edn :as edn]
             [clojure.data.json :as json]
             [globar.rest-api :as ra]
-            [globar.calendar.error-parsing :as ep]
+            [globar.calendar.error-parsing :as c-ep]
+            [globar.error-parsing :as ep]
             [clojure.spec.alpha :as s]))
 
 (use-fixtures :each setup-test-system!)
@@ -110,7 +111,7 @@
           error-msg "Sorry, that time is already booked. Please try a different time."
           error-code :101
           spec-error (s/explain-str ::cc/valid-calendar bad-bookings-cal)
-          generated-error-data (ep/get-error-data ep/ERROR_MSG_SET_EN spec-error)]
+          generated-error-data (ep/get-error-data ep/ERROR_MSG_SET_EN c-ep/get-error-code spec-error)]
       (is (= error-msg (:message generated-error-data)))
       (is (= error-code (:code generated-error-data))))
     (let [incomplete-cal (dissoc good-calendar :template)
@@ -119,12 +120,12 @@
           malformed-cal "i am not a calendar. i am a monkey man."
           bad-time-cal (assoc good-calendar :booked [[-23 120]])
           bad-time-chunk-cal (assoc good-calendar :template [[600 500]])]
-      (is (= (ep/get-error-code (s/explain-str ::cc/valid-calendar incomplete-cal)) :201))
-      (is (= (ep/get-error-code (s/explain-str ::cc/valid-calendar bad-date-cal)) :102))
-      (is (= (ep/get-error-code (s/explain-str ::cc/valid-calendar unavailable-cal)) :100))
-      (is (= (ep/get-error-code (s/explain-str ::cc/valid-calendar malformed-cal)) :200))
-      (is (= (ep/get-error-code (s/explain-str ::cc/valid-calendar bad-time-cal)) :212))
-      (is (= (ep/get-error-code (s/explain-str ::cc/valid-calendar bad-time-chunk-cal)) :209)))))
+      (is (= (c-ep/get-error-code (s/explain-str ::cc/valid-calendar incomplete-cal)) :201))
+      (is (= (c-ep/get-error-code (s/explain-str ::cc/valid-calendar bad-date-cal)) :102))
+      (is (= (c-ep/get-error-code (s/explain-str ::cc/valid-calendar unavailable-cal)) :100))
+      (is (= (c-ep/get-error-code (s/explain-str ::cc/valid-calendar malformed-cal)) :200))
+      (is (= (c-ep/get-error-code (s/explain-str ::cc/valid-calendar bad-time-cal)) :212))
+      (is (= (c-ep/get-error-code (s/explain-str ::cc/valid-calendar bad-time-chunk-cal)) :209)))))
           
 
 (deftest test-templates

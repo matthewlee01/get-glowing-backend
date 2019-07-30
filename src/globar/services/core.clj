@@ -2,6 +2,7 @@
   (:require [clojure.spec.alpha :as s]
             [globar.db :as db]
             [globar.error-parsing :as ep]
+            [globar.services.error-parsing :as s-ep]
             [io.pedestal.http :as http]))
     
 (s/def ::vendor-id
@@ -44,7 +45,7 @@
                            (db/create-service service)))
      (http/json-response {:error (->> service
                                       (s/explain-str ::valid-service)
-                                      (ep/get-error-data ep/ERROR_MSG_SET_EN))}))))
+                                      (ep/get-error-data ep/ERROR_MSG_SET_EN s-ep/get-error-code))}))))
 
 
 
