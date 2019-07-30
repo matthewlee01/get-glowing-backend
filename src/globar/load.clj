@@ -1,5 +1,6 @@
 (ns globar.load
   (:require [globar.db :as db]
+            [globar.ven-reg.db :as vr-db]
             [io.pedestal.log :as log]
             [clojure.java.io :as io]
             [clojure.edn :as edn]))
@@ -51,7 +52,7 @@
       (let [new-vendor {:user-id (:user-id user)
                         :summary summary
                         :profile-pic "placeholder.jpg"}
-            vendor (db/create-vendor new-vendor)
+            vendor (vr-db/create-vendor new-vendor)
             ven-id (:vendor-id vendor)
             services (:services vendor-info)]
         (println services)
