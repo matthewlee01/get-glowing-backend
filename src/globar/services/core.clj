@@ -2,12 +2,13 @@
   (:require [clojure.spec.alpha :as s]
             [globar.db :as db]
             [globar.error-parsing :as ep]
+            [globar.services.db :as s-db]
             [globar.services.error-parsing :as s-ep]
+            [globar.specs :as common-specs]
             [io.pedestal.http :as http]))
-    
+
 (s/def ::vendor-id
-  (s/and integer?
-         db/find-vendor-by-id))
+  ::common-specs/vendor-id)
 
 (s/def ::s-type
   string?)
@@ -41,8 +42,8 @@
                     (assoc :vendor-id (:vendor-id vendor)))]
     (if (s/valid? ::valid-service service)  
      (http/json-response (if (:service-id service) 
-                           (db/update-service service)
-                           (db/create-service service)))
+                           (s-db/update-service service)
+                           (s-db/create-service service)))
      (http/json-response {:error (->> service
                                       (s/explain-str ::valid-service)
                                       (ep/get-error-data ep/ERROR_MSG_SET_EN s-ep/get-error-code))}))))
