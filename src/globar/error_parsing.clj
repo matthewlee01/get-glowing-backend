@@ -37,7 +37,31 @@
      :309 :invalid-data-msg
      :310 :invalid-data-msg
      :311 :invalid-data-msg
-     :312 :vendor-not-found-msg
+     :312 :invalid-data-msg
+     :313 :invalid-data-msg
+     :314 :invalid-data-msg
+     :315 :vendor-not-found-msg
+     :400 :invalid-data-msg
+     :401 :invalid-data-msg
+     :402 :invalid-data-msg
+     :403 :invalid-data-msg
+     :404 :invalid-data-msg
+     :405 :invalid-data-msg
+     :406 :invalid-data-msg
+     :407 :invalid-data-msg
+     :408 :invalid-data-msg
+     :409 :invalid-data-msg
+     :410 :invalid-data-msg
+     :411 :invalid-data-msg
+     :412 :invalid-data-msg
+     :413 :invalid-data-msg
+     :414 :invalid-data-msg
+     :415 :invalid-data-msg
+     :416 :invalid-data-msg
+     :417 :invalid-data-msg
+     :418 :invalid-data-msg
+     :419 :invalid-data-msg
+     :420 :vendor-not-found-msg
      :000 :unknown-error-msg})
 
 (def ERROR_MSG_SET_EN 
