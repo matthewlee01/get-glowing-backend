@@ -52,4 +52,4 @@
               (http/json-response (db/find-vendor-by-id vendor-id))))
         (http/json-response {:error (->> vendor
                                        (s/explain-str ::valid-vendor)
-                                       (ep/get-error-data ep/ERROR_MSG_SET_EN vr-ep/get-error-code))}))))
+                                       (ep/get-error-data ep/ERROR_MSG_SET_EN vr-ep/get-error-code vr-ep/ERROR_CODE_KEY))}))))

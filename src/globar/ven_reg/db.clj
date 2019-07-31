@@ -12,8 +12,8 @@
                          (assoc :is-vendor true) ;; set the vendor flag on the associated user object
                          (db/update-user))
         result (jdbc/insert! db/db-conn :Vendors {:user_id user-id
-                                               :summary summary
-                                               :profile_pic profile-pic}
+                                                  :summary summary
+                                                  :profile_pic profile-pic}
                              {:identifiers #(.replace % \_\-)})]
 
     (first result)))

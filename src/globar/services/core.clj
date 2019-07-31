@@ -46,7 +46,7 @@
                            (s-db/create-service service)))
      (http/json-response {:error (->> service
                                       (s/explain-str ::valid-service)
-                                      (ep/get-error-data ep/ERROR_MSG_SET_EN s-ep/get-error-code))}))))
+                                      (ep/get-error-data ep/ERROR_MSG_SET_EN s-ep/get-error-code s-ep/ERROR_CODE_KEY))}))))
 
 
 
