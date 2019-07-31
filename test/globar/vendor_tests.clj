@@ -89,45 +89,46 @@
 
 (deftest test-vendor-creation
   ;; first create a new user
-  (let [new-user {:name_first "I am the Test user"
-                  :name_last "Andrrson-Coopers"
+  (let [new-user {:name-first "I am the Test user"
+                  :name-last "Andrrson-Coopers"
                   :name "Billy the Big Bad Bob"
                   :sub "social google | some funny; characters@?"
                   :avatar "http://google.com/some/url/to/a/file.jpg"
                   :email "test@test.com"
-                  :email_verified true
-                  :addr_str_num "#2-5985"
-                  :addr_str_name "Canada Way SE"
-                  :addr_city "New Westminster"
-                  :addr_state "BC"
-                  :addr_postal "V5e-3N9"
-                  :phone "778-994-6836"
+                  :email-verified true
+                  :addr-str-num 5985
+                  :addr-str-name "Canada Way SE"
+                  :addr-city "New Westminster"
+                  :addr-state "BC"
+                  :addr-postal "V5e-3N9"
+                  :phone 7789946836
                   :locale "Pacific Standard Time"}
-
+        
         ;; issue the curl call
         post-result (sh "curl" "-H" 
                         "Content-Type: application/json" 
                         "-d" (json/write-str new-user) "-X" 
                         "POST" "http://localhost:8889/user")
         post-clj (json/read-str (:out post-result) :key-fn keyword)
-
         ;; now create a new vendor
-        new-vendor {:user-id (:user-id post-clj)
-                    :summary "This is my story - I wish I had one, but this is all I got!"}
-
+        new-vendor (assoc new-user 
+                     :user-id (:user-id post-clj)
+                     :summary "This is my story - I wish I had one, but this is all I got!")
+        
         ;; issue the curl call
         post-result (sh "curl" "-H" 
                         "Content-Type: application/json" 
                         "-d" (json/write-str new-vendor) "-X" 
                         "POST" "http://localhost:8889/vendor")
+
         post-clj (json/read-str (:out post-result) :key-fn keyword)]
-    (is (= new-vendor (dissoc  post-clj 
-                               :created-at
-                               :radius 
-                               :profile-pic
-                               :updated-at
-                               :vendor-id
-                               :template)))))
+    (is (= (select-keys new-vendor [:user-id :summary]) (dissoc post-clj 
+                                                          :created-at
+                                                          :radius 
+                                                          :profile-pic
+                                                          :updated-at
+                                                          :vendor-id
+                                                          :template)))))
 
 (deftest test-vendor-update
   ;; first create a new vendor
