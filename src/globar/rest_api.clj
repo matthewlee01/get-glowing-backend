@@ -117,8 +117,8 @@
                 (if (s/valid? ::u-c/valid-user new-user)
                   (u-db/create-user new-user)
                   (http/json-response {:error (->> new-user
-                                       (s/explain-str ::u-c/valid-user)
-                                       (ep/get-error-data ep/ERROR_MSG_SET_EN u-ep/get-error-code))}))))
+                                                   (s/explain-str ::u-c/valid-user)
+                                                   (ep/get-error-data ep/ERROR_MSG_SET_EN u-ep/get-error-code u-ep/ERROR_CODE_KEY))}))))
 
           ; now that the user exists in our db either way, 
           ; read the user and send it back to the client

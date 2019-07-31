@@ -14,8 +14,8 @@
     "failed: map?" :100
     "failed: (re-matches DATE_REGEX %)" :101
     "failed: string? in: [:date]" :102
-    "failed: int? in: [:user-id]" :103
-    "failed: int? in: [:vendor-id]"  :104   
+    "failed: integer? in: [:user-id]" :103
+    "failed: integer? in: [:vendor-id]"  :104   
     "failed: find-vendor-by-id" :105
     "failed: find-user-by-id" :106
     ;;some common calendar data problems
@@ -48,6 +48,7 @@
   {:unavailable-booking-msg "Sorry, that booking is not available. Please try a different time."
    :overlapping-bookings-msg "Sorry, that time is already booked. Please try a different time."
    :bad-date-msg "Sorry, the date you tried to book is invalid. Please ensure that your date is formatted as YYYY-MM-DD!"
+   :bad-email-msg "Sorry, the email you tried to submit is invalid. Please ensure that you have correctly entered your email address!"
    :invalid-data-msg "Sorry, but something went wrong while registering your data. Please take note of your error code and contact us for assistance."
    :vendor-not-found-msg "Sorry, but the vendor you are trying to access couldn't be found. Please try again, or contact us if the problem persists."
    :user-not-found-msg "Sorry, but the user you are trying to access couldn't be found. Please try again, or contact us if the problem persists."
