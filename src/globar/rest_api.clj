@@ -3,6 +3,7 @@
             [globar.error-parsing :as ep]
             [globar.calendar.error-parsing :as c-ep]
             [globar.ven-reg.error-parsing :as v-ep]
+            [globar.users.error-parsing :as u-ep]
             [io.pedestal.http.route.definition :refer [defroutes]]
             [io.pedestal.http.ring-middlewares :as ring-mw]
             [io.pedestal.log :as log]
@@ -13,7 +14,9 @@
             [globar.bookings.core :as b-c]
             [globar.calendar.core :as c-c]
             [globar.services.core :as s-c]
+            [globar.users.core :as u-c]
             [globar.db :as db]
+            [globar.users.db :as u-db]
             [globar.ven-reg.core :as vr-c]
             [globar.ven-reg.db :as vr-db]
             [cheshire.core :as cheshire]
@@ -53,14 +56,6 @@
     ;; write a new row to the images table
     (image-db/create-image {:vendor-id 1234 :service-id service-id :description desc :filename new-filename})    
     (http/json-response {:filename new-filename})))
-
-(defn upsert-user
-  [request]
-  (let [user (get-in request [:json-params])]
-    (if (:user-id user)
-      (do (db/update-user user)
-          (http/json-response (db/find-user-by-id (:user-id user))))
-      (http/json-response (db/create-user user)))))
 
 (defn decode64 [str]
   (String. (.decode (Base64/getDecoder) str)))
@@ -114,14 +109,21 @@
           ; if the user doesn't exist, create a new user record
           (when-not user
               ;; change the name from auth0 from picture->avatar as that's what we use
-              (db/create-user (-> ( clojure.set/rename-keys user-info {:picture :avatar
-                                                                       :given_name :name-first
-                                                                       :family_name :name-last})
-                                  (assoc :is-vendor false))))
+              (let [new-user (-> user-info
+                               (clojure.set/rename-keys {:picture :avatar
+                                                         :given_name :name-first
+                                                         :family_name :name-last})
+                               (assoc :is-vendor false))]
+                (if (s/valid? ::u-c/valid-user new-user)
+                  (u-db/create-user new-user)
+                  (http/json-response {:error (->> new-user
+                                       (s/explain-str ::u-c/valid-user)
+                                       (ep/get-error-data ep/ERROR_MSG_SET_EN u-ep/get-error-code))}))))
 
           ; now that the user exists in our db either way, 
           ; read the user and send it back to the client
           (http/json-response (db/find-user-by-sub (:sub user-info))))
+
        
       ;; the call to verify failed so fail the login
       {:status 403})))
@@ -177,7 +179,7 @@
     ["/calendar/:vendor-id" ^:interceptors [(body-params/body-params)] {:post c-c/put-calendar}]
     ["/calendar/:vendor-id/:date" {:get c-c/get-calendar}]
     ["/vendor" ^:interceptors [(body-params/body-params)] {:post vr-c/upsert-vendor}]
-    ["/user" ^:interceptors [(body-params/body-params)] {:post upsert-user}]
+    ["/user" ^:interceptors [(body-params/body-params)] {:post u-c/upsert-user}]
     ["/login" ^:interceptors [(body-params/body-params)] {:post login}]
     ["/booking" ^:interceptors [(body-params/body-params) authorization-interceptor] {:post b-c/upsert-booking}]
     ["/v_calendar" ^:interceptors [(body-params/body-params) ven-authz-interceptor] {:post c-c/v-get-calendar}]

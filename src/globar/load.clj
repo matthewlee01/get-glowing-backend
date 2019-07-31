@@ -1,6 +1,7 @@
 (ns globar.load
   (:require [globar.db :as db]
             [globar.services.db :as s-db]
+            [globar.users.db :as u-db]
             [globar.ven-reg.db :as vr-db]
             [io.pedestal.log :as log]
             [clojure.java.io :as io]
@@ -47,7 +48,7 @@
                   :addr-postal "V5E-3N9"
                   :phone "778-994-6836"
                   :locale "Pacific Standard Time"}
-        user (db/create-user new-user)]
+        user (u-db/create-user new-user)]
 
     (if user
       (let [new-vendor {:user-id (:user-id user)

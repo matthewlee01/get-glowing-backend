@@ -4,11 +4,11 @@
             [globar.error-parsing :as ep]
             [globar.services.db :as s-db]
             [globar.services.error-parsing :as s-ep]
-            [globar.specs :as common-specs]
+            [globar.ven-reg.core :as vr-c]
             [io.pedestal.http :as http]))
 
 (s/def ::vendor-id
-  ::common-specs/vendor-id)
+  ::vr-c/vendor-id)
 
 (s/def ::s-type
   string?)

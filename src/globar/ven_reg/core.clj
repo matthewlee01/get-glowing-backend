@@ -3,12 +3,12 @@
             [globar.db :as db]
             [globar.error-parsing :as ep]
             [globar.ven-reg.error-parsing :as vr-ep]
-            [globar.specs :as common-specs]
             [globar.ven-reg.db :as vr-db]
             [io.pedestal.http :as http]))
 
 (s/def ::vendor-id
-  ::common-specs/vendor-id)
+  (s/and integer?
+         db/find-vendor-by-id))
 
 (s/def ::name-first  ;;describes a valid time value
   string?)
