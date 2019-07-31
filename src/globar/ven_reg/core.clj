@@ -37,19 +37,27 @@
 (s/def ::phone
   int?)
          
-(s/def ::valid-vendor
-  (s/keys :req-un [::name-first ::name-last ::email ::addr-str-num ::addr-str-name ::addr-city ::addr-state ::addr-postal ::phone]
-          :opt-un [::vendor-id]))
+(s/def ::valid-vendor-for-creation
+  (s/keys :req-un [::name-first ::name-last ::email ::addr-str-num ::addr-str-name ::addr-city ::addr-state ::addr-postal ::phone]))
+
+(s/def ::valid-vendor-for-update
+  (s/keys :req-un [::vendor-id]
+          :opt-un [::name-first ::name-last ::email ::addr-str-num ::addr-str-name ::addr-city ::addr-state ::addr-postal ::phone]))
 
 (defn upsert-vendor 
   [request]
   (let [vendor (get-in request [:json-params])
         vendor-id (:vendor-id vendor)]
-    (if (s/valid? ::valid-vendor vendor)
-        (if (nil? vendor-id)
-          (http/json-response (vr-db/create-vendor vendor))
-          (do (vr-db/update-vendor vendor)
-              (http/json-response (db/find-vendor-by-id vendor-id))))
+
+    (if (nil? vendor-id)
+      (if (s/valid? ::valid-vendor-for-creation vendor)
+        (http/json-response (vr-db/create-vendor vendor))
         (http/json-response {:error (->> vendor
-                                       (s/explain-str ::valid-vendor)
-                                       (ep/get-error-data ep/ERROR_MSG_SET_EN vr-ep/get-error-code vr-ep/ERROR_CODE_KEY))}))))
+                                       (s/explain-str ::valid-vendor-for-creation)
+                                       (ep/get-error-data ep/ERROR_MSG_SET_EN vr-ep/get-error-code))}))
+      (if (s/valid? ::valid-vendor-for-update vendor)
+        (do (vr-db/update-vendor vendor)
+            (http/json-response (db/find-vendor-by-id vendor-id)))
+        (http/json-response {:error (->> vendor
+                                       (s/explain-str ::valid-vendor-for-update)
+                                       (ep/get-error-data ep/ERROR_MSG_SET_EN vr-ep/get-error-code vr-ep/ERROR_CODE_KEY))})))))
