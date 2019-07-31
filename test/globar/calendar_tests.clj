@@ -110,9 +110,9 @@
     (is (= (s/valid? ::c-c/valid-calendar "i am a monkey man. they call me mr monkey man.") false))
     (let [bad-bookings-cal (assoc good-calendar :booked overlapping-bookings)
           error-msg "Sorry, that time is already booked. Please try a different time."
-          error-code :101
+          error-code :201
           spec-error (s/explain-str ::c-c/valid-calendar bad-bookings-cal)
-          generated-error-data (ep/get-error-data ep/ERROR_MSG_SET_EN c-ep/get-error-code spec-error c-ep/ERROR_CODE_KEY)]
+          generated-error-data (ep/get-error-data ep/ERROR_MSG_SET_EN c-ep/get-error-code c-ep/ERROR_CODE_KEY spec-error)]
       (is (= error-msg (:message generated-error-data)))
       (is (= error-code (:code generated-error-data))))
     (let [incomplete-cal (dissoc good-calendar :template)
@@ -121,12 +121,12 @@
           malformed-cal "i am not a calendar. i am a monkey man."
           bad-time-cal (assoc good-calendar :booked [[-23 120]])
           bad-time-chunk-cal (assoc good-calendar :template [[600 500]])]
-      (is (= (c-ep/get-error-code (s/explain-str ::c-c/valid-calendar incomplete-cal)) :201))
-      (is (= (c-ep/get-error-code (s/explain-str ::c-c/valid-calendar bad-date-cal)) :102))
-      (is (= (c-ep/get-error-code (s/explain-str ::c-c/valid-calendar unavailable-cal)) :100))
-      (is (= (c-ep/get-error-code (s/explain-str ::c-c/valid-calendar malformed-cal)) :200))
-      (is (= (c-ep/get-error-code (s/explain-str ::c-c/valid-calendar bad-time-cal)) :212))
-      (is (= (c-ep/get-error-code (s/explain-str ::c-c/valid-calendar bad-time-chunk-cal)) :209)))))
+      (is (= (c-ep/get-error-code (s/explain-str ::c-c/valid-calendar incomplete-cal)) :202))
+      (is (= (c-ep/get-error-code (s/explain-str ::c-c/valid-calendar bad-date-cal)) :101))
+      (is (= (c-ep/get-error-code (s/explain-str ::c-c/valid-calendar unavailable-cal)) :200))
+      (is (= (c-ep/get-error-code (s/explain-str ::c-c/valid-calendar malformed-cal)) :100))
+      (is (= (c-ep/get-error-code (s/explain-str ::c-c/valid-calendar bad-time-cal)) :110))
+      (is (= (c-ep/get-error-code (s/explain-str ::c-c/valid-calendar bad-time-chunk-cal)) :107)))))
           
 (deftest test-templates
  (let [vendor-id 1236
