@@ -1,6 +1,7 @@
 (ns globar.ven-reg.db
   (:require [clojure.java.jdbc :as jdbc]
-            [globar.db :as db]))
+            [globar.db :as db]
+            [globar.users.db :as u-db]))
 
 (defn create-vendor
   [new-vendor]
@@ -10,7 +11,7 @@
         updated-user (-> (db/find-user-by-id user-id)
                          (merge new-vendor)
                          (assoc :is-vendor true) ;; set the vendor flag on the associated user object
-                         (db/update-user))
+                         (u-db/update-user))
         result (jdbc/insert! db/db-conn :Vendors {:user_id user-id
                                                   :summary summary
                                                   :profile_pic profile-pic}

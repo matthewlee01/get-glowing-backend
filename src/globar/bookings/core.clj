@@ -6,14 +6,15 @@
             [globar.bookings.db :as b-db]
             [globar.bookings.error-parsing :as b-ep]
             [globar.error-parsing :as ep]
-            [globar.specs :as common-specs]
+            [globar.users.core :as u-c]
+            [globar.ven-reg.core :as vr-c]
             [clojure.spec.alpha :as s]))
 
 (s/def ::user-id
-  ::common-specs/user-id)
+  ::u-c/user-id)
 
 (s/def ::vendor-id
-  ::common-specs/vendor-id)
+  ::vr-c/vendor-id)
 
 (s/def ::booking-id
   (s/and int?
