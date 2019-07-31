@@ -57,4 +57,4 @@
           (http/json-response (u-db/create-user user)))
       (http/json-response {:error (->> user
                                        (s/explain-str ::valid-user)
-                                       (ep/get-error-data ep/ERROR_MSG_SET_EN u-ep/get-error-code))}))))
+                                       (ep/get-error-data ep/ERROR_MSG_SET_EN u-ep/get-error-code u-ep/ERROR_CODE_KEY))}))))
