@@ -45,13 +45,13 @@
                         (assoc :date date))]
     (if (s/valid? ::valid-booking booking) 
       (if (s/valid? ::c-c/valid-calendar new-cal-day)
-            (if (nil? booking-id) ;;checks if booking already exists, then creates/updates accordingly
-              (do (c-c/write-calendar-day vendor-id new-cal-day)
-                  (http/json-response (b-db/create-booking booking)))
-              (http/json-response (b-db/update-booking booking))) ;;update functionality needs to be expanded
-            (http/json-response {:error (->> new-cal-day
+        (if (nil? booking-id) ;;checks if booking already exists, then creates/updates accordingly
+          (do (c-c/write-calendar-day vendor-id new-cal-day)
+              (http/json-response (b-db/create-booking booking)))
+          (http/json-response (b-db/update-booking booking))) ;;update functionality needs to be expanded
+        (http/json-response {:error (->> new-cal-day
                                              (s/explain-str ::c-c/valid-calendar)
-                                             (ep/get-error-data ep/ERROR_MSG_SET_EN c-ep/get-error-code))}))
+                                             (ep/get-error-data ep/ERROR_MSG_SET_EN c-ep/get-error-code c-ep/ERROR_CODE_KEY))}))
       (http/json-response {:error (->> booking
                                        (s/explain-str ::valid-booking)
-                                       (ep/get-error-data ep/ERROR_MSG_SET_EN b-ep/get-error-code))}))))
+                                       (ep/get-error-data ep/ERROR_MSG_SET_EN b-ep/get-error-code b-ep/ERROR_CODE_KEY))}))))

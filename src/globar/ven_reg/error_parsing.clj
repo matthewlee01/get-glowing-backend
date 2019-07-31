@@ -6,7 +6,6 @@
   "takes a spec error data string and converts it to an error code."
   (condp ep/includes-str? spec-str
     ;; :400: vendor registration data problems
-    "failed: map?" :400
     "failed: (contains? % :name-first)" :401
     "failed: (contains? % :name-last)" :402
     "failed: (contains? % :email)" :403
@@ -24,10 +23,28 @@
     "failed: string? in: [:addr-state]" :415
     "failed: string? in: [:addr-postal]" :416
     "failed: int? in: [:addr-str-num]" :417
-    "failed: int? in: [:vendor-id]" :418
-    "failed: int? in: [:phone]" :419
-    "failed: find-vendor-by-id" :420
-    ;; :000: unknown error, ideally this should never happen
-    :000))
+    "failed: int? in: [:phone]" :418
+    (ep/common-get-error-code spec-str)))
 
+(def ERROR_CODE_KEY 
+  {:400 :invalid-data-msg
+   :401 :invalid-data-msg
+   :402 :invalid-data-msg
+   :403 :invalid-data-msg
+   :404 :invalid-data-msg
+   :405 :invalid-data-msg
+   :406 :invalid-data-msg
+   :407 :invalid-data-msg
+   :408 :invalid-data-msg
+   :409 :invalid-data-msg
+   :410 :invalid-data-msg
+   :411 :invalid-data-msg
+   :412 :invalid-data-msg
+   :413 :invalid-data-msg
+   :414 :invalid-data-msg
+   :415 :invalid-data-msg
+   :416 :invalid-data-msg
+   :417 :invalid-data-msg
+   :418 :invalid-data-msg})
+  
 

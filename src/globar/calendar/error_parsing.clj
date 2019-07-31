@@ -8,27 +8,24 @@
   :200 errors are calendar structure problems
   :000 is unknown error"
   (condp ep/includes-str? spec-str
-    ;; :100: calendar data problems
-    "failed: bookings-available?" :100
-    "failed: distinct-time-chunks? in: [:booked]" :101
-    "failed: (re-matches DATE_REGEX %)" :102
-    ;; :200: calendar structure problems
-    "failed: map?" :200
-    "failed: (contains? % :template)" :201
-    "failed: (contains? % :date)" :202
-    "failed: (contains? % :available)" :203
-    "failed: (contains? % :booked)" :204
-    "failed: vector? in: [:available]" :205
-    "failed: vector? in: [:booked]" :206
-    "failed: vector? in: [:template]" :207
-    "failed: string? in: [:date]" :208
-    "failed: (< (first %) (second %))" :209
-    "failed: (= (count %) 2)" :210
-    "failed: (< % MAX_TIME)" :211
-    "failed: (>= % MIN_TIME)" :212
-    "spec: :globar.calendar.core/time" :213
-    "spec: :globar.calendar.core/time-chunk" :214
-    ;; :000: unknown error, ideally this should never happen
-    :000))
+    "failed: bookings-available?" :200
+    "failed: distinct-time-chunks? in: [:booked]" :201
+    "failed: (contains? % :template)" :202
+    "failed: (contains? % :date)" :203
+    "failed: (contains? % :available)" :204
+    "failed: (contains? % :booked)" :205
+    "failed: vector? in: [:available]" :206
+    "failed: vector? in: [:booked]" :207
+    "failed: vector? in: [:template]" :208
+    (ep/common-get-error-code spec-str)))
 
-
+(def ERROR_CODE_KEY
+  {:200 :unavailable-booking-msg
+   :201 :overlapping-bookings-msg
+   :202 :invalid-data-msg
+   :203 :invalid-data-msg
+   :204 :invalid-data-msg
+   :205 :invalid-data-msg
+   :206 :invalid-data-msg
+   :207 :invalid-data-msg
+   :208 :invalid-data-msg})

@@ -112,7 +112,7 @@
           error-msg "Sorry, that time is already booked. Please try a different time."
           error-code :101
           spec-error (s/explain-str ::c-c/valid-calendar bad-bookings-cal)
-          generated-error-data (ep/get-error-data ep/ERROR_MSG_SET_EN c-ep/get-error-code spec-error)]
+          generated-error-data (ep/get-error-data ep/ERROR_MSG_SET_EN c-ep/get-error-code spec-error c-ep/ERROR_CODE_KEY)]
       (is (= error-msg (:message generated-error-data)))
       (is (= error-code (:code generated-error-data))))
     (let [incomplete-cal (dissoc good-calendar :template)
@@ -128,7 +128,6 @@
       (is (= (c-ep/get-error-code (s/explain-str ::c-c/valid-calendar bad-time-cal)) :212))
       (is (= (c-ep/get-error-code (s/explain-str ::c-c/valid-calendar bad-time-chunk-cal)) :209)))))
           
-
 (deftest test-templates
  (let [vendor-id 1236
        test-template {:Sunday [[100 200] [500 600]]
