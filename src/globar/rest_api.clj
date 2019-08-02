@@ -11,6 +11,7 @@
             [io.pedestal.http :as http]
             [io.pedestal.interceptor.helpers :refer [defbefore]]
             [globar.config :as config]
+            [globar.ven-list.core :as vl-c]
             [globar.bookings.core :as b-c]
             [globar.calendar.core :as c-c]
             [globar.services.core :as s-c]
@@ -184,6 +185,7 @@
     ["/booking" ^:interceptors [(body-params/body-params) authorization-interceptor] {:post b-c/upsert-booking}]
     ["/v_calendar" ^:interceptors [(body-params/body-params) ven-authz-interceptor] {:post c-c/v-get-calendar}]
     ["/v_bookings" ^:interceptors [(body-params/body-params) ven-authz-interceptor] {:post b-c/v-get-bookings}]
+    ["/v_list" ^:interceptors [(body-params/body-params)] {:post vl-c/get-ven-list-page}]
     ["/services" ^:interceptors [(body-params/body-params) ven-authz-interceptor] {:post s-c/get-services}]
     ["/service" ^:interceptors [(body-params/body-params) ven-authz-interceptor] {:post s-c/upsert-service}]]])
 
