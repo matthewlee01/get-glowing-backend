@@ -19,11 +19,13 @@ To get an environment up to work on the globar code itself:
 5. to stop the system: ```(stop)```
 
 ### To populate the sample vendors
-To load the sample vendors from the .edn file
+To load the sample vendors from the .edn file on a backend server running in a docker container:
 1. start the containers to bring up the production mode system: ```bin/docker-up.sh```
 2. start a shell inside the docker container running the globar server: ```docker exec -it globar_app_1 sh```
 3. run the script to install telnet and connect a repl to the globar server: ```./telnet-to-repl.sh```
 4. at the repl prompt, change to the globar.core directory and run the function that loads the sample data: ```(in-ns 'globar.core) (load-sample-vendors)```
+
+If you want to accomplish this from a server running from a REPL, just run the ```(load-sample-vendors)``` directly from the REPL
 
 ### To inspect the raw database tables
 Run one of the ```list-...``` scripts in the "bin" directory
