@@ -66,8 +66,6 @@
   (s/and (s/keys :req-un [::available ::booked ::template ::date])
          bookings-available?))
 
-
-
 (defn get-template
   [vendor-id]
   (c-db/read-vendor-template vendor-id))
