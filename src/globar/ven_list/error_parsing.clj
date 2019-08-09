@@ -17,6 +17,7 @@
     "failed: vector? in: [:sort-by]" :710
     "failed: vector? in: [:filter-by]" :711
     "failed: vector? in: [:filter-by " :712 ;distinction between [:filter-by] and [:filter-by i]
+    "failed: (= (last %) " :713
     (ep/common-get-error-code spec-str)))
 
 (def ERROR_CODE_KEY
@@ -32,4 +33,5 @@
    :709 :invalid-data-msg
    :710 :invalid-data-msg
    :711 :invalid-data-msg
-   :712 :invalid-data-msg})
+   :712 :invalid-data-msg
+   :713 :invalid-data-msg})
