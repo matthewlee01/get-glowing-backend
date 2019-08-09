@@ -22,8 +22,8 @@
     "failed: string? in: [:addr-city]" :414
     "failed: string? in: [:addr-state]" :415
     "failed: string? in: [:addr-postal]" :416
-    "failed: int? in: [:addr-str-num]" :417
-    "failed: int? in: [:phone]" :418
+    "failed: integer? in: [:addr-str-num]" :417
+    "failed: integer? in: [:phone]" :418
     (ep/common-get-error-code spec-str)))
 
 (def ERROR_CODE_KEY 

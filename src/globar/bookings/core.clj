@@ -17,11 +17,11 @@
   ::vr-c/vendor-id)
 
 (s/def ::booking-id
-  (s/and int?
+  (s/and integer?
          db/find-booking-by-id))
 
 (s/def ::service
-  int?)
+  integer?)
 
 (s/def ::time
   ::c-c/time-chunk)
@@ -51,8 +51,8 @@
               (http/json-response (b-db/create-booking booking)))
           (http/json-response (b-db/update-booking booking))) ;;update functionality needs to be expanded
         (http/json-response {:error (->> new-cal-day
-                                             (s/explain-str ::c-c/valid-calendar)
-                                             (ep/get-error-data ep/ERROR_MSG_SET_EN c-ep/get-error-code c-ep/ERROR_CODE_KEY))}))
+                                         (s/explain-str ::c-c/valid-calendar)
+                                         (ep/get-error-data ep/ERROR_MSG_SET_EN c-ep/get-error-code c-ep/ERROR_CODE_KEY))}))
       (http/json-response {:error (->> booking
                                        (s/explain-str ::valid-booking)
                                        (ep/get-error-data ep/ERROR_MSG_SET_EN b-ep/get-error-code b-ep/ERROR_CODE_KEY))}))))
