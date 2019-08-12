@@ -23,6 +23,7 @@
             [cheshire.core :as cheshire]
             [buddy.core.keys :as keys]
             [fipp.edn :refer [pprint]]
+            [clojure.edn :as edn]
             [clojure.spec.alpha :as s]
             [globar.images.db :as image-db]
             [ring.util.codec :as codec])
@@ -43,8 +44,9 @@
   [request]
   "upload a file - should be a photo?"
   (let [form-params (:params request)
+        vendor-id (get-in request [:vendor :vendor-id])
         src-file (get form-params (:file-field config/image-config))
-        service-id (Integer/parseInt (get form-params (:service-id-field config/image-config)))
+        service-id (edn/read-string (get form-params (:service-id-field config/image-config)))
         desc (get form-params (:description-field config/image-config))
         src-filename (:filename src-file)
         src-filetype (last (clojure.string/split src-filename #"\."))
@@ -55,7 +57,7 @@
     ;; copy the file to the destination
     (io/copy input-file (io/file (:dest-dir config/image-config) new-filename))
     ;; write a new row to the images table
-    (image-db/create-image {:vendor-id 1234 :service-id service-id :description desc :filename new-filename})    
+    (image-db/create-image {:vendor-id vendor-id :service-id service-id :description desc :filename new-filename})    
     (http/json-response {:filename new-filename})))
 
 (defn decode64 [str]
@@ -160,12 +162,10 @@
 (def ven-authz-interceptor
   {:name ::ven-authz-interceptor
    :enter (fn [context]
-            (clojure.pprint/pprint context)
             (let [json-params (get-in context [:request :json-params])
                   access-token (if json-params
                                  (:access-token json-params)
                                  (get-in context [:request :params "access-token"]))
-                  _ (println "token: " access-token)
                   user (find-user-from-token access-token)
                   vendor (db/find-vendor-by-user (:user-id user))]
 

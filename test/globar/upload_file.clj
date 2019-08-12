@@ -13,7 +13,7 @@
 (deftest test-file-upload
   ;; call the upload endpoint to upload a file
   (let [desc "hello world & my name is \\"
-        token "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsImtpZCI6Ik5ETTFSa1ZFUWpVMFF6VXpNMFJHTVRReVJrWTVRakJET1Rjd04wTkRRVVJFUmtNeE16aEVSQSJ9.eyJpc3MiOiJodHRwczovL24wMGIuYXV0aDAuY29tLyIsInN1YiI6Imdvb2dsZS1vYXV0aDJ8MTA2NjkyMDY1MDg1NDQwNTg5Mjk1IiwiYXVkIjpbImFwaS5nZXRnbG93aW5nLmNvbSIsImh0dHBzOi8vbjAwYi5hdXRoMC5jb20vdXNlcmluZm8iXSwiaWF0IjoxNTYzNTYwNzUxLCJleHAiOjE1NjM1Njc5NTEsImF6cCI6Ik41VFBRRlpTS0xiZllkczQwWVl2NGkzMXY1NTc3c3pWIiwic2NvcGUiOiJvcGVuaWQgcHJvZmlsZSBlbWFpbCJ9.zC2YhIqDQ2TqOSG-WpMlyEzyfBn5EbW0su4eZd2h3Bd12RemFRXaHBqUuQ_7aO8649nuRQgmEdHRFVeXtAw6vaeyzqDxk1iIIWPUYJqOLG7iH364nq_FmNAynDyG6HNfJ301boIsx586fOovryFrY6h0Bt6mOCvIC1ogH7jimZknkAaMghuviJgRjfEnrxiqe6vLOmIXaNEdFFmFkn8GE3CyTEJB2r254YpZwqSq0TNORmCQZZMlvfdR_fNOq4CkaAgihav_D7Gi9rNCajGCDzsVr3pMYQKuwJX1aSb5j-VVqaYH6XnZgvVh7qDTYWwWBdEJ9c3ALMxvIpxOfOAAfw"
+        token "uh oh broken. need magic debug token logic here"
         post-result (shell/sh "curl" 
                               "-X"
                               "POST"
