@@ -14,8 +14,8 @@
     "failed: (contains % :service)" :502
     "failed: (contains % :time)" :503
     "failed: (contains % :date)" :504
-    "failed: int? in: [:booking-id]" :505
-    "failed: int? in: [:service]" :506
+    "failed: integer? in: [:booking-id]" :505
+    "failed: integer? in: [:service]" :506
     "failed: find-booking-by-id" :507
     (ep/common-get-error-code spec-str)))
 
