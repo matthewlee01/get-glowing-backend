@@ -44,8 +44,8 @@
   "upload a file - should be a photo?"
   (let [form-params (:params request)
         src-file (get form-params (:file-field config/image-config))
-        service-id (Integer/parseInt (get form-params (:service-id-field  config/image-config)))
-        desc (codec/url-decode (get form-params (:description-field config/image-config)))
+        service-id (Integer/parseInt (get form-params (:service-id-field config/image-config)))
+        desc (get form-params (:description-field config/image-config))
         src-filename (:filename src-file)
         src-filetype (last (clojure.string/split src-filename #"\."))
         new-filename (str (java.util.UUID/randomUUID) "." src-filetype)
@@ -160,7 +160,12 @@
 (def ven-authz-interceptor
   {:name ::ven-authz-interceptor
    :enter (fn [context]
-            (let [access-token (get-in context [:request :json-params :access-token])
+            (clojure.pprint/pprint context)
+            (let [json-params (get-in context [:request :json-params])
+                  access-token (if json-params
+                                 (:access-token json-params)
+                                 (get-in context [:request :params "access-token"]))
+                  _ (println "token: " access-token)
                   user (find-user-from-token access-token)
                   vendor (db/find-vendor-by-user (:user-id user))]
 
@@ -175,8 +180,9 @@
                   (assoc context :response {:status 403
                                             :headers {}
                                             :body {}})))))})
+
 (defroutes rest-api-routes
-  [[["/upload" ^:interceptors [(ring-mw/multipart-params)] {:post upload}]
+  [[["/upload" ^:interceptors [(ring-mw/multipart-params) ven-authz-interceptor] {:post upload}]
     ["/calendar/:vendor-id" ^:interceptors [(body-params/body-params)] {:post c-c/put-calendar}]
     ["/calendar/:vendor-id/:date" {:get c-c/get-calendar}]
     ["/vendor" ^:interceptors [(body-params/body-params)] {:post vr-c/upsert-vendor}]
