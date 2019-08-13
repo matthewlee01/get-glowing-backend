@@ -10,19 +10,19 @@
   [max-cost]
   (str "(SELECT MIN(s.s_price)
          FROM Services s
-         WHERE s.vendor_id = v.vendor_id) < CAST(" max-cost " AS int)"))
+         WHERE s.vendor_id = v.vendor_id) <= CAST(" max-cost " AS int)"))
 
 (defn min-cost-filter-clause
   [min-cost]
   (str "(SELECT MAX(s.s_price)
          FROM Services s
-         WHERE s.vendor_id = v.vendor_id) > CAST(" min-cost " AS int)"))
+         WHERE s.vendor_id = v.vendor_id) >= CAST(" min-cost " AS int)"))
 
 (defn min-rating-filter-clause
   [min-rating]
   (str "(SELECT AVG(r.rating)
          FROM vendor_rating r
-         WHERE r.vendor_id = v.vendor_id) > CAST(" min-rating " AS int)"))
+         WHERE r.vendor_id = v.vendor_id) >= CAST(" min-rating " AS decimal)"))
 
 (defn generate-filter-clause
   [[filter-col filter-arg]]
