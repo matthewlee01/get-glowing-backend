@@ -11,7 +11,7 @@
   "Adds a new image record to the Images table"
   [image]
   (log/debug ::create-image image)
-  (let [field-spec (select-keys image [:vendor-id :filename :metadata :service-id :description]) 
+  (let [field-spec (select-keys image [:deleted :vendor-id :filename :published :metadata :service-id :description]) 
         db-field-spec (clojure.set/rename-keys field-spec
                                                {:vendor-id :vendor_id
                                                 :service-id :service_id})
@@ -25,5 +25,25 @@
   "Return all the images for a given vendor"
   [vendor-id]
   (log/debug :function ::get-images :vendor-id vendor-id) 
-  (db/query ["SELECT * FROM Images WHERE vendor_id = ?" vendor-id]))
+  (db/query ["SELECT * FROM Images 
+              WHERE vendor_id = ?
+              AND deleted = false" vendor-id]))
 
+(defn ven-publish-photo
+  [filename]
+  (db/execute ["UPDATE Images
+               SET published = true
+               WHERE filename = ?" filename]))
+
+(defn ven-publish-all
+  [ven-id]
+  (db/execute ["UPDATE Images
+               SET published = true
+               WHERE vendor_id = ?" ven-id]))
+
+(defn ven-delete-photo
+  [filename]
+  (db/execute ["UPDATE Images
+                SET deleted = true
+                WHERE filename = ?" filename]))
+  ;;perhaps add some code here in the future to delete the actual file

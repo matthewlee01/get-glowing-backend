@@ -52,6 +52,12 @@
                :params params))
   (jdbc/execute! db-conn statement {:multi? false}))
 
+(defn find-ven-photos-by-id
+  "gets all photos for a vendor (even unpublished)"
+  [vendor-id]
+  (query ["SELECT filename, service_id, description, published
+           FROM Images WHERE vendor_id = ? AND deleted = false
+           ORDER BY created_at desc" vendor-id]))
 
 (defn find-user-by-id
   "this is for internal use because internally we use the id for cross table joins"

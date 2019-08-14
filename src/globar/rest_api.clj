@@ -57,8 +57,30 @@
     ;; copy the file to the destination
     (io/copy input-file (io/file (:dest-dir config/image-config) new-filename))
     ;; write a new row to the images table
-    (image-db/create-image {:vendor-id vendor-id :service-id service-id :description desc :filename new-filename})    
+    (image-db/create-image {:deleted false :published false :vendor-id vendor-id :service-id service-id :description desc :filename new-filename})    
     (http/json-response {:filename new-filename})))
+
+(defn v-get-photos
+  [request]
+  (let [vendor-id (get-in request [:vendor :vendor-id])
+        photos (db/find-ven-photos-by-id vendor-id)]
+    (clojure.pprint/pprint photos)
+    (http/json-response {:photos photos})))
+
+(defn v-publish-photo
+  [request]
+  (let [vendor-id (get-in request [:vendor :vendor-id])
+        filename (get-in request [:json-params :filename])]
+    (if (= filename "all")
+      (image-db/ven-publish-all vendor-id)
+      (image-db/ven-publish-photo filename))
+    (v-get-photos request)))
+
+(defn v-delete-photo
+  [request]
+  (let [filename (get-in request [:json-params :filename])]
+    (image-db/ven-delete-photo filename)
+    (v-get-photos request)))
 
 (defn decode64 [str]
   (String. (.decode (Base64/getDecoder) str)))
@@ -192,6 +214,9 @@
     ["/v_calendar" ^:interceptors [(body-params/body-params) ven-authz-interceptor] {:post c-c/v-get-calendar}]
     ["/v_bookings" ^:interceptors [(body-params/body-params) ven-authz-interceptor] {:post b-c/v-get-bookings}]
     ["/v_list" ^:interceptors [(body-params/body-params)] {:post vl-c/get-ven-list-page}]
+    ["/v_photos" ^:interceptors [(body-params/body-params) ven-authz-interceptor] {:post v-get-photos}]
+    ["/v_publish_photo" ^:interceptors [(body-params/body-params) ven-authz-interceptor] {:post v-publish-photo}]
     ["/services" ^:interceptors [(body-params/body-params) ven-authz-interceptor] {:post s-c/get-services}]
+    ["/v_delete_photo" ^:interceptors [(body-params/body-params) ven-authz-interceptor] {:post v-delete-photo}]
     ["/service" ^:interceptors [(body-params/body-params) ven-authz-interceptor] {:post s-c/upsert-service}]]])
 
