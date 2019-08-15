@@ -44,13 +44,13 @@
         filename (get-in request [:json-params :filename])]
     (if (= filename "all")
       (image-db/ven-publish-all vendor-id)
-      (image-db/ven-publish-photo filename))
+      (image-db/update-image {:filename filename :published true}))
     (v-get-photos request)))
 
 (defn v-delete-photo
   [request]
   (let [filename (get-in request [:json-params :filename])]
-    (image-db/ven-delete-photo filename)
+    (image-db/update-image {:filename filename :deleted true})
     (v-get-photos request)))
 
 
