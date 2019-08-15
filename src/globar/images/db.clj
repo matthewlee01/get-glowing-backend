@@ -21,14 +21,6 @@
                              {:identifiers #(.replace % \_\-)})]
     (first result)))
 
-(defn get-images
-  "Return all the images for a given vendor"
-  [vendor-id]
-  (log/debug :function ::get-images :vendor-id vendor-id) 
-  (db/query ["SELECT * FROM Images 
-              WHERE vendor_id = ?
-              AND deleted = false" vendor-id]))
-
 (defn ven-publish-photo
   [filename]
   (db/execute ["UPDATE Images
