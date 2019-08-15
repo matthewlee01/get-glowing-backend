@@ -57,7 +57,7 @@
   [vendor-id]
   (query ["SELECT filename, service_id, description, published
            FROM Images WHERE vendor_id = ? AND deleted = false
-           ORDER BY created_at desc" vendor-id]))
+           ORDER BY published asc, created_at desc" vendor-id]))
 
 (defn find-user-by-id
   "this is for internal use because internally we use the id for cross table joins"

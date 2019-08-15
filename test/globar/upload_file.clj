@@ -13,7 +13,7 @@
 (deftest test-file-upload
   ;; call the upload endpoint to upload a file
   (let [desc "hello world & my name is \\"
-        token "uh oh broken. need magic debug token logic here"
+        token "DEBUG-TEST-TOKEN"
         post-result (shell/sh "curl" 
                               "-X"
                               "POST"
@@ -27,7 +27,7 @@
                               "-F"
                               "service-id=5"
                               "-F"
-                              (str "description=" (codec/url-encode desc)))
+                              (str "description=" desc))
 
         post-clj (json/read-str (:out post-result) :key-fn keyword)
         filename (:filename post-clj)]
