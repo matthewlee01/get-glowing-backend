@@ -16,7 +16,7 @@
   "assembles all the data from various tables for the ven-details response"
   (let [ven-user (get-ven-user vendor-id)
         services (db/list-services-for-vendor vendor-id)
-        photos (db/list-photos-by-ven-id vendor-id false)]
+        images (db/list-images-by-ven-id vendor-id false)]
     (assoc ven-user :services services
-                    :photos photos)))
+                    :images images)))
     

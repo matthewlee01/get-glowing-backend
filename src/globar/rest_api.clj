@@ -170,9 +170,8 @@
     ["/v_calendar" ^:interceptors [(body-params/body-params) ven-authz-interceptor] {:post c-c/v-get-calendar}]
     ["/v_bookings" ^:interceptors [(body-params/body-params) ven-authz-interceptor] {:post b-c/v-get-bookings}]
     ["/v_list" ^:interceptors [(body-params/body-params)] {:post vl-c/get-ven-list-page}]
-    ["/v_photos" ^:interceptors [(body-params/body-params) ven-authz-interceptor] {:post i-c/v-get-photos}]
-    ["/v_publish_photo" ^:interceptors [(body-params/body-params) ven-authz-interceptor] {:post i-c/v-publish-photo}]
+    ["/v_image_list" ^:interceptors [(body-params/body-params) ven-authz-interceptor] {:post i-c/v-get-images}]
+    ["/v_images" ^:interceptors [(body-params/body-params) ven-authz-interceptor] {:post i-c/update-image}]
     ["/services" ^:interceptors [(body-params/body-params) ven-authz-interceptor] {:post s-c/get-services}]
-    ["/v_delete_photo" ^:interceptors [(body-params/body-params) ven-authz-interceptor] {:post i-c/v-delete-photo}]
     ["/service" ^:interceptors [(body-params/body-params) ven-authz-interceptor] {:post s-c/upsert-service}]]])
 

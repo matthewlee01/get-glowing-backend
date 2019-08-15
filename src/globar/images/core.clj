@@ -32,25 +32,19 @@
     (image-db/create-image {:deleted false :published false :vendor-id vendor-id :service-id service-id :description desc :filename new-filename})    
     (http/json-response {:filename new-filename})))
 
-(defn v-get-photos
+(defn v-get-images
   [request]
   (let [vendor-id (get-in request [:vendor :vendor-id])
-        photos (db/list-photos-by-ven-id vendor-id true)]
-    (http/json-response {:photos photos})))
+        images (db/list-images-by-ven-id vendor-id true)]
+    (http/json-response {:images images})))
 
-(defn v-publish-photo
+(defn update-image
   [request]
   (let [vendor-id (get-in request [:vendor :vendor-id])
-        filename (get-in request [:json-params :filename])]
-    (if (= filename "all")
+        image (get-in request [:json-params :image])]
+    (if (= (:published image) "ALL")
       (image-db/ven-publish-all vendor-id)
-      (image-db/update-image {:filename filename :published true}))
-    (v-get-photos request)))
-
-(defn v-delete-photo
-  [request]
-  (let [filename (get-in request [:json-params :filename])]
-    (image-db/update-image {:filename filename :deleted true})
-    (v-get-photos request)))
+      (image-db/update-image image))
+    (v-get-images request)))
 
 

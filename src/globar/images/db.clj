@@ -44,21 +44,9 @@
                               ["filename = ?" filename])]
       (first result))))
 
-(defn ven-publish-photo
-  [filename]
-  (db/execute ["UPDATE Images
-               SET published = true
-               WHERE filename = ?" filename]))
-
 (defn ven-publish-all
   [ven-id]
   (db/execute ["UPDATE Images
                SET published = true
                WHERE vendor_id = ?" ven-id]))
 
-(defn ven-delete-photo
-  [filename]
-  (db/execute ["UPDATE Images
-                SET deleted = true
-                WHERE filename = ?" filename]))
-  ;;perhaps add some code here in the future to delete the actual file

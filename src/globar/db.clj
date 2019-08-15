@@ -51,8 +51,8 @@
                :params params))
   (jdbc/execute! db-conn statement {:multi? false}))
 
-(defn list-photos-by-ven-id
-  "gets all photos for a vendor. owner param dictates whether or not you are allowed to see unpublished photos."
+(defn list-images-by-ven-id
+  "gets all images for a vendor. owner param dictates whether or not you are allowed to see unpublished images."
   [vendor-id owner?]
   (->> (query [(str "SELECT filename, service_id, description, published, 
                      TO_CHAR(created_at, 'YYYY-MM-DD')

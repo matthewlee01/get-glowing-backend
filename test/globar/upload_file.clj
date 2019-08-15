@@ -35,7 +35,7 @@
     (is (= (.exists (io/file (str DEST_DIR filename))) true))
 
     ;; read the db to check for the corresponding row
-    (let [images (globar.db/list-photos-by-ven-id 1234 true)
+    (let [images (globar.db/list-images-by-ven-id 1234 true)
           image (first images)]
       (is some? image)
       (is (= (:service-id image) 5))
