@@ -4,8 +4,7 @@
             [clojure.java.io :as io]
             [globar.images.db :as i-db]
             [clojure.java.shell :as shell]
-            [clojure.data.json :as json]
-            [ring.util.codec :as codec])) 
+            [clojure.data.json :as json]))
 
 (use-fixtures :once setup-test-system!)
 
@@ -49,9 +48,4 @@
     ;; first we make sure the file isn't there from previous tests
     (when (.exists (io/file (str DEST_DIR filename)))
       (io/delete-file (str DEST_DIR filename))))))
-
-(deftest test-json-file-upload
-  (let [file (io/file "dev-resources/clojure_logo.png")
-        body {:filename "clojure_logo.png"
-              :file file}]))
-    
+   
