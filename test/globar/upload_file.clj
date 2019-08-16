@@ -2,6 +2,7 @@
    (:require [clojure.test :refer :all]
             [globar.test_utils :refer [setup-test-system! q]]
             [clojure.java.io :as io]
+            [globar.images.db :as i-db]
             [clojure.java.shell :as shell]
             [clojure.data.json :as json]
             [ring.util.codec :as codec])) 
@@ -35,16 +36,19 @@
     (is (= (.exists (io/file (str DEST_DIR filename))) true))
 
     ;; read the db to check for the corresponding row
-    (let [images (globar.db/list-images-by-ven-id 1234 true)
-          image (first images)]
+    (let [image (i-db/find-image-by-filename filename)]
       (is some? image)
       (is (= (:service-id image) 5))
       (is (= (:description image) desc))
-      (is (= (:filename image) filename)))
-
+      (let [new-description "a more interesting description"
+            updated-image (i-db/update-image {:filename filename
+                                              :description new-description})
+            reread-image (i-db/find-image-by-filename filename)]
+        (is (= (:description reread-image) new-description))
+        (is (= (:filename reread-image) filename)))
     ;; first we make sure the file isn't there from previous tests
     (when (.exists (io/file (str DEST_DIR filename)))
-      (io/delete-file (str DEST_DIR filename)))))
+      (io/delete-file (str DEST_DIR filename))))))
 
 (deftest test-json-file-upload
   (let [file (io/file "dev-resources/clojure_logo.png")

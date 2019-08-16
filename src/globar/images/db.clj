@@ -3,6 +3,7 @@
             [clojure.string :as str]
             [clojure.edn :as edn]
             [globar.config :as config]
+            [io.pedestal.log :as log]
             [globar.db :as db]
             [clojure.java.jdbc :as jdbc]))
 
@@ -42,7 +43,8 @@
                                        :deleted deleted
                                        :service_id service-id}
                               ["filename = ?" filename])]
-      (first result))))
+      (first result))
+    (log/debug :message "file not found")))
 
 (defn ven-publish-all
   [ven-id]
