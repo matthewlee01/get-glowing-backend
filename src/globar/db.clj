@@ -43,7 +43,6 @@
                :params params))
   (jdbc/query db-conn statement {:identifiers #(.replace % \_\-)}))
 
-
 (defn execute
   "execute a more complex SQL statement with postgres"
   [statement]
@@ -52,6 +51,17 @@
                :params params))
   (jdbc/execute! db-conn statement {:multi? false}))
 
+(defn list-images-by-ven-id
+  "gets all images for a vendor. owner param dictates whether or not you are allowed to see unpublished images."
+  [vendor-id owner?]
+  (->> (query [(str "SELECT filename, service_id, description, published, 
+                     TO_CHAR(created_at, 'YYYY-MM-DD')
+                     FROM Images 
+                     WHERE vendor_id = ? AND deleted = false "
+                    (if (not owner?)
+                      "AND published = true ")
+                    "ORDER BY published asc, created_at desc") vendor-id])
+      (map #(clojure.set/rename-keys % {:to-char :upload-date}))))
 
 (defn find-user-by-id
   "this is for internal use because internally we use the id for cross table joins"

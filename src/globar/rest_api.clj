@@ -12,51 +12,27 @@
             [io.pedestal.interceptor.helpers :refer [defbefore]]
             [globar.config :as config]
             [globar.ven-list.core :as vl-c]
+            [globar.images.core :as i-c]
             [globar.bookings.core :as b-c]
             [globar.calendar.core :as c-c]
             [globar.services.core :as s-c]
             [globar.users.core :as u-c]
             [globar.db :as db]
+            [globar.ven-details.core :as vd-c]
             [globar.users.db :as u-db]
             [globar.ven-reg.core :as vr-c]
             [globar.ven-reg.db :as vr-db]
             [cheshire.core :as cheshire]
             [buddy.core.keys :as keys]
             [fipp.edn :refer [pprint]]
+            [clojure.edn :as edn]
             [clojure.spec.alpha :as s]
-            [globar.images.db :as image-db]
             [ring.util.codec :as codec])
   (:import
             [java.util Base64]
             [com.auth0.jwt JWT]
             [com.auth0.jwt.algorithms Algorithm]
             [com.auth0.client.auth AuthAPI]))
-
-
-(defn stream->bytes [input-stream]
-  (loop [buffer (.read input-stream) accum []]
-    (if (< buffer 0)
-      accum
-      (recur (.read input-stream) (conj accum buffer)))))
-
-(defn upload 
-  [request]
-  "upload a file - should be a photo?"
-  (let [form-params (:params request)
-        src-file (get form-params (:file-field config/image-config))
-        service-id (Integer/parseInt (get form-params (:service-id-field  config/image-config)))
-        desc (codec/url-decode (get form-params (:description-field config/image-config)))
-        src-filename (:filename src-file)
-        src-filetype (last (clojure.string/split src-filename #"\."))
-        new-filename (str (java.util.UUID/randomUUID) "." src-filetype)
-        input-file (:tempfile src-file)
-        file-bytes (with-open [input-stream (io/input-stream input-file)]
-                     (stream->bytes input-stream))]
-    ;; copy the file to the destination
-    (io/copy input-file (io/file (:dest-dir config/image-config) new-filename))
-    ;; write a new row to the images table
-    (image-db/create-image {:vendor-id 1234 :service-id service-id :description desc :filename new-filename})    
-    (http/json-response {:filename new-filename})))
 
 (defn decode64 [str]
   (String. (.decode (Base64/getDecoder) str)))
@@ -160,9 +136,15 @@
 (def ven-authz-interceptor
   {:name ::ven-authz-interceptor
    :enter (fn [context]
-            (let [access-token (get-in context [:request :json-params :access-token])
+            (let [json-params (get-in context [:request :json-params])
+                  access-token (if json-params
+                                 (:access-token json-params)
+                                 (get-in context [:request :params "access-token"]))
                   user (find-user-from-token access-token)
-                  vendor (db/find-vendor-by-user (:user-id user))]
+                  vendor (if (and config/debug?
+                                  (= access-token "DEBUG-TEST-TOKEN"))
+                           (db/find-vendor-by-user 234)
+                           (db/find-vendor-by-user (:user-id user)))]
 
               (if vendor
                 (do
@@ -175,10 +157,12 @@
                   (assoc context :response {:status 403
                                             :headers {}
                                             :body {}})))))})
+
 (defroutes rest-api-routes
-  [[["/upload" ^:interceptors [(ring-mw/multipart-params)] {:post upload}]
+  [[["/upload" ^:interceptors [(ring-mw/multipart-params) ven-authz-interceptor] {:post i-c/upload}]
     ["/calendar/:vendor-id" ^:interceptors [(body-params/body-params)] {:post c-c/put-calendar}]
     ["/calendar/:vendor-id/:date" {:get c-c/get-calendar}]
+    ["/vendor_details" ^:interceptors [(body-params/body-params)] {:post vd-c/get-ven-details}]
     ["/vendor" ^:interceptors [(body-params/body-params)] {:post vr-c/upsert-vendor}]
     ["/user" ^:interceptors [(body-params/body-params)] {:post u-c/upsert-user}]
     ["/login" ^:interceptors [(body-params/body-params)] {:post login}]
@@ -186,6 +170,8 @@
     ["/v_calendar" ^:interceptors [(body-params/body-params) ven-authz-interceptor] {:post c-c/v-get-calendar}]
     ["/v_bookings" ^:interceptors [(body-params/body-params) ven-authz-interceptor] {:post b-c/v-get-bookings}]
     ["/v_list" ^:interceptors [(body-params/body-params)] {:post vl-c/get-ven-list-page}]
+    ["/v_image_list" ^:interceptors [(body-params/body-params) ven-authz-interceptor] {:post i-c/v-get-images}]
+    ["/v_images" ^:interceptors [(body-params/body-params) ven-authz-interceptor] {:post i-c/update-image}]
     ["/services" ^:interceptors [(body-params/body-params) ven-authz-interceptor] {:post s-c/get-services}]
     ["/service" ^:interceptors [(body-params/body-params) ven-authz-interceptor] {:post s-c/upsert-service}]]])
 

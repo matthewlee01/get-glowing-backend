@@ -3,15 +3,21 @@
             [clojure.string :as str]
             [clojure.edn :as edn]
             [globar.config :as config]
+            [io.pedestal.log :as log]
             [globar.db :as db]
             [clojure.java.jdbc :as jdbc]))
 
+(defn find-image-by-filename
+  [filename]
+  (-> (db/query ["SELECT * FROM Images
+                  WHERE filename = ?" filename])
+      first))
 
 (defn create-image
   "Adds a new image record to the Images table"
   [image]
   (log/debug ::create-image image)
-  (let [field-spec (select-keys image [:vendor-id :filename :metadata :service-id :description]) 
+  (let [field-spec (select-keys image [:deleted :vendor-id :filename :published :metadata :service-id :description]) 
         db-field-spec (clojure.set/rename-keys field-spec
                                                {:vendor-id :vendor_id
                                                 :service-id :service_id})
@@ -21,9 +27,28 @@
                              {:identifiers #(.replace % \_\-)})]
     (first result)))
 
-(defn get-images
-  "Return all the images for a given vendor"
-  [vendor-id]
-  (log/debug :function ::get-images :vendor-id vendor-id) 
-  (db/query ["SELECT * FROM Images WHERE vendor_id = ?" vendor-id]))
+(defn update-image
+  "updates an image in the table by filename"
+  [image]
+  (if-let [filename (:filename image)]
+    (let [existing-image (find-image-by-filename filename)
+          new-image (merge existing-image image)
+          {:keys [filename vendor-id metadata description published deleted service-id]} new-image
+          result (jdbc/update! db/db-conn
+                              :Images {:filename filename
+                                       :vendor_id vendor-id
+                                       :metadata metadata
+                                       :description description
+                                       :published published
+                                       :deleted deleted
+                                       :service_id service-id}
+                              ["filename = ?" filename])]
+      (first result))
+    (log/debug :message "file not found")))
+
+(defn ven-publish-all
+  [ven-id]
+  (db/execute ["UPDATE Images
+               SET published = true
+               WHERE vendor_id = ?" ven-id]))
 
