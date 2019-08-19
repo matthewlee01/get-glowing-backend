@@ -129,7 +129,9 @@ create table Images (
   filename text not null,
   metadata text,
   description text,
-  service_id int not null references Services(service_id),
+  published boolean,
+  deleted boolean,
+  service_id int references Services(service_id),
   created_at timestamptz not null default current_timestamp,
   updated_at timestamptz not null default current_timestamp
 );
