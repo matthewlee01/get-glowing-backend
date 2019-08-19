@@ -1,5 +1,6 @@
 (ns globar.error-parsing
-  (:require [clojure.string :as str]))
+  (:require [clojure.string :as str]
+            [io.pedestal.log :as log]))
 
 (defn includes-str?
   [substr str]
@@ -58,6 +59,7 @@
 (defn get-error-data
   [error-msg-map error-parser codemap spec-str]
   "takes a spec error data string, an error parser, a code map, and an error message set and converts it to info for the client to display"
+  (log/debug :function "get-error-data" :error-string spec-str)
   (let [error-code (error-parser spec-str)
         error-key (error-code (merge COMMON_CODE_KEY codemap))
         error-msg (error-key error-msg-map)]

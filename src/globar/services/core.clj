@@ -53,9 +53,9 @@
           (log/debug :function "upsert-service" :result result) 
           (http/json-response {:data result})))
      (do
-       (let [error-str (s/explain-str service ::valid-service)]
+       (let [error-str (s/explain-str ::valid-service service)]
          (log/debug :function "upsert-service" :error-string error-str)
-         (http/json-response {:error (ep/get-error-data error-str ep/ERROR_MSG_SET_EN s-ep/get-error-code s-ep/ERROR_CODE_KEY)}))))))
+         (http/json-response {:error (ep/get-error-data ep/ERROR_MSG_SET_EN s-ep/get-error-code s-ep/ERROR_CODE_KEY error-str)}))))))
 
 
 
