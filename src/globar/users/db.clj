@@ -32,6 +32,8 @@
   (let [field-spec (select-keys new-user [:name-first :name-last :name :email :email-verified
                                           :is-vendor :addr-str-num :addr-str-name :addr-city
                                           :addr-state :addr-postal :phone :locale :avatar :sub])
+        updated-field-spec (-> (db/find-user-by-id (:user-id new-user))
+                               (merge field-spec))
         db-field-spec (clojure.set/rename-keys field-spec
                                             {:name-first :name_first
                                              :name-last :name_last
@@ -44,4 +46,4 @@
                                              :addr-postal :addr_postal})]
 
     (jdbc/update! db/db-conn :Users db-field-spec ["user_id = ?" (:user-id new-user)])
-    (println "TODO: add error checking to this!! ")))
+    updated-field-spec))
