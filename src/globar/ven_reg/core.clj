@@ -19,10 +19,7 @@
 (s/def ::email ;;describes a valid time collection
   string?) 
 
-(s/def ::addr-str-num
-  integer?)
-
-(s/def ::addr-str-name
+(s/def ::addr-street
   string?)
 
 (s/def ::addr-city
@@ -38,11 +35,11 @@
   integer?)
          
 (s/def ::valid-vendor-for-creation
-  (s/keys :req-un [::name-first ::name-last ::email ::addr-str-num ::addr-str-name ::addr-city ::addr-state ::addr-postal ::phone]))
+  (s/keys :req-un [::name-first ::name-last ::email ::addr-street ::addr-city ::addr-state ::addr-postal ::phone]))
 
 (s/def ::valid-vendor-for-update
   (s/keys :req-un [::vendor-id]
-          :opt-un [::name-first ::name-last ::email ::addr-str-num ::addr-str-name ::addr-city ::addr-state ::addr-postal ::phone]))
+          :opt-un [::name-first ::name-last ::email ::addr-street ::addr-city ::addr-state ::addr-postal ::phone]))
 
 (defn upsert-vendor 
   [request]

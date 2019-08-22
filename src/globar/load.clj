@@ -41,8 +41,7 @@
                   :avatar "http://google.com/some/url/to/a/file.jpg"
                   :email email
                   :email_verified true
-                  :addr-str-num "#2-5985"
-                  :addr-str-name "Canada Way SE"
+                  :addr-street "#2-5985 Canada Way SE"
                   :addr-city city
                   :addr-state "BC"
                   :addr-postal "V5E-3N9"

@@ -168,3 +168,9 @@
       (#(assoc % :time [(:start-time %) (:end-time %)]))
       (dissoc :start-time :end-time)))
                 
+(defn find-user-id-by-ven-id
+  [ven-id]
+  (-> (query ["SELECT user_id FROM Vendors
+               WHERE vendor_id = ?" ven-id])
+      first
+      :user-id))

@@ -12,21 +12,30 @@
                          (merge new-vendor)
                          (assoc :is-vendor true) ;; set the vendor flag on the associated user object
                          (u-db/update-user))
+        initial-profile-pic (if profile-pic
+                              profile-pic
+                              "default-pfp.png")
         result (jdbc/insert! db/db-conn :Vendors {:user_id user-id
                                                   :summary summary
-                                                  :profile_pic profile-pic}
+                                                  :profile_pic initial-profile-pic}
                              {:identifiers #(.replace % \_\-)})]
 
     (first result)))
 
 (defn update-vendor
   [vendor]
-  (let [{vendor-id :vendor-id
-         summary :summary} vendor
-         result (jdbc/update! db/db-conn 
+  (let [updated-vendor (-> (db/find-vendor-by-id (:vendor-id vendor))
+                           (merge vendor))
+        rekeyed-vendor (clojure.set/rename-keys updated-vendor {:vendor-id :vendor_id
+                                                                :user-id :user_id
+                                                                :profile-pic :profile_pic
+                                                                :created-at :created_at
+                                                                :updated-at :updated_at})
+        result (jdbc/update! db/db-conn 
                               :Vendors 
-                              {:summary summary}
-                              ["vendor_id = ?" vendor-id])]
-    (println "TODO: add error checking to this!! " result)
+                              rekeyed-vendor
+                              ["vendor_id = ?" (:vendor-id vendor)])]
     (if (= 0 (first result))
-      (println "ERROR UPDATING VENDOR"))))
+      (println "ERROR UPDATING VENDOR")
+      updated-vendor)))
+    

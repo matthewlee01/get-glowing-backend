@@ -96,8 +96,7 @@
                   :avatar "http://google.com/some/url/to/a/file.jpg"
                   :email "test@test.com"
                   :email-verified true
-                  :addr-str-num 5985
-                  :addr-str-name "Canada Way SE"
+                  :addr-street "5985 Canada Way SE"
                   :addr-city "New Westminster"
                   :addr-state "BC"
                   :addr-postal "V5e-3N9"
