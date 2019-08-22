@@ -22,10 +22,8 @@
         vendor-map (-> (select-keys updated-vals [:summary
                                                   :profile-pic])
                        (assoc :vendor-id vendor-id))
-        _  (println "vmap: " vendor-map)
         user-map (-> (select-keys updated-vals [:locale
-                                                :addr-str-num
-                                                :addr-str-name
+                                                :addr-street
                                                 :addr-city
                                                 :addr-state
                                                 :addr-postal
@@ -34,21 +32,17 @@
                                                 :phone
                                                 :email])
                      (assoc :user-id user-id))
-        _ (println "umap: " user-map)
         user-result (if (> (count user-map) 1) 
                       (u-db/update-user user-map)
                       (db/find-user-by-id user-id))
-        _ (println "uresult: " user-result)
         vendor-result (if (> (count vendor-map) 1)
                         (v-db/update-vendor vendor-map)
-                        (db/find-vendor-by-id vendor-id))
-        _ (println "vresult: " vendor-result)]
+                        (db/find-vendor-by-id vendor-id))]
     (http/json-response (-> (merge user-result vendor-result)
                             (select-keys [:summary
                                           :profile-pic
                                           :locale
-                                          :addr-str-num
-                                          :addr-str-name
+                                          :addr-street
                                           :addr-city
                                           :addr-state
                                           :addr-postal
