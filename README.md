@@ -1,6 +1,6 @@
 # globar
 
-###NOTE
+### NOTE
 This is a snapshot of the server code for the get-glowing web app.
 Some sensitive information and files have been redacted for privacy reasons,
 so the code as it is in this version of the repo will most likely not compile.
